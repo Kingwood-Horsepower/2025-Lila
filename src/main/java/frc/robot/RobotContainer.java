@@ -75,9 +75,9 @@ public class RobotContainer {
             //point.withModuleDirection(new Rotation2d(driverController.getLeftY(), driverController.getLeftX()))
         //));
 
-        targeAquired.and(joystick.b()).whileTrue(camera.runOnce(()-> System.out.println(" target.getYaw()")).andThen(drivetrain.applyRequest(() ->
-        drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+        targeAquired.and(driverController.b()).whileTrue(camera.runOnce(()-> System.out.println(" target.getYaw()")).andThen(drivetrain.applyRequest(() ->
+        drive.withVelocityX(driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate)) 
         ));// Drive counterclockwise with negative X (left)
 
