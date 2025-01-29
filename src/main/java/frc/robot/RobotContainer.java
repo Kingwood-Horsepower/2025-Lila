@@ -44,7 +44,7 @@ public class RobotContainer {
 
     public static CameraSubsystem camera = new CameraSubsystem(); // this was public static final
 
-    public final Trigger targeAquired = new Trigger(() -> camera.isTarget);
+    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget);
 
     private final double translationVelocityMult = 0.7; //Cannot be more than 1
     private final double rotVelocityMult = 1; 
@@ -100,5 +100,15 @@ public class RobotContainer {
 
  public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
+    }
+
+    public void UpdateRobotPosition(){
+        var visionEst = camera.getEstimatedGlobalPose();
+        visionEst.ifPresent(
+                est -> {
+
+                    drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
+                });
+
     }
 }

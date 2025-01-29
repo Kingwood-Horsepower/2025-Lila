@@ -5,18 +5,42 @@
 package frc.robot.subsystems;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Arrays;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+
+import static frc.robot.Constants.CameraConstants.*;
 
 public class CameraSubsystem extends SubsystemBase {
+  
+
+  AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(kApriltags, kFieldLenght, kFieldWidth);
+  
   PhotonCamera mainCamera = new PhotonCamera("Arducam");
   List<PhotonPipelineResult> results = null;
 
-  public boolean isTarget = false;
+  PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, kRobotToCam);
+  
+
+  public boolean hasTarget = false;
   public double targetYaw = 0;
   /** Creates a new CameraSubsystem. */
   public CameraSubsystem() {}
@@ -25,6 +49,7 @@ public class CameraSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     results = mainCamera.getAllUnreadResults();
+    
     processResults();
     
   }
@@ -33,22 +58,37 @@ public class CameraSubsystem extends SubsystemBase {
     //Check if we have a frame
     if (results.isEmpty())
     {
-      isTarget = false;
+      hasTarget = false;
       return;
     }
-    var result = results.get(results.size() - 1);
-
     //Check if we have a target
-    if(!result.hasTargets())
+    if(getBestResult().hasTargets())
     {
-      isTarget = false;
+      hasTarget = false;
       return;
     }
     
-    var target = result.getBestTarget();
-    isTarget = true;
+    var target = getBestResult().getBestTarget();
+    hasTarget = true;
     
     targetYaw = target.getYaw();
   }
   
+ public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
+        Optional<EstimatedRobotPose> visionEst = Optional.empty();
+        
+        if(results != null)
+        {
+          visionEst = photonPoseEstimator.update(getBestResult());
+        }
+        return visionEst;
+  }
+
+
+
+
+public PhotonPipelineResult getBestResult(){
+  return results.get(results.size() - 1);
+}
+
 }
