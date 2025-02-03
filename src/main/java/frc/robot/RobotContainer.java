@@ -12,7 +12,13 @@ import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -96,6 +102,7 @@ public class RobotContainer {
         driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+        resetPose();
     }
 
  public Command getAutonomousCommand() {
@@ -103,12 +110,25 @@ public class RobotContainer {
     }
 
     public void UpdateRobotPosition(){
-        var visionEst = camera.getEstimatedGlobalPose();
-        visionEst.ifPresent(
+        if(camera != null){
+            var visionEst = camera.getEstimatedGlobalPose();
+            visionEst.ifPresent(
                 est -> {
+                    System.out.println(est.estimatedPose.getTranslation());
+                    //SmartDashboard.putString("string", state.Pose.getTranslation().toString());
 
                     drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
                 });
+        }
+        
 
+    }
+
+    public void resetPose() {
+        // Example Only - startPose should be derived from some assumption
+        // of where your robot was placed on the field.
+        // The first pose in an autonomous path is often a good choice.
+        var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d());
+        drivetrain.resetPose(startPose);
     }
 }

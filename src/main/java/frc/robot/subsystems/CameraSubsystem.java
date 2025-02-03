@@ -27,18 +27,19 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.CameraConstants.*;
 
 public class CameraSubsystem extends SubsystemBase {
   
 
-  AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(kApriltags, kFieldLenght, kFieldWidth);
+  AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(kApriltags, kFieldLenght.magnitude(), kFieldWidth.magnitude());
   
-  PhotonCamera mainCamera = new PhotonCamera("Arducam");
+  PhotonCamera mainCamera = new PhotonCamera("MainCamera");
   List<PhotonPipelineResult> results = null;
 
-  PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, kRobotToCam);
-  
+  PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToCam);
+
 
   public boolean hasTarget = false;
   public double targetYaw = 0;
@@ -49,7 +50,6 @@ public class CameraSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     results = mainCamera.getAllUnreadResults();
-    
     processResults();
     
   }
@@ -62,7 +62,7 @@ public class CameraSubsystem extends SubsystemBase {
       return;
     }
     //Check if we have a target
-    if(getBestResult().hasTargets())
+    if(!getBestResult().hasTargets())
     {
       hasTarget = false;
       return;
@@ -70,16 +70,21 @@ public class CameraSubsystem extends SubsystemBase {
     
     var target = getBestResult().getBestTarget();
     hasTarget = true;
-    
-    targetYaw = target.getYaw();
+    if(target != null)
+       targetYaw = target.getYaw();
   }
   
  public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
         
-        if(results != null)
+        if(!results.isEmpty())
         {
-          visionEst = photonPoseEstimator.update(getBestResult());
+          if(getBestResult().hasTargets())
+          {
+            visionEst = photonPoseEstimator.update(getBestResult());
+          }
+
         }
         return visionEst;
   }
