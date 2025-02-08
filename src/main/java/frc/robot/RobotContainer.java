@@ -6,23 +6,32 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.CoralIntake;
+import frc.robot.subsystems.CameraSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -36,12 +45,16 @@ public class RobotContainer {
             //.withSteerRequestType(SteerRequestType.); 
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-
+    
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController driverController = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+    public static CameraSubsystem camera = new CameraSubsystem(); // this was public static final
+
+    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget);
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake();
@@ -71,9 +84,18 @@ public class RobotContainer {
         );
 
         driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        driverController.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(driverController.getLeftY(), driverController.getLeftX()))
-        ));
+        //driverController.b().whileTrue(drivetrain.applyRequest(() ->
+            //point.withModuleDirection(new Rotation2d(driverController.getLeftY(), driverController.getLeftX()))
+        //));
+
+        targeAquired.and(driverController.b()).whileTrue(camera.runOnce(()-> System.out.println(" target.getYaw()")).andThen(drivetrain.applyRequest(() ->
+        drive.withVelocityX(driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+            .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate)) 
+        ));// Drive counterclockwise with negative X (left)
+
+
+    
 
         driverController.x().whileTrue(
             Commands.startEnd(
@@ -113,9 +135,33 @@ public class RobotContainer {
         driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+        resetPose();
     }
 
-    public Command getAutonomousCommand() {
+ public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
+    }
+
+    public void UpdateRobotPosition(){
+        if(camera != null){
+            var visionEst = camera.getEstimatedGlobalPose();
+            visionEst.ifPresent(
+                est -> {
+                    System.out.println(est.estimatedPose.getTranslation());
+                    //SmartDashboard.putString("string", state.Pose.getTranslation().toString());
+
+                    drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
+                });
+        }
+        
+
+    }
+
+    public void resetPose() {
+        // Example Only - startPose should be derived from some assumption
+        // of where your robot was placed on the field.
+        // The first pose in an autonomous path is often a good choice.
+        var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d());
+        drivetrain.resetPose(startPose);
     }
 }
