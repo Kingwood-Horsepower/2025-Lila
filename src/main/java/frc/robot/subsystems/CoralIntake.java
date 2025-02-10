@@ -46,7 +46,7 @@ public class CoralIntake extends SubsystemBase {
         armMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)
-            .inverted(true)
+            .inverted(false)
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .pid(0.3, 0.0, 0.0)

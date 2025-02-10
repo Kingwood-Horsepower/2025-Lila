@@ -66,6 +66,10 @@ public class RobotContainer {
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(2);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2);
 
+    double elevatorFirstStageDistance = 20;
+
+    
+
     public RobotContainer() {
         configureBindings();
     }
@@ -95,13 +99,18 @@ public class RobotContainer {
         ));// Drive counterclockwise with negative X (left)
 
 
-    
+        driverController.b().whileTrue(
+            Commands.startEnd(
+                () -> coralIntake.runIntake(0.0, -2.0),
+                () -> coralIntake.runIntake(0.0, 0.0),
+                coralIntake)
+        );   
 
         driverController.x().whileTrue(
             Commands.startEnd(
-                () -> coralIntake.runIntake(.1, 2.0),
+                () -> coralIntake.runIntake(.3, 2.0),
                 () -> coralIntake.runIntake(0.0, 0.0),
-                coralIntake, elevator)
+                coralIntake)
         );   
 
         driverController.leftTrigger(0.1).whileTrue(
@@ -118,9 +127,10 @@ public class RobotContainer {
                 algaeIntake)
         );
 
-        driverController.rightTrigger(0.1).whileTrue(
-            new RunCommand(
-                () -> elevator.setSetPoint(driverController.getLeftTriggerAxis()*5),
+        driverController.rightTrigger(0.01).whileTrue(
+            Commands.startEnd(
+                () -> elevator.setSetPoint(1),//driverController.getLeftTriggerAxis()*5
+                () -> elevator.setSetPoint(0),
                 elevator)
         );
 
