@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.math.util.Units.*;
+import static frc.robot.Constants.ElevatorConstants.*;
 
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -43,11 +44,21 @@ public class Elevator extends SubsystemBase{
     private final int ELEVATOR_GEAR_RATIO = 12;
     private final double ELEVATOR_SPROCKET_CIRCUMFERENCE = 1.281*Math.PI;
     private final double ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS = ELEVATOR_GEAR_RATIO/ELEVATOR_SPROCKET_CIRCUMFERENCE;
-    private final double ELEVATOR_MAX_EXTENSION_INCHES = 21;
+    
 
-    boolean isZerod = true;
-    double ElevatorMaxExtensionInches = ELEVATOR_MAX_EXTENSION_INCHES;
-    String maxExtensionPreferenceKey = "Elevator Max Extension Inches";
+    private final double[] ELEVATOR_LEVELS = {
+        ELEVATOR_HOME_INCHES,
+        ELEVATOR_L1_INCHES,
+        ELEVATOR_L2_INCHES,
+        ELEVATOR_L3_INCHES,
+        ELEVATOR_MAX_INCHES,
+    };
+
+    private int elevatorLevel = 0;
+    private boolean isZerod = true;
+    
+    private double ElevatorMaxExtensionInches = ELEVATOR_MAX_INCHES;
+    //private String maxExtensionPreferenceKey = "Elevator Max Extension Inches";
 
     public Elevator() {
         leadMotorConfig
@@ -73,7 +84,7 @@ public class Elevator extends SubsystemBase{
             .follow(leadMotor, true);
         followMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        Preferences.initDouble(maxExtensionPreferenceKey, ElevatorMaxExtensionInches);
+        //Preferences.initDouble(maxExtensionPreferenceKey, ElevatorMaxExtensionInches);
     }
 
     /**
@@ -82,22 +93,45 @@ public class Elevator extends SubsystemBase{
      * @param setPoint double that represents distance in inches
      */
     public void setSetPoint(double setPoint) {
-        ElevatorMaxExtensionInches = Preferences.getDouble(maxExtensionPreferenceKey, 5);
+        //ElevatorMaxExtensionInches = Preferences.getDouble(maxExtensionPreferenceKey, 5);
         SmartDashboard.putNumber("elevator setpoint in inches", setPoint*ElevatorMaxExtensionInches);
         leadMotorController.setReference(setPoint*ElevatorMaxExtensionInches*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+        SmartDashboard.putNumber("value that setReference is set to", setPoint*ElevatorMaxExtensionInches*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
+        
     }
 
-    public void getIsZerod() {
+    public int getElevatorLevel() {
+        return elevatorLevel;
+    }
 
+    public void incrementElevatorLevel(){
+        if (elevatorLevel == 4) elevatorLevel = 0;
+        else elevatorLevel += 1;
+        SmartDashboard.putNumber("elevator level", elevatorLevel);
+        System.out.println(elevatorLevel);
+    }
 
-    } 
+    public void setElevatorLevel(){
+        leadMotorController.setReference(ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+    }
+
+    public void setElevatorLevel(int level){
+        elevatorLevel = level;
+        leadMotorController.setReference(ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+    }
+
+    // public boolean getIsZerod() {
+    //     return isZerod;
+    // } 
 
     @Override
     public void periodic() {
-
         
+        isZerod = magneticLimitSwitch.get();
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
+        
+        
         SmartDashboard.putBoolean("magnetic limit switch", magneticLimitSwitch.get());
 
     }

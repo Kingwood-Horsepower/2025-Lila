@@ -30,6 +30,7 @@ public class CoralIntake extends SubsystemBase {
 
     private double setPoint = 0.0;
     private double velocity = 0.0;
+    private boolean isAtSetPoint = true;
 
     private final SparkFlex rollerMotor = new SparkFlex(rollerMotorID, MotorType.kBrushless);
     private final SparkFlexConfig rollerMotorConfig = new SparkFlexConfig();
@@ -79,6 +80,11 @@ public class CoralIntake extends SubsystemBase {
         this.setPoint = setPoint;
     }
 
+    public void setRollerVelocity(double velocity) {
+        this.velocity = velocity;
+        rollerMotor.set(velocity);
+    }
+
     /**
      * Command arm to setpoint and run intake
      * 
@@ -87,17 +93,47 @@ public class CoralIntake extends SubsystemBase {
      */
     public void runIntake(double setPoint, double velocity) {
         setSetPoint(setPoint);
-        this.velocity = velocity;
-        rollerMotor.set(velocity);
+        setRollerVelocity(velocity);
+    }
 
+    /**
+     * Command arm to setpoint and run intake
+     * 
+     * @param setPoint FUCKING NUMBER FROM 0 TO 0.12, THE SUBSYSTEM MULTIPLIES THIS NUMBER BY THE GEAR RATIO. 
+     * @param velocity velocity of the intake motor, idk what the range is
+     */
+    private boolean checkIsAtSetPoint() {
+        double tolerance = 1; // one motor rotation of tolerance, 1/45th of rotation or arm tolerance
+        double currPosition = armEncoder.getPosition(); // in motor rotations
+        double targetPosition = setPoint*ARM_GEAR_RATIO; // in motor rotations
+        if ((currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance)) return true;
+        return false;
+    }
+
+    // uhhh this is stupid, prob just make the top one public idk
+    public boolean getIsAtSetPoint() {
+        return isAtSetPoint;
+    }
+
+    public boolean getIsNearZero() {
+        double tolerance = 1; // one motor rotation of tolerance, 1/45th of rotation or arm tolerance
+        double currPosition = armEncoder.getPosition(); // in motor rotations
+        if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
+        return false;
     }
 
     @Override
     public void periodic() {
         // ill change this later
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
+        isAtSetPoint = checkIsAtSetPoint();
+        SmartDashboard.putBoolean("is at setpoint", isAtSetPoint);
+        SmartDashboard.putBoolean("is not near zero", !getIsNearZero());
+        SmartDashboard.putBoolean("cmd should end", getIsAtSetPoint() && !getIsNearZero());
         //rollerMotorController.setReference(velocity, ControlType.kVelocity);
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
+        SmartDashboard.putNumber("roller amps", rollerMotor.getOutputCurrent());
+        
         
         
     }
