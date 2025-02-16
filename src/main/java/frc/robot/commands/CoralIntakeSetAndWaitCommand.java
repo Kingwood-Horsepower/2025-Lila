@@ -17,9 +17,9 @@ public class CoralIntakeSetAndWaitCommand extends Command {
     @Override
     public void initialize() {
         if (elevator.getElevatorLevel() == 4) {
-            coralIntake.setSetPoint(0.07);
-            }
-            else coralIntake.setSetPoint(0.07); // 0
+            coralIntake.setSetPoint(0.26);
+        }
+        else coralIntake.setSetPoint(0.26); // 0
     }
   
     @Override

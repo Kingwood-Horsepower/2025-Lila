@@ -73,7 +73,7 @@ public class Elevator extends SubsystemBase{
             .maxMotion
             //idk if i want to use the units library on top of the units math util, its very verbose
             .maxVelocity(2000) // takes an rpm 
-            .maxAcceleration(6000) // takes an rpm/s
+            .maxAcceleration(15000) // takes an rpm/s
             .allowedClosedLoopError(0.6)
             ; // <- this semicolon is important
         leadMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -120,9 +120,18 @@ public class Elevator extends SubsystemBase{
         leadMotorController.setReference(ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
     }
 
-    // public boolean getIsZerod() {
-    //     return isZerod;
-    // } 
+    public boolean getIsNearZero() {
+        double tolerance = 5; // one motor rotation of tolerance, 1/45th of rotation or arm tolerance
+        double currPosition = leadEncoder.getPosition(); // in motor rotations
+        if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
+        return false;
+    }
+
+    public boolean isInMotion() {
+        double tolerance = 0.1;
+        if (Math.abs(leadEncoder.getVelocity()) > tolerance) return true;
+        return false;
+    }
 
     @Override
     public void periodic() {
@@ -130,7 +139,8 @@ public class Elevator extends SubsystemBase{
         isZerod = magneticLimitSwitch.get();
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
-        
+        SmartDashboard.putNumber("elevator setpoint", ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
+        SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
         
         SmartDashboard.putBoolean("magnetic limit switch", magneticLimitSwitch.get());
 

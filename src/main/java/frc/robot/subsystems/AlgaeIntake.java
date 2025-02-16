@@ -27,7 +27,7 @@ public class AlgaeIntake extends SubsystemBase{
     //setup motors
 
     DigitalInput limitSwitch = new DigitalInput(8);
-    DigitalInput IRsensor = new DigitalInput(9);
+
     
     private final int rollerMotorID = 16;
     private final int armMotorID = 17;
@@ -110,7 +110,7 @@ public class AlgaeIntake extends SubsystemBase{
         // ill change this later
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
         //rollerMotorController.setReference(velocity, ControlType.kVelocity);
-        SmartDashboard.putBoolean("IR", IRsensor.get());
+        
         SmartDashboard.putBoolean("limit", limitSwitch.get());
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
         

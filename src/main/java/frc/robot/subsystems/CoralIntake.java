@@ -13,10 +13,16 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import frc.robot.subsystems.Elevator;
+
 public class CoralIntake extends SubsystemBase {
+    private final DigitalInput IRsensor = new DigitalInput(9); // false = broken
+    private final Elevator elevator;
+
     private final int rollerMotorID = 23;
     private final int armMotorID = 24;
 
@@ -31,6 +37,7 @@ public class CoralIntake extends SubsystemBase {
     private double setPoint = 0.0;
     private double velocity = 0.0;
     private boolean isAtSetPoint = true;
+    private boolean hasCoral = false;
 
     private final SparkFlex rollerMotor = new SparkFlex(rollerMotorID, MotorType.kBrushless);
     private final SparkFlexConfig rollerMotorConfig = new SparkFlexConfig();
@@ -42,12 +49,13 @@ public class CoralIntake extends SubsystemBase {
     //private final double ARM_MAX_ACCELERATION = 633*ARM_GEAR_RATIO ; //2000 deg/sec -> rotations/min/s
     
 
-    public CoralIntake() {
+    public CoralIntake(Elevator elevator) {
+        this.elevator = elevator;
         // continue setup
         armMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)
-            .inverted(false)
+            .inverted(true)
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .pid(0.3, 0.0, 0.0)
@@ -55,8 +63,8 @@ public class CoralIntake extends SubsystemBase {
             .velocityFF(0) // calculated using recalc
             .maxMotion
             //idk if i want to use the units library on top of the units math util, its very verbose
-            .maxVelocity(1000) // takes an rpm 
-            .maxAcceleration(3000) // takes an rpm/s
+            .maxVelocity(3000) // takes an rpm 
+            .maxAcceleration(5000) // takes an rpm/s
             .allowedClosedLoopError(0.6)
             ; // <- this semicolon is important
         armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -88,12 +96,21 @@ public class CoralIntake extends SubsystemBase {
     /**
      * Command arm to setpoint and run intake
      * 
-     * @param setPoint FUCKING NUMBER FROM 0 TO 0.12, THE SUBSYSTEM MULTIPLIES THIS NUMBER BY THE GEAR RATIO. 
+     * @param setPoint THE SUBSYSTEM MULTIPLIES THIS NUMBER BY THE GEAR RATIO. 
      * @param velocity velocity of the intake motor, idk what the range is
      */
     public void runIntake(double setPoint, double velocity) {
         setSetPoint(setPoint);
         setRollerVelocity(velocity);
+    }
+
+    public void stowIntake(){
+
+        // if i am not near zero, or not set to 0, or i have coral set to down position
+        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || hasCoral) setSetPoint(.26);
+        // set up
+        else setSetPoint(0.0);
+        setRollerVelocity(0.0);
     }
 
     /**
@@ -127,13 +144,18 @@ public class CoralIntake extends SubsystemBase {
         // ill change this later
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
         isAtSetPoint = checkIsAtSetPoint();
+        hasCoral = !IRsensor.get(); 
+
+
         SmartDashboard.putBoolean("is at setpoint", isAtSetPoint);
-        SmartDashboard.putBoolean("is not near zero", !getIsNearZero());
-        SmartDashboard.putBoolean("cmd should end", getIsAtSetPoint() && !getIsNearZero());
-        //rollerMotorController.setReference(velocity, ControlType.kVelocity);
+        SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());
+
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
         SmartDashboard.putNumber("roller amps", rollerMotor.getOutputCurrent());
+        SmartDashboard.putBoolean("IR", IRsensor.get());
+        SmartDashboard.putBoolean("hasCoral", hasCoral);
         
+
         
         
     }

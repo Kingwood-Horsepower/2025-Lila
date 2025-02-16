@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.CoralIntakeSetAndWaitCommand;
+import frc.robot.commands.ElevatorSetAndWaitCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -59,10 +60,10 @@ public class RobotContainer {
     public final Trigger targeAquired = new Trigger(() -> camera.hasTarget);
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
-    private final CoralIntake coralIntake = new CoralIntake();
+    private final CoralIntake coralIntake = new CoralIntake(elevator);
 
-    private final double translationVelocityMult = 0.7; //Cannot be more than 1
-    private final double rotVelocityMult = 1; 
+    private final double translationVelocityMult = 0.15; //Cannot be more than 1
+    private final double rotVelocityMult = .5; 
 
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(2, -2, 0); //How fast can the robot accellerate and decellerate
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(2);
@@ -98,23 +99,20 @@ public class RobotContainer {
             .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate)) 
         ));// Drive counterclockwise with negative X (left)
 
-
+        // coral intake command
+        // uses stow
         driverController.y().whileTrue(
             Commands.startEnd(
-                () -> coralIntake.runIntake(.23, .7), 
+                () -> {
+                    coralIntake.runIntake(.07, .7);
+                    elevator.setElevatorLevel(0);
+                    }, 
                 () -> 
-                    coralIntake.runIntake(0.0, 0.0), 
-                coralIntake, algaeIntake)
+                    coralIntake.stowIntake(), 
+                coralIntake, elevator)
         );
 
-        driverController.b().whileTrue(
-            Commands.startEnd(
-                () -> coralIntake.runIntake(0.0, -.7),
-                () -> coralIntake.runIntake(0.0, 0.0),
-                coralIntake)
-        );   
-
-
+        // algae intake command
         driverController.leftTrigger(0.1).whileTrue(
             Commands.startEnd(
                 () -> algaeIntake.runIntake(.11, -1.0),
@@ -122,6 +120,7 @@ public class RobotContainer {
                 algaeIntake)
         );
 
+        // algae score command
         driverController.leftBumper().whileTrue(
             Commands.startEnd(
                 () -> algaeIntake.runIntake(.11, 1.0), 
@@ -129,28 +128,17 @@ public class RobotContainer {
                 algaeIntake)
         );
 
+        // coral elevator increment level
         driverController.rightBumper().whileTrue(
             Commands.runOnce(
                 () -> {
                     elevator.incrementElevatorLevel();
                     elevator.setElevatorLevel();
+                    coralIntake.stowIntake();
                     }, 
-                elevator)
+                coralIntake, elevator)
         );
 
-        //idk where to put this, move later?
-        // Command setCoralIntakeToLevelCommand = new FunctionalCommand(
-        //     () -> {},
-        //     () -> {
-        //         if (elevator.getElevatorLevel() == 4) {
-        //             coralIntake.setSetPoint(0.07);
-        //         }
-        //         else coralIntake.setSetPoint(0.0);
-        //     },
-        //     null,
-        //     () -> coralIntake.getIsAtSetPoint(),
-        //     elevator, coralIntake
-        // );
 
         Command setCoralIntakeToLevelCommand = new CoralIntakeSetAndWaitCommand(coralIntake, elevator);
 
@@ -159,21 +147,36 @@ public class RobotContainer {
             elevator, coralIntake
         );
 
-        Command waitLol = new WaitCommand(1.0);
+        Command waitSmol = new WaitCommand(.3);
 
-        Command resetElevatorAndCoralCommand = Commands.runOnce(
+        Command waitLol = new WaitCommand(1.5);
+
+        
+        Command setRollerVelocitiesZeroCommand = Commands.runOnce(
+            () -> coralIntake.setRollerVelocity(0), 
+            elevator, coralIntake
+        );
+
+        Command elevatorToZeroCommand = new ElevatorSetAndWaitCommand(elevator);
+
+        Command stowIntakeCommand = Commands.runOnce(
             () -> {
-                elevator.setSetPoint(0);
-                elevator.setElevatorLevel(0);
-                coralIntake.runIntake(0.0, 0.0);
+  
+                coralIntake.stowIntake();
             },
             elevator, coralIntake
         );
 
 
-
+        //uses stow
         driverController.rightTrigger(0.01).onTrue(
-            setCoralIntakeToLevelCommand.andThen(outTakeCoralCommand.andThen(waitLol.andThen(resetElevatorAndCoralCommand)))
+            setCoralIntakeToLevelCommand.andThen(
+            waitSmol.andThen(
+            outTakeCoralCommand.andThen(
+            waitLol.andThen(
+            setRollerVelocitiesZeroCommand.andThen(
+            elevatorToZeroCommand.andThen(
+            stowIntakeCommand))))))
         );
 
         // Run SysId routines when holding back/start and X/Y.
