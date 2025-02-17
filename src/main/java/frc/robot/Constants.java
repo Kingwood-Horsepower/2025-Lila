@@ -28,4 +28,14 @@ public class Constants {
             );
     }
 
+    public static class ElevatorConstants
+    {
+        // ELEVATOR LEVELS
+        public static final double ELEVATOR_HOME_INCHES = 0;    //0
+        public static final double ELEVATOR_L1_INCHES = 3;      //1
+        public static final double ELEVATOR_L2_INCHES = 9;     //2
+        public static final double ELEVATOR_L3_INCHES = 15.5;     //3
+        public static final double ELEVATOR_MAX_INCHES = 28;    //4
+    }
+
 }
