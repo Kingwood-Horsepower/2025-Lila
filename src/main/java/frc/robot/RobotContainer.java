@@ -47,16 +47,10 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.01)
             .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
-            .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// (not) Use open-loop control for drive motors
            //.withSteerRequestType(SteerRequestType.);
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-    
-
-    // Other references
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-    private final CommandXboxController driverController = new CommandXboxController(0);
-    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget);
     
     // Subsystems
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -65,6 +59,11 @@ public class RobotContainer {
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake(elevator);
 
+    // Other references
+    private final Telemetry logger = new Telemetry(MaxSpeed);
+    private final CommandXboxController driverController = new CommandXboxController(0);
+    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget);
+        
     // SlewRaeLimiters
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(2, -2, 0); // How fast can the robot accellerate                                                                                // and decellerate
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(2);
@@ -82,6 +81,7 @@ public class RobotContainer {
     public RobotContainer() {
         configureCommands();
         configureBindings();
+        drivetrain.registerTelemetry(logger::telemeterize);
         resetPose();
     }
 
@@ -116,12 +116,8 @@ public class RobotContainer {
 
     /* #region configureBindings */
     private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention, I am so
-        // skibidi
-        // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
-
                 drivetrain.applyRequest(() -> drive
                         .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()) * translationVelocityMult
                                 * MaxSpeed)
@@ -147,8 +143,8 @@ public class RobotContainer {
         // .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate))
         // ));// Drive counterclockwise with negative X (left)
 
-        // coral intake command
-        // uses stow
+        //coral intake command
+        //uses stow
         driverController.y().whileTrue(
                 Commands.startEnd(
                         () -> {
@@ -192,17 +188,7 @@ public class RobotContainer {
                                                         elevatorToZeroCommand.andThen(
                                                                 stowIntakeCommand)))))));
 
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        driverController.back().and(driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        driverController.back().and(driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        driverController.start().and(driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        driverController.start().and(driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        // reset the field-centric heading on left bumper press
-        driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
-        drivetrain.registerTelemetry(logger::telemeterize);
     }
     /* #endregion */
 
@@ -222,8 +208,6 @@ public class RobotContainer {
     }
 
     public void resetPose() {
-        // Example Only - startPose should be derived from some assumption
-        // of where your robot was placed on the field.
         // The first pose in an autonomous path is often a good choice.
         var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d());
         drivetrain.resetPose(startPose);

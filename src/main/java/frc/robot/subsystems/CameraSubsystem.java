@@ -35,7 +35,7 @@ public class CameraSubsystem extends SubsystemBase {
 
   AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(kApriltags, kFieldLenght.magnitude(), kFieldWidth.magnitude());
   
-  PhotonCamera mainCamera = new PhotonCamera("MainCamera");
+  PhotonCamera mainCamera = new PhotonCamera("Arducam");
   List<PhotonPipelineResult> results = null;
 
   PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToCam);

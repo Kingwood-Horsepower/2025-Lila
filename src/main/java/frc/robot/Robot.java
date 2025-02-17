@@ -59,7 +59,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() 
   {
     if(m_robotContainer != null){
-      m_robotContainer.UpdateRobotPosition();
+      //m_robotContainer.UpdateRobotPosition();
     }
   }
 

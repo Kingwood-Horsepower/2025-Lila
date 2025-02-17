@@ -113,7 +113,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     );
 
     /* The SysId routine to test */
-    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineSteer;
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -266,9 +266,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .withDriveRequestType(DriveRequestType.Velocity);
 
     //Unused as of now
-    private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
+    private final PIDController xController = new PIDController(23.273, 0.56078, 0.0);
+    private final PIDController yController = new PIDController(23.273, 0.56078, 0.0);;
+    private final PIDController headingController = new PIDController(25.568, 1.1683, 0.0);
     
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
 
@@ -279,9 +279,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // WE NEED TO APPLY PID AND FEED FORWARD
         // use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
         ChassisSpeeds speeds = new ChassisSpeeds(
-            sample.vx,
-            sample.vy,
-            sample.omega
+            sample.vx + xController.calculate(pose.getX(), sample.x),
+            sample.vy + yController.calculate(pose.getY(), sample.y),
+            sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
         );
 
         // Apply the generated speeds
