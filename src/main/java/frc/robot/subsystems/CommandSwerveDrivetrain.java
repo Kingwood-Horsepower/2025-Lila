@@ -6,12 +6,20 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -21,7 +29,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -250,5 +258,41 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    //SwerveRequest used by the follow trajectory method;
+
+    private final SwerveRequest.ApplyFieldSpeeds trajectoryRequest = new SwerveRequest.ApplyFieldSpeeds()       
+        .withDriveRequestType(DriveRequestType.Velocity);
+
+    //Unused as of now
+    private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
+    
+    SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
+
+    public void followTrajectory(SwerveSample sample) {
+        // Get the current pose of the robot
+        Pose2d pose = getRobotPose();
+
+        // WE NEED TO APPLY PID AND FEED FORWARD
+        // use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
+        ChassisSpeeds speeds = new ChassisSpeeds(
+            sample.vx,
+            sample.vy,
+            sample.omega
+        );
+
+        // Apply the generated speeds
+        this.setControl(trajectoryRequest.withSpeeds(speeds));
+    }
+    public Pose2d getRobotPose()
+    {
+        return this.getState().Pose;
+    }
+
+    {
+
     }
 }

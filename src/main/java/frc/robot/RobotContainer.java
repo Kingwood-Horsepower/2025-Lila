@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.*;
 
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -37,7 +38,7 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.01)
             .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// Use open-loop control for drive motors
+            .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
             //.withSteerRequestType(SteerRequestType.); 
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -76,16 +77,18 @@ public class RobotContainer {
             )
         );
 
-        driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        //driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        driverController.a().onTrue((Commands.runOnce(SignalLogger::start)));
+        driverController.b().onTrue((Commands.runOnce(SignalLogger::stop)));
         //driverController.b().whileTrue(drivetrain.applyRequest(() ->
             //point.withModuleDirection(new Rotation2d(driverController.getLeftY(), driverController.getLeftX()))
         //));
 
-        targeAquired.and(driverController.b()).whileTrue(camera.runOnce(()-> System.out.println(" target.getYaw()")).andThen(drivetrain.applyRequest(() ->
-        drive.withVelocityX(driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate)) 
-        ));// Drive counterclockwise with negative X (left)
+        //targeAquired.and(driverController.b()).whileTrue(camera.runOnce(()-> System.out.println(" target.getYaw()")).andThen(drivetrain.applyRequest(() ->
+        //drive.withVelocityX(driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+         //   .withVelocityY(driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+         //   .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate)) 
+        //));// Drive counterclockwise with negative X (left)
 
 
     
