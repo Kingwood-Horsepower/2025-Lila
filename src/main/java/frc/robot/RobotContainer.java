@@ -37,38 +37,36 @@ import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.CameraSubsystem;
 
 public class RobotContainer {
+    //Data
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-                                                                                      // max angular velocity
+    private final double translationVelocityMult = 0.15; // Cannot be more than 1
+    private final double rotVelocityMult = .5;                                                                                      // max angular velocity
 
-    /* Setting up bindings for necessary control of the swerve drive platform */
+    //SwerveRequestes
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.01)
             .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
             .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
-    // .withSteerRequestType(SteerRequestType.);
+           //.withSteerRequestType(SteerRequestType.);
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    
 
+    // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
-
     private final CommandXboxController driverController = new CommandXboxController(0);
-
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
-    public static CameraSubsystem camera = new CameraSubsystem(); // this was public static final
-
     public final Trigger targeAquired = new Trigger(() -> camera.hasTarget);
+    
+    // Subsystems
+    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public static CameraSubsystem camera = new CameraSubsystem(); // this was public static final
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake(elevator);
 
-    private final double translationVelocityMult = 0.15; // Cannot be more than 1
-    private final double rotVelocityMult = .5;
-
     // SlewRaeLimiters
-    private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(2, -2, 0); // How fast can the robot accellerate
-                                                                                 // and decellerate
+    private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(2, -2, 0); // How fast can the robot accellerate                                                                                // and decellerate
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(2);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2);
 
