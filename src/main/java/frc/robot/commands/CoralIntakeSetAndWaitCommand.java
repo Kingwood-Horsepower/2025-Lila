@@ -25,6 +25,6 @@ public class CoralIntakeSetAndWaitCommand extends Command {
     @Override
     public boolean isFinished() {
         //if (elevator.getElevatorLevel() != 4) return true;
-        return (coralIntake.getIsAtSetPoint() && !coralIntake.getIsNearZero());
+        return (coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero());
     }
 }

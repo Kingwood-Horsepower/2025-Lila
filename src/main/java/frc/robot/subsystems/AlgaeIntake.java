@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class AlgaeIntake extends SubsystemBase{
     //setup motors
 
-    DigitalInput limitSwitch = new DigitalInput(8);
+    //DigitalInput limitSwitch = new DigitalInput(8);
 
     
     private final int rollerMotorID = 16;
@@ -67,7 +67,7 @@ public class AlgaeIntake extends SubsystemBase{
             .maxMotion
             //idk if i want to use the units library on top of the units math util, its very verbose
             .maxVelocity(5000) // takes an rpm 
-            .maxAcceleration(20000) // takes an rpm/s
+            .maxAcceleration(12000) // takes an rpm/s
             .allowedClosedLoopError(0.6)
             ; // <- this semicolon is important
         armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -111,7 +111,7 @@ public class AlgaeIntake extends SubsystemBase{
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
         //rollerMotorController.setReference(velocity, ControlType.kVelocity);
         
-        SmartDashboard.putBoolean("limit", limitSwitch.get());
+        //SmartDashboard.putBoolean("limit", limitSwitch.get());
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
         
         

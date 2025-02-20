@@ -36,7 +36,6 @@ public class CoralIntake extends SubsystemBase {
 
     private double setPoint = 0.0;
     private double velocity = 0.0;
-    private boolean isAtSetPoint = true;
     private boolean hasCoral = false;
 
     private final SparkFlex rollerMotor = new SparkFlex(rollerMotorID, MotorType.kBrushless);
@@ -44,10 +43,7 @@ public class CoralIntake extends SubsystemBase {
     private final SparkClosedLoopController rollerMotorController = rollerMotor.getClosedLoopController();
     private final RelativeEncoder rollerEncoder = rollerMotor.getEncoder();
     
-    private final int ARM_GEAR_RATIO = 45;
-    //private final double ARM_MAX_VELOCITY = 31*ARM_GEAR_RATIO; //190 deg/sec -> rotations/min
-    //private final double ARM_MAX_ACCELERATION = 633*ARM_GEAR_RATIO ; //2000 deg/sec -> rotations/min/s
-    
+    private final int ARM_GEAR_RATIO = 45; // this is the sprocket gear ratio now
 
     public CoralIntake(Elevator elevator) {
         this.elevator = elevator;
@@ -55,7 +51,7 @@ public class CoralIntake extends SubsystemBase {
         armMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)
-            .inverted(true)
+            .inverted(true) 
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .pid(0.3, 0.0, 0.0)
@@ -113,28 +109,17 @@ public class CoralIntake extends SubsystemBase {
         setRollerVelocity(0.0);
     }
 
-    /**
-     * Command arm to setpoint and run intake
-     * 
-     * @param setPoint FUCKING NUMBER FROM 0 TO 0.12, THE SUBSYSTEM MULTIPLIES THIS NUMBER BY THE GEAR RATIO. 
-     * @param velocity velocity of the intake motor, idk what the range is
-     */
-    private boolean checkIsAtSetPoint() {
-        double tolerance = 1; // one motor rotation of tolerance, 1/45th of rotation or arm tolerance
-        double currPosition = armEncoder.getPosition(); // in motor rotations
-        double targetPosition = setPoint*ARM_GEAR_RATIO; // in motor rotations
+    public boolean getIsNearSetPoint() {
+        double tolerance = 1; // in encoder rotations
+        double currPosition = armEncoder.getPosition();
+        double targetPosition = setPoint*ARM_GEAR_RATIO; 
         if ((currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance)) return true;
         return false;
     }
 
-    // uhhh this is stupid, prob just make the top one public idk
-    public boolean getIsAtSetPoint() {
-        return isAtSetPoint;
-    }
-
     public boolean getIsNearZero() {
-        double tolerance = 1; // one motor rotation of tolerance, 1/45th of rotation or arm tolerance
-        double currPosition = armEncoder.getPosition(); // in motor rotations
+        double tolerance = 1; // in encoder rotations
+        double currPosition = armEncoder.getPosition(); 
         if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
         return false;
     }
@@ -143,16 +128,12 @@ public class CoralIntake extends SubsystemBase {
     public void periodic() {
         // ill change this later
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
-        isAtSetPoint = checkIsAtSetPoint();
         hasCoral = !IRsensor.get(); 
 
-
-        SmartDashboard.putBoolean("is at setpoint", isAtSetPoint);
+        SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
         SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());
-
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
         SmartDashboard.putNumber("roller amps", rollerMotor.getOutputCurrent());
-        SmartDashboard.putBoolean("IR", IRsensor.get());
         SmartDashboard.putBoolean("hasCoral", hasCoral);
         
 

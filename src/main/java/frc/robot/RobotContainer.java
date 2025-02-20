@@ -65,9 +65,9 @@ public class RobotContainer {
     private final double translationVelocityMult = 0.15; //Cannot be more than 1
     private final double rotVelocityMult = .5; 
 
-    private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(2, -2, 0); //How fast can the robot accellerate and decellerate
-    private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(2);
-    private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2);
+    private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); //How fast can the robot accellerate and decellerate
+    private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
+    private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(1.3);
 
     
 
@@ -81,6 +81,12 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             
+            // drivetrain.applyRequest(() ->
+            //     drive.withVelocityX(driverController.getLeftY() * translationVelocityMult * MaxSpeed)
+            //         .withVelocityY(driverController.getLeftX() * translationVelocityMult * MaxSpeed) 
+            //         .withRotationalRate(driverController.getRightX() * -1 * rotVelocityMult * MaxAngularRate)
+            // )
+
             drivetrain.applyRequest(() ->
                 drive.withVelocityX(driveLimiterX.calculate(driverController.getLeftY()) * translationVelocityMult * MaxSpeed)
                     .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()) * translationVelocityMult * MaxSpeed) 
@@ -187,7 +193,7 @@ public class RobotContainer {
         driverController.start().and(driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        //driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
         resetPose();

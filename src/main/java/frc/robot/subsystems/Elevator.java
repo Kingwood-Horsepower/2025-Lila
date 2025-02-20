@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Elevator extends SubsystemBase{
 
     DigitalInput magneticLimitSwitch = new DigitalInput(1);
+    DigitalInput IRZero = new DigitalInput(8);
 
     private final int leadMotorID = 21;
     private final int followMotorID = 19;
@@ -54,6 +55,7 @@ public class Elevator extends SubsystemBase{
         ELEVATOR_MAX_INCHES,
     };
 
+    private double setPoint = 0.0;
     private int elevatorLevel = 0;
     private boolean isZerod = true;
     
@@ -67,14 +69,14 @@ public class Elevator extends SubsystemBase{
             .inverted(false)
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .pid(0.3, 0, 0)
+            .pid(0.1, 0, 0)
             .outputRange(-1, 1)
             .velocityFF(0) // calculated using recalc
             .maxMotion
             //idk if i want to use the units library on top of the units math util, its very verbose
             .maxVelocity(2000) // takes an rpm 
             .maxAcceleration(15000) // takes an rpm/s
-            .allowedClosedLoopError(0.6)
+            .allowedClosedLoopError(4)
             ; // <- this semicolon is important
         leadMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
@@ -90,14 +92,10 @@ public class Elevator extends SubsystemBase{
     /**
      * Command arm to setpoint
      * 
-     * @param setPoint double that represents distance in inches
+     * @param setPoint double that represents distance of the middle stage to its bottom 
      */
     public void setSetPoint(double setPoint) {
-        //ElevatorMaxExtensionInches = Preferences.getDouble(maxExtensionPreferenceKey, 5);
-        SmartDashboard.putNumber("elevator setpoint in inches", setPoint*ElevatorMaxExtensionInches);
-        leadMotorController.setReference(setPoint*ElevatorMaxExtensionInches*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
-        SmartDashboard.putNumber("value that setReference is set to", setPoint*ElevatorMaxExtensionInches*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
-        
+        this.setPoint = setPoint;
     }
 
     public int getElevatorLevel() {
@@ -112,37 +110,46 @@ public class Elevator extends SubsystemBase{
     }
 
     public void setElevatorLevel(){
-        leadMotorController.setReference(ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+        setSetPoint(ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
     }
 
     public void setElevatorLevel(int level){
         elevatorLevel = level;
-        leadMotorController.setReference(ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+        setElevatorLevel();
+    }
+
+    public boolean getIsNearSetPoint() {
+        double tolerance = 2;  // in encoder rotations
+        double currPosition = leadEncoder.getPosition(); 
+        double targetPosition = setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS;
+        if ((currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance)) return true;
+        return false;
     }
 
     public boolean getIsNearZero() {
-        double tolerance = 5; // one motor rotation of tolerance, 1/45th of rotation or arm tolerance
-        double currPosition = leadEncoder.getPosition(); // in motor rotations
+        double tolerance = 5; // in encoder rotations
+        double currPosition = leadEncoder.getPosition();
         if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
         return false;
     }
 
-    public boolean isInMotion() {
-        double tolerance = 0.1;
-        if (Math.abs(leadEncoder.getVelocity()) > tolerance) return true;
-        return false;
+    public void zeroElevator() {
+        leadEncoder.setPosition(0.0);
+        followEncoder.setPosition(0.0);
     }
+
 
     @Override
     public void periodic() {
-        
-        isZerod = magneticLimitSwitch.get();
+
+        leadMotorController.setReference(setPoint*ElevatorMaxExtensionInches*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+        isZerod = !IRZero.get();
+
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
-        SmartDashboard.putNumber("elevator setpoint", ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
-        SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
-        
-        SmartDashboard.putBoolean("magnetic limit switch", magneticLimitSwitch.get());
+        SmartDashboard.putNumber("elevator setpoint", setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
+        //SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
+        SmartDashboard.putBoolean("isZerod", isZerod);
 
     }
 
