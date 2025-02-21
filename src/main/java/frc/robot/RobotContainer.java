@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.opencv.core.Mat;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
@@ -24,11 +26,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.CoralIntakeSetAndWaitCommand;
-import frc.robot.commands.ElevatorSetAndWaitCommand;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -58,6 +60,7 @@ public class RobotContainer {
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake(elevator);
+    private final Auto auto;
 
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -69,37 +72,35 @@ public class RobotContainer {
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(2);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2);
 
-    // Algee Commands
+    // Coral Commands
     private Command setCoralIntakeToLevelCommand;
     private Command outTakeCoralCommand;
-    private Command waitSmol;
-    private Command waitLol;
-    private Command setRollerVelocitiesZeroCommand;
     private Command elevatorToZeroCommand;
     private Command stowIntakeCommand;
 
-    public RobotContainer() {
+    private Command scoreCoral;
+    private Command intakeCoral;
+    private Command incrementElevatorLevel;
+
+
+    public RobotContainer() {     
         configureCommands();
         configureBindings();
         drivetrain.registerTelemetry(logger::telemeterize);
         resetPose();
+        auto = new Auto(drivetrain, coralIntake, elevator, intakeCoral, scoreCoral, incrementElevatorLevel);
     }
 
     /* #region configureCommands */
     private void configureCommands() {
-        // Setup Coral and Alge Commands
-        setCoralIntakeToLevelCommand = new CoralIntakeSetAndWaitCommand(coralIntake, elevator);
-        outTakeCoralCommand = Commands.runOnce(
-                () -> coralIntake.setRollerVelocity(-1),
-                elevator, coralIntake);
-        waitSmol = new WaitCommand(.3);
-        waitLol = new WaitCommand(1.5);
-
-        setRollerVelocitiesZeroCommand = Commands.runOnce(
-                () -> coralIntake.setRollerVelocity(0),
-                elevator, coralIntake);
-
-        elevatorToZeroCommand = new ElevatorSetAndWaitCommand(elevator);
+        // Setup Coral commands
+        setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
+        outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
+        elevatorToZeroCommand = Commands.startEnd(
+            () -> {
+                elevator.setSetPoint(0.0);
+                elevator.setElevatorLevel(0);
+            }, () -> {}, coralIntake, elevator);
 
         stowIntakeCommand = Commands.runOnce(
                 () -> {
@@ -107,8 +108,32 @@ public class RobotContainer {
                     coralIntake.stowIntake();
                 },
                 elevator, coralIntake);
-    }
 
+        scoreCoral = Commands.sequence(
+            setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsAtSetPoint() && !coralIntake.getIsNearZero()),
+            new WaitCommand(.3),
+            outTakeCoralCommand.withTimeout(1.5),
+            elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
+            stowIntakeCommand
+        );
+
+        intakeCoral = Commands.startEnd(
+            () -> {
+                coralIntake.runIntake(.07, .7);
+                elevator.setElevatorLevel(0);
+            },
+            () -> coralIntake.stowIntake(),
+            coralIntake, elevator).until(()-> elevator.getIsNearSetPoint() && coralIntake.getIsNearSetPoint());
+
+        incrementElevatorLevel = Commands.startEnd(
+            () -> {
+                elevator.incrementElevatorLevel();
+                elevator.setElevatorLevel();
+                coralIntake.stowIntake();
+            },
+            () -> {},
+            coralIntake, elevator).until(elevator::getIsNearSetPoint);
+    }
     public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
     }
@@ -127,8 +152,8 @@ public class RobotContainer {
                                 * rotVelocityMult * MaxAngularRate)));
 
         // driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        driverController.a().onTrue((Commands.runOnce(SignalLogger::start)));
-        driverController.b().onTrue((Commands.runOnce(SignalLogger::stop)));
+        //driverController.a().onTrue((Commands.runOnce(SignalLogger::start)));
+        //driverController.b().onTrue((Commands.runOnce(SignalLogger::stop)));
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
         // point.withModuleDirection(new Rotation2d(driverController.getLeftY(),
         // driverController.getLeftX()))
@@ -142,17 +167,6 @@ public class RobotContainer {
         // negative X (left)
         // .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate))
         // ));// Drive counterclockwise with negative X (left)
-
-        //coral intake command
-        //uses stow
-        driverController.y().whileTrue(
-                Commands.startEnd(
-                        () -> {
-                            coralIntake.runIntake(.07, .7);
-                            elevator.setElevatorLevel(0);
-                        },
-                        () -> coralIntake.stowIntake(),
-                        coralIntake, elevator));
 
         // algae intake command
         driverController.leftTrigger(0.1).whileTrue(
@@ -169,24 +183,16 @@ public class RobotContainer {
                         algaeIntake));
 
         // coral elevator increment level
-        driverController.rightBumper().whileTrue(
-                Commands.runOnce(
-                        () -> {
-                            elevator.incrementElevatorLevel();
-                            elevator.setElevatorLevel();
-                            coralIntake.stowIntake();
-                        },
-                        coralIntake, elevator));
+        driverController.y().onTrue(incrementElevatorLevel.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));        
 
+        //uses stow
+        driverController.rightBumper().onTrue(scoreCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+
+        //coral intake command
         // uses stow
-        driverController.rightTrigger(0.01).onTrue(
-                setCoralIntakeToLevelCommand.andThen(
-                        waitSmol.andThen(
-                                outTakeCoralCommand.andThen(
-                                        waitLol.andThen(
-                                                setRollerVelocitiesZeroCommand.andThen(
-                                                        elevatorToZeroCommand.andThen(
-                                                                stowIntakeCommand)))))));
+        driverController.rightTrigger(0.01).onTrue(                
+            intakeCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+                
 
 
     }
@@ -199,7 +205,8 @@ public class RobotContainer {
             visionEst.ifPresent(
                     est -> {
                         System.out.println(est.estimatedPose.getTranslation());
-                        // SmartDashboard.putString("string", state.Pose.getTranslation().toString());
+                        SmartDashboard.putString("CameraOdometry", est.estimatedPose.getTranslation().toString());
+                        SmartDashboard.putNumber("CameraOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
 
                         drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
                     });
@@ -209,7 +216,8 @@ public class RobotContainer {
 
     public void resetPose() {
         // The first pose in an autonomous path is often a good choice.
-        var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d());
+        //var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d(Math.PI));
+        var startPose = new Pose2d(AutoConstants.getStartingPosition(), new Rotation2d(Math.PI));
         drivetrain.resetPose(startPose);
     }
     /* #endregion */

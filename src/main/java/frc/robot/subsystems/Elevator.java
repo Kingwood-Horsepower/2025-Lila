@@ -127,10 +127,11 @@ public class Elevator extends SubsystemBase{
         return false;
     }
 
-    public boolean isInMotion() {
-        double tolerance = 0.1;
-        if (Math.abs(leadEncoder.getVelocity()) > tolerance) return true;
-        return false;
+    public boolean getIsNearSetPoint() {
+        double tolerance = 2; // one motor rotation of tolerance, 1/45th of rotation or arm tolerance
+        double currPosition = leadEncoder.getPosition(); // in motor rotations
+        double targetPosition = ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS; // in motor rotations
+        return (currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance);
     }
 
     @Override

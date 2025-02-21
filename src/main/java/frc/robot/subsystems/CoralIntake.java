@@ -119,7 +119,7 @@ public class CoralIntake extends SubsystemBase {
      * @param setPoint FUCKING NUMBER FROM 0 TO 0.12, THE SUBSYSTEM MULTIPLIES THIS NUMBER BY THE GEAR RATIO. 
      * @param velocity velocity of the intake motor, idk what the range is
      */
-    private boolean checkIsAtSetPoint() {
+    public boolean getIsNearSetPoint() {
         double tolerance = 1; // one motor rotation of tolerance, 1/45th of rotation or arm tolerance
         double currPosition = armEncoder.getPosition(); // in motor rotations
         double targetPosition = setPoint*ARM_GEAR_RATIO; // in motor rotations
@@ -143,7 +143,7 @@ public class CoralIntake extends SubsystemBase {
     public void periodic() {
         // ill change this later
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
-        isAtSetPoint = checkIsAtSetPoint();
+        isAtSetPoint = getIsNearSetPoint();
         hasCoral = !IRsensor.get(); 
 
 
@@ -158,6 +158,10 @@ public class CoralIntake extends SubsystemBase {
 
         
         
+    }
+    public boolean hasCoral()
+    {
+        return hasCoral;
     }
 
 }
