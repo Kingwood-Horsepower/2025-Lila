@@ -88,7 +88,7 @@ public class RobotContainer {
         configureBindings();
         drivetrain.registerTelemetry(logger::telemeterize);
         resetPose();
-        auto = new Auto(drivetrain, coralIntake, elevator, intakeCoral, scoreCoral, incrementElevatorLevel);
+        auto = new Auto(drivetrain, coralIntake, elevator, intakeCoral, scoreCoral);
     }
 
     /* #region configureCommands */
