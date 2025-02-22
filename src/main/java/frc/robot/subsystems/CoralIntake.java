@@ -130,6 +130,7 @@ public class CoralIntake extends SubsystemBase {
     public void periodic() {
         // ill change this later
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
+        //isAtSetPoint = getIsNearSetPoint();
         hasCoral = !IRsensor.get(); 
 
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
@@ -142,6 +143,10 @@ public class CoralIntake extends SubsystemBase {
 
         
         
+    }
+    public boolean hasCoral()
+    {
+        return hasCoral;
     }
 
 }

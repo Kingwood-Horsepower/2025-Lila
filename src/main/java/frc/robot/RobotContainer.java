@@ -6,8 +6,10 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.opencv.core.Mat;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -24,11 +26,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.CoralIntakeSetAndWaitCommand;
-import frc.robot.commands.ElevatorSetAndWaitCommand;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -37,86 +39,129 @@ import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.CameraSubsystem;
 
 public class RobotContainer {
+    //Data
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
+    private final double translationVelocityMult = 0.15; // Cannot be more than 1
+    private final double rotVelocityMult = .5;                                                                                      // max angular velocity
 
-    /* Setting up bindings for necessary control of the swerve drive platform */
+    //SwerveRequestes
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.01)
             .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// Use open-loop control for drive motors
-            //.withSteerRequestType(SteerRequestType.); 
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// (not) Use open-loop control for drive motors
+           //.withSteerRequestType(SteerRequestType.);
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-
-    private final CommandXboxController driverController = new CommandXboxController(0);
-
+    // Subsystems
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
     public static CameraSubsystem camera = new CameraSubsystem(); // this was public static final
-
-    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget);
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake(elevator);
+    private final Auto auto;
 
-    private final double translationVelocityMult = 0.4; //Cannot be more than 1
-    private final double rotVelocityMult = .5; 
-
-    private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); //How fast can the robot accellerate and decellerate
+    // Other references
+    private final Telemetry logger = new Telemetry(MaxSpeed);
+    private final CommandXboxController driverController = new CommandXboxController(0);
+    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget());
+        
+    // SlewRaeLimiters
+    private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(1.3);
 
-    
+    // Coral Commands (Some command are public because used by the Auto class)
+    private Command setCoralIntakeToLevelCommand;
+    private Command outTakeCoralCommand;
+    private Command elevatorToZeroCommand;
 
-    public RobotContainer() {
+    public Command scoreCoral;
+    public Command intakeCoral;
+    private Command incrementElevatorLevel;
+
+    public Command alignRobotWithAprilTag;
+
+
+    public RobotContainer() {     
+        configureCommands();
         configureBindings();
+        drivetrain.registerTelemetry(logger::telemeterize);
+        resetPose();
+        auto = new Auto(drivetrain, coralIntake, elevator, this);
     }
 
+    /* #region configureCommands */
+    private void configureCommands() {
+        // Setup Coral commands
+        //Score Coral
+        setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
+        outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
+        elevatorToZeroCommand = Commands.startEnd(
+            () -> {
+                elevator.setSetPoint(0.0);
+                elevator.setElevatorLevel(0);
+            }, () -> {}, coralIntake, elevator);
+
+        scoreCoral = Commands.sequence(
+            setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
+            new WaitCommand(.3),
+            outTakeCoralCommand.withTimeout(1.5),
+            elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
+            Commands.runOnce(coralIntake :: stowIntake, elevator, coralIntake)
+        );
+        //Intake Coral
+        intakeCoral = Commands.startEnd(
+            () -> {
+                coralIntake.runIntake(.07, .7);
+                elevator.setElevatorLevel(0);
+            },
+            () -> coralIntake.stowIntake(),
+            coralIntake, elevator).until(()-> elevator.getIsNearSetPoint() && coralIntake.getIsNearSetPoint());
+        //increment elevator
+        incrementElevatorLevel = Commands.startEnd(
+            () -> {
+                elevator.incrementElevatorLevel();
+                elevator.setElevatorLevel();
+                coralIntake.stowIntake();
+            },
+            () -> {},
+            coralIntake, elevator).until(elevator::getIsNearSetPoint);
+        //align robot with april tag
+         alignRobotWithAprilTag = drivetrain.applyRequest(() ->
+        drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDesiredDistanceToAprilTag-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+        .withVelocityY(driverController.getLeftX() * MaxSpeed)
+        .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targeAquired);
+
+        
+    }
+    public Command getAutonomousCommand() {
+        return Commands.print("No autonomous command configured");
+    }
+    /* #endregion */
+
+    /* #region configureBindings */
     private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention, I am so skibidi
-        // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            
-            // drivetrain.applyRequest(() ->
-            //     drive.withVelocityX(driverController.getLeftY() * translationVelocityMult * MaxSpeed)
-            //         .withVelocityY(driverController.getLeftX() * translationVelocityMult * MaxSpeed) 
-            //         .withRotationalRate(driverController.getRightX() * -1 * rotVelocityMult * MaxAngularRate)
-            // )
+                // Drivetrain will execute this command periodically
+                drivetrain.applyRequest(() -> drive
+                        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()) * translationVelocityMult
+                                * MaxSpeed)
+                        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()) * translationVelocityMult
+                                * MaxSpeed)
+                        .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
+                                * rotVelocityMult * MaxAngularRate)));
 
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(driveLimiterX.calculate(driverController.getLeftY()) * translationVelocityMult * MaxSpeed)
-                    .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()) * translationVelocityMult * MaxSpeed) 
-                    .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1 * rotVelocityMult * MaxAngularRate)
-            )
-        );
+        // driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        //driverController.a().onTrue((Commands.runOnce(SignalLogger::start)));
+        //driverController.b().onTrue((Commands.runOnce(SignalLogger::stop)));
+        // driverController.b().whileTrue(drivetrain.applyRequest(() ->
+        // point.withModuleDirection(new Rotation2d(driverController.getLeftY(),
+        // driverController.getLeftX()))
+        // ));
 
-        driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        //driverController.b().whileTrue(drivetrain.applyRequest(() ->
-            //point.withModuleDirection(new Rotation2d(driverController.getLeftY(), driverController.getLeftX()))
-        //));
-
-        targeAquired.and(driverController.b()).whileTrue(camera.runOnce(()-> System.out.println(" target.getYaw()")).andThen(drivetrain.applyRequest(() ->
-        drive.withVelocityX(driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate)) 
-        ));// Drive counterclockwise with negative X (left)
-
-        // coral intake command
-        // uses stow
-        driverController.y().whileTrue(
-            Commands.startEnd(
-                () -> {
-                    coralIntake.runIntake(.03, .7);
-                    elevator.setElevatorLevel(0);
-                    }, 
-                () -> 
-                    coralIntake.stowIntake(), 
-                coralIntake, elevator)
-        );
+        driverController.b().whileTrue(alignRobotWithAprilTag);
 
         // algae intake command
         driverController.leftBumper().whileTrue(
@@ -129,103 +174,58 @@ public class RobotContainer {
         );
 
         // coral elevator increment level
-        driverController.rightBumper().whileTrue(
-            Commands.runOnce(
-                () -> {
-                    elevator.incrementElevatorLevel();
-                    elevator.setElevatorLevel();
-                    coralIntake.stowIntake();
-                    }, 
-                coralIntake, elevator)
-        );
-
-
-        Command setCoralIntakeToLevelCommand = new CoralIntakeSetAndWaitCommand(coralIntake, elevator);
-
-        Command outTakeCoralCommand = Commands.runOnce(
-            () -> coralIntake.setRollerVelocity(-1), 
-            elevator, coralIntake
-        );
-
-        Command waitSmol = new WaitCommand(.3);
-
-        Command waitLol = new WaitCommand(1.5);
-
-        
-        Command setRollerVelocitiesZeroCommand = Commands.runOnce(
-            () -> coralIntake.setRollerVelocity(0), 
-            elevator, coralIntake
-        );
-
-        Command elevatorToZeroCommand = new ElevatorSetAndWaitCommand(elevator);
-
-        Command stowIntakeCommand = Commands.runOnce(
-            () -> {
-  
-                coralIntake.stowIntake();
-            },
-            elevator, coralIntake
-        );
-
+        driverController.y().onTrue(incrementElevatorLevel.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));        
 
         //uses stow
-        driverController.rightTrigger(0.01).onTrue(
-            setCoralIntakeToLevelCommand.andThen(
-            waitSmol.andThen(
-            outTakeCoralCommand.andThen(
-            waitLol.andThen(
-            setRollerVelocitiesZeroCommand.andThen(
-            elevatorToZeroCommand.andThen(
-            stowIntakeCommand))))))
-        );
+        driverController.rightBumper().onTrue(scoreCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        driverController.back().and(driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        driverController.back().and(driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        driverController.start().and(driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        driverController.start().and(driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        //coral intake command
+        // uses stow
+        driverController.rightTrigger(0.01).onTrue(                
+            intakeCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+                
 
-        // reset the field-centric heading on left bumper press
-        //driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        drivetrain.registerTelemetry(logger::telemeterize);
-        resetPose();
-
-        driverController.b().whileTrue(
-            Commands.runOnce(
-                () -> {
-                    elevator.resetEncoders();
-                    algaeIntake.loadPreferences();    
-                }, 
-                elevator, algaeIntake)
-        );
     }
+    /* #endregion */
 
- public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
-    }
-
-    public void UpdateRobotPosition(){
-        if(camera != null){
-            var visionEst = camera.getEstimatedGlobalPose();
+    /* #region Other Methods*/
+    public void UpdateRobotPosition() {
+        if (camera != null) {
+            //Right camera
+            var visionEst = camera.getEstimatedGlobalRightPose();
             visionEst.ifPresent(
-                est -> {
-                    System.out.println(est.estimatedPose.getTranslation());
-                    //SmartDashboard.putString("string", state.Pose.getTranslation().toString());
+                    est -> {
+                        System.out.println(est.estimatedPose.getTranslation());
+                        SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
+                        SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
 
-                    drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
-                });
-        }
+                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
+                    });
+            //Left camera
+
+            visionEst = camera.getEstimatedGlobalLeftPose();
+            visionEst.ifPresent(
+                    est -> {
+                        System.out.println(est.estimatedPose.getTranslation());
+                        SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
+                        SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
         
+                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
+                    });
+        }
 
     }
 
     public void resetPose() {
-        // Example Only - startPose should be derived from some assumption
-        // of where your robot was placed on the field.
         // The first pose in an autonomous path is often a good choice.
-        var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d());
+        //var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d(Math.PI));
+        var startPose = new Pose2d(AutoConstants.getStartingPosition(), new Rotation2d(Math.PI));
         drivetrain.resetPose(startPose);
     }
+
+    public void autonomousPeriodic(){
+        //auto.PollAutoRoutine();
+    }
+    /* #endregion */
 }
