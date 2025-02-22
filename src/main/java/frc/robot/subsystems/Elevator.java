@@ -69,14 +69,18 @@ public class Elevator extends SubsystemBase{
             .inverted(false)
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+
             .pid(0.1, 0, 0)
+
             .outputRange(-1, 1)
             .velocityFF(0) // calculated using recalc
             .maxMotion
             //idk if i want to use the units library on top of the units math util, its very verbose
             .maxVelocity(2000) // takes an rpm 
-            .maxAcceleration(15000) // takes an rpm/s
-            .allowedClosedLoopError(4)
+
+            .maxAcceleration(5000) // takes an rpm/s
+            .allowedClosedLoopError(0.6)
+
             ; // <- this semicolon is important
         leadMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
@@ -110,7 +114,7 @@ public class Elevator extends SubsystemBase{
     }
 
     public void setElevatorLevel(){
-        setSetPoint(ELEVATOR_LEVELS[elevatorLevel]*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
+        setSetPoint(ELEVATOR_LEVELS[elevatorLevel]);
     }
 
     public void setElevatorLevel(int level){
@@ -138,11 +142,15 @@ public class Elevator extends SubsystemBase{
         followEncoder.setPosition(0.0);
     }
 
+    public void resetEncoders() {
+        leadEncoder.setPosition(0.0);
+        followEncoder.setPosition(0.0);
+    }
 
     @Override
     public void periodic() {
 
-        leadMotorController.setReference(setPoint*ElevatorMaxExtensionInches*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+        leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
         isZerod = !IRZero.get();
 
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());

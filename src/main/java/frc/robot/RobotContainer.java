@@ -62,7 +62,7 @@ public class RobotContainer {
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake(elevator);
 
-    private final double translationVelocityMult = 0.15; //Cannot be more than 1
+    private final double translationVelocityMult = 0.4; //Cannot be more than 1
     private final double rotVelocityMult = .5; 
 
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); //How fast can the robot accellerate and decellerate
@@ -110,7 +110,7 @@ public class RobotContainer {
         driverController.y().whileTrue(
             Commands.startEnd(
                 () -> {
-                    coralIntake.runIntake(.07, .7);
+                    coralIntake.runIntake(.03, .7);
                     elevator.setElevatorLevel(0);
                     }, 
                 () -> 
@@ -119,19 +119,13 @@ public class RobotContainer {
         );
 
         // algae intake command
-        driverController.leftTrigger(0.1).whileTrue(
-            Commands.startEnd(
-                () -> algaeIntake.runIntake(.11, -1.0),
-                () -> algaeIntake.runIntake(0.04, 0.0), 
-                algaeIntake)
+        driverController.leftBumper().whileTrue(
+            algaeIntake.intake()
         );
 
         // algae score command
-        driverController.leftBumper().whileTrue(
-            Commands.startEnd(
-                () -> algaeIntake.runIntake(.11, 1.0), 
-                () -> algaeIntake.runIntake(0.0, 0.0), 
-                algaeIntake)
+        driverController.leftTrigger(0.1).whileTrue(
+            algaeIntake.score()
         );
 
         // coral elevator increment level
@@ -197,6 +191,15 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
         resetPose();
+
+        driverController.b().whileTrue(
+            Commands.runOnce(
+                () -> {
+                    elevator.resetEncoders();
+                    algaeIntake.loadPreferences();    
+                }, 
+                elevator, algaeIntake)
+        );
     }
 
  public Command getAutonomousCommand() {

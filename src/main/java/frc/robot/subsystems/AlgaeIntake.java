@@ -19,9 +19,13 @@ import static edu.wpi.first.math.util.Units.*;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 //import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import static frc.robot.Constants.AlgaeConstants.*;
 
 public class AlgaeIntake extends SubsystemBase{
     //setup motors
@@ -49,9 +53,13 @@ public class AlgaeIntake extends SubsystemBase{
     private final RelativeEncoder rollerEncoder = rollerMotor.getEncoder();
     
     private final int ARM_GEAR_RATIO = 135;
-    //private final double ARM_MAX_VELOCITY = 31*ARM_GEAR_RATIO; //190 deg/sec -> rotations/min
-    //private final double ARM_MAX_ACCELERATION = 633*ARM_GEAR_RATIO ; //2000 deg/sec -> rotations/min/s
-    
+
+    public static final String algaeDownSetPointKey = "algae down point";
+    public static final String algaeStoreSetPointKey = "algae store point";
+
+    private static double algaeDownPoint = ALGAE_DOWN_POINT;
+    private static double algaeStorePoint = ALGAE_STORE_POINT;
+
 
     public AlgaeIntake() {
         // continue setup
@@ -66,8 +74,8 @@ public class AlgaeIntake extends SubsystemBase{
             .velocityFF(0) // calculated using recalc
             .maxMotion
             //idk if i want to use the units library on top of the units math util, its very verbose
-            .maxVelocity(5000) // takes an rpm 
-            .maxAcceleration(12000) // takes an rpm/s
+            .maxVelocity(3000) // takes an rpm 
+            .maxAcceleration(7000) // takes an rpm/s
             .allowedClosedLoopError(0.6)
             ; // <- this semicolon is important
         armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -79,7 +87,12 @@ public class AlgaeIntake extends SubsystemBase{
 
         rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-
+        if (!Preferences.containsKey(algaeDownSetPointKey)) {
+            Preferences.setDouble(algaeDownSetPointKey, algaeDownPoint);
+          }
+        if (!Preferences.containsKey(algaeStoreSetPointKey)) {
+          Preferences.setDouble(algaeStoreSetPointKey, algaeStorePoint);
+        }
     }
 
     /**
@@ -104,6 +117,26 @@ public class AlgaeIntake extends SubsystemBase{
         rollerMotor.set(velocity);
 
     }
+
+    public void loadPreferences() {
+        algaeDownPoint = Preferences.getDouble(algaeDownSetPointKey, algaeDownPoint);
+        algaeStorePoint = Preferences.getDouble(algaeStoreSetPointKey, algaeStorePoint);
+    }
+
+    public Command intake() {
+        return Commands.startEnd(
+            () -> runIntake(algaeDownPoint, -1.0),
+            () -> runIntake(algaeStorePoint, 0.0), 
+            this);
+    }
+
+    public Command score() {
+        return Commands.startEnd(
+            () -> runIntake(algaeDownPoint, 1.0),
+            () -> runIntake(0.0, 0.0), 
+            this);
+    }
+
 
     @Override
     public void periodic() {

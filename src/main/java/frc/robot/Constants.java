@@ -38,4 +38,10 @@ public class Constants {
         public static final double ELEVATOR_MAX_INCHES = 27;    //4
     }
 
+
+    public static class AlgaeConstants
+    {
+        public static final double ALGAE_DOWN_POINT = .11;
+        public static final double ALGAE_STORE_POINT = .04;
+    }
 }

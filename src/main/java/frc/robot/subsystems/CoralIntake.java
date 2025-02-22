@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -30,6 +31,7 @@ public class CoralIntake extends SubsystemBase {
     private final SparkMaxConfig armMotorConfig = new SparkMaxConfig();
     private final SparkClosedLoopController armMotorController = armMotor.getClosedLoopController();
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
+    private final AbsoluteEncoder absEncoder = armMotor.getAbsoluteEncoder();
     
     //look at revlib for arm motor: getForwardLimitSwitch
     //look at revlib for intake motor: getOutputCurrent
@@ -54,7 +56,7 @@ public class CoralIntake extends SubsystemBase {
             .inverted(true) 
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .pid(0.3, 0.0, 0.0)
+            .pid(0.3, 0.0, 0.1)
             .outputRange(-1, 1) //what does this do??
             .velocityFF(0) // calculated using recalc
             .maxMotion
@@ -135,6 +137,7 @@ public class CoralIntake extends SubsystemBase {
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
         SmartDashboard.putNumber("roller amps", rollerMotor.getOutputCurrent());
         SmartDashboard.putBoolean("hasCoral", hasCoral);
+        SmartDashboard.putNumber("absEncoder", absEncoder.getPosition());
         
 
         
