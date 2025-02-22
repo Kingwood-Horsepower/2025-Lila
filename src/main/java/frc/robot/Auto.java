@@ -19,14 +19,14 @@ import static frc.robot.Constants.AutoConstants.*;
 
 public class Auto {
     private final AutoFactory autoFactory;
-
+    
     private final CoralIntake coralIntake;
     private final Elevator elevator;
+    private final RobotContainer robotContainer;
 
-    private Command scoreCoral;
-    private Command intakeCoral;
+    private final AutoRoutine autoRoutine;
 
-    public Auto(CommandSwerveDrivetrain driveSubsystem, CoralIntake _coralIntake, Elevator _elevator, Command _intakeCoral, Command _scoreCoral)
+    public Auto(CommandSwerveDrivetrain driveSubsystem, CoralIntake _coralIntake, Elevator _elevator, RobotContainer _robotContainer)
     {   
         autoFactory = new AutoFactory(
             driveSubsystem::getRobotPose, // A function that returns the current robot pose
@@ -39,40 +39,24 @@ public class Auto {
         coralIntake = _coralIntake;
         elevator = _elevator;
 
-        scoreCoral = _scoreCoral;
-        intakeCoral = _intakeCoral;
+        robotContainer = _robotContainer;
+        autoRoutine = getAutoRoutine();
     }
-//1 is closest to center, and S1 is to the right
+    public void PollAutoRoutine()
+    {
+        autoRoutine.poll();
+    }
+    public void KillAutoRoutine()
+    {
+        autoRoutine.kill();
+    }
     @SuppressWarnings("unused")
-    public AutoRoutine getAutoRoutine()
+    AutoRoutine getAutoRoutine()
     {
         AutoRoutine routine = autoFactory.newRoutine("Autonomous");
-        AutoTrajectory goToCoralStation = null;
-        
+        AutoTrajectory goToCoralStation = getStartingAutoTrajectory(routine);
+
         //custom starting trajectory based on the starting position and the targetStation
-        switch (startingPosition) {
-            case goonCage:
-                if(targetStation == TargetCoralStation.rightStation)
-                   goToCoralStation = routine.trajectory("AutoStart1S1");
-                else
-                   goToCoralStation = routine.trajectory("AutoStart1S2");
-                break;
-            case sigmaCage:
-                if(targetStation == TargetCoralStation.rightStation)
-                   goToCoralStation = routine.trajectory("AutoStart2S1");
-                else
-                   goToCoralStation = routine.trajectory("AutoStart2S2");
-                break;
-            case edgeCage:
-                if(targetStation == TargetCoralStation.rightStation)
-                   goToCoralStation = routine.trajectory("AutoStart3S1");
-                else
-                   goToCoralStation = routine.trajectory("AutoStart3S2");
-                break;
-            default:
-                System.out.println("Wrong auto constants");
-                break;
-       }
        routine.active().onTrue(
         Commands.sequence(
             goToCoralStation.resetOdometry(),
@@ -91,11 +75,18 @@ public class Auto {
             goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral1));
         }
         //Score Coral and come back to the station
-        goToCoral1.done().onTrue(ScoreCoralAndComeBack(null));     
-        goToCoral9.done().onTrue(ScoreCoralAndComeBack(null));
+        AutoTrajectory goToCoral1R = routine.trajectory("Coral1S2R");
+        AutoTrajectory goToCoral9R = routine.trajectory("Coral9S1R");
+
+        goToCoral1.done().onTrue(ScoreCoralAndComeBack(goToCoral1R));     
+        goToCoral9.done().onTrue(ScoreCoralAndComeBack(goToCoral9R));
 
         AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
         AutoTrajectory goToCoral10 = routine.trajectory("Coral10S1");
+
+        goToCoral1R.done().onTrue(IntakeCoralAndGo(goToCoral2));
+        goToCoral9R.done().onTrue(IntakeCoralAndGo(goToCoral10));
+
 
 
 
@@ -105,26 +96,48 @@ public class Auto {
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
         Command setElevator =Commands.startEnd(
             () -> {
-                elevator.setElevatorLevel(4);;
-                elevator.setElevatorLevel();
+                elevator.setElevatorLevel(4);
                 coralIntake.stowIntake();
             },
             () -> {},
             coralIntake, elevator).until(elevator::getIsNearSetPoint);
         return Commands.sequence(
-            setElevator,
-            scoreCoral,
+            robotContainer.alignRobotWithAprilTag.withDeadline(setElevator),
+            robotContainer.scoreCoral,
             nexTrajectory.resetOdometry(),
             nexTrajectory.cmd()
         );
     }
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
-                intakeCoral,
+                robotContainer.intakeCoral,
                 new WaitUntilCommand(coralIntake :: hasCoral),
                 nexTrajectory.resetOdometry(),
                 nexTrajectory.cmd()
             );
+    }
+    private AutoTrajectory getStartingAutoTrajectory(AutoRoutine routine){
+        switch (startingPosition) {
+            case goonCage:
+                if(targetStation == TargetCoralStation.rightStation)
+                  return routine.trajectory("AutoStart1S1");
+                else
+                  return routine.trajectory("AutoStart1S2");
+            case sigmaCage:
+                if(targetStation == TargetCoralStation.rightStation)
+                   return routine.trajectory("AutoStart2S1");
+                else
+                   return routine.trajectory("AutoStart2S2");
+            case edgeCage:
+                if(targetStation == TargetCoralStation.rightStation)
+                   return routine.trajectory("AutoStart3S1");
+                else
+                   return routine.trajectory("AutoStart3S2");
+            default:
+                System.out.println("Wrong auto constants");
+                return null;
+       }
+
     }
 
 

@@ -65,22 +65,23 @@ public class RobotContainer {
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
     private final CommandXboxController driverController = new CommandXboxController(0);
-    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget);
+    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget());
         
     // SlewRaeLimiters
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(2, -2, 0); // How fast can the robot accellerate                                                                                // and decellerate
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(2);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2);
 
-    // Coral Commands
+    // Coral Commands (Some command are public because used by the Auto class)
     private Command setCoralIntakeToLevelCommand;
     private Command outTakeCoralCommand;
     private Command elevatorToZeroCommand;
-    private Command stowIntakeCommand;
 
-    private Command scoreCoral;
-    private Command intakeCoral;
+    public Command scoreCoral;
+    public Command intakeCoral;
     private Command incrementElevatorLevel;
+
+    public Command alignRobotWithAprilTag;
 
 
     public RobotContainer() {     
@@ -88,12 +89,13 @@ public class RobotContainer {
         configureBindings();
         drivetrain.registerTelemetry(logger::telemeterize);
         resetPose();
-        auto = new Auto(drivetrain, coralIntake, elevator, intakeCoral, scoreCoral);
+        auto = new Auto(drivetrain, coralIntake, elevator, this);
     }
 
     /* #region configureCommands */
     private void configureCommands() {
         // Setup Coral commands
+        //Score Coral
         setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
         outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
         elevatorToZeroCommand = Commands.startEnd(
@@ -102,21 +104,14 @@ public class RobotContainer {
                 elevator.setElevatorLevel(0);
             }, () -> {}, coralIntake, elevator);
 
-        stowIntakeCommand = Commands.runOnce(
-                () -> {
-
-                    coralIntake.stowIntake();
-                },
-                elevator, coralIntake);
-
         scoreCoral = Commands.sequence(
             setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsAtSetPoint() && !coralIntake.getIsNearZero()),
             new WaitCommand(.3),
             outTakeCoralCommand.withTimeout(1.5),
             elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
-            stowIntakeCommand
+            Commands.runOnce(coralIntake :: stowIntake, elevator, coralIntake)
         );
-
+        //Intake Coral
         intakeCoral = Commands.startEnd(
             () -> {
                 coralIntake.runIntake(.07, .7);
@@ -124,7 +119,7 @@ public class RobotContainer {
             },
             () -> coralIntake.stowIntake(),
             coralIntake, elevator).until(()-> elevator.getIsNearSetPoint() && coralIntake.getIsNearSetPoint());
-
+        //increment elevator
         incrementElevatorLevel = Commands.startEnd(
             () -> {
                 elevator.incrementElevatorLevel();
@@ -133,6 +128,13 @@ public class RobotContainer {
             },
             () -> {},
             coralIntake, elevator).until(elevator::getIsNearSetPoint);
+        //align robot with april tag
+         alignRobotWithAprilTag = drivetrain.applyRequest(() ->
+        drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDesiredDistanceToAprilTag-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+        .withVelocityY(driverController.getLeftX() * MaxSpeed)
+        .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targeAquired);
+
+        
     }
     public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
@@ -159,14 +161,7 @@ public class RobotContainer {
         // driverController.getLeftX()))
         // ));
 
-        // targeAquired.and(driverController.b()).whileTrue(camera.runOnce(()->
-        // System.out.println(" target.getYaw()")).andThen(drivetrain.applyRequest(() ->
-        // drive.withVelocityX(driverController.getLeftY() * MaxSpeed) // Drive forward
-        // with negative Y (forward)
-        // .withVelocityY(driverController.getLeftX() * MaxSpeed) // Drive left with
-        // negative X (left)
-        // .withRotationalRate(-1.0 * (camera.targetYaw/50)* MaxAngularRate))
-        // ));// Drive counterclockwise with negative X (left)
+        driverController.b().whileTrue(alignRobotWithAprilTag);
 
         // algae intake command
         driverController.leftTrigger(0.1).whileTrue(
@@ -201,13 +196,25 @@ public class RobotContainer {
     /* #region Other Methods*/
     public void UpdateRobotPosition() {
         if (camera != null) {
-            var visionEst = camera.getEstimatedGlobalPose();
+            //Right camera
+            var visionEst = camera.getEstimatedGlobalRightPose();
             visionEst.ifPresent(
                     est -> {
                         System.out.println(est.estimatedPose.getTranslation());
-                        SmartDashboard.putString("CameraOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+                        SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
+                        SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
 
+                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
+                    });
+            //Left camera
+
+            visionEst = camera.getEstimatedGlobalLeftPose();
+            visionEst.ifPresent(
+                    est -> {
+                        System.out.println(est.estimatedPose.getTranslation());
+                        SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
+                        SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+        
                         drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
                     });
         }
@@ -219,6 +226,10 @@ public class RobotContainer {
         //var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d(Math.PI));
         var startPose = new Pose2d(AutoConstants.getStartingPosition(), new Rotation2d(Math.PI));
         drivetrain.resetPose(startPose);
+    }
+
+    public void autonomousPeriodic(){
+        //auto.PollAutoRoutine();
     }
     /* #endregion */
 }
