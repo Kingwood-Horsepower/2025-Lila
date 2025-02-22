@@ -31,17 +31,17 @@ public class CoralIntake extends SubsystemBase {
     private final SparkMaxConfig armMotorConfig = new SparkMaxConfig();
     private final SparkClosedLoopController armMotorController = armMotor.getClosedLoopController();
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
-    private final AbsoluteEncoder absEncoder = armMotor.getAbsoluteEncoder();
+    //private final AbsoluteEncoder absEncoder = armMotor.getAbsoluteEncoder();
     
     //look at revlib for arm motor: getForwardLimitSwitch
     //look at revlib for intake motor: getOutputCurrent
 
     private double setPoint = 0.0;
     private double velocity = 0.0;
-    private boolean hasCoral = false;
+    public boolean hasCoral = false;
 
-    private final SparkFlex rollerMotor = new SparkFlex(rollerMotorID, MotorType.kBrushless);
-    private final SparkFlexConfig rollerMotorConfig = new SparkFlexConfig();
+    private final SparkMax rollerMotor = new SparkMax(rollerMotorID, MotorType.kBrushless);
+    private final SparkMaxConfig rollerMotorConfig = new SparkMaxConfig();
     private final SparkClosedLoopController rollerMotorController = rollerMotor.getClosedLoopController();
     private final RelativeEncoder rollerEncoder = rollerMotor.getEncoder();
     
@@ -122,7 +122,7 @@ public class CoralIntake extends SubsystemBase {
     public boolean getIsNearZero() {
         double tolerance = 1; // in encoder rotations
         double currPosition = armEncoder.getPosition(); 
-        if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
+        if ((currPosition > 0 - tolerance) && (currPosition < 0 + tolerance)) return true;
         return false;
     }
 
@@ -138,7 +138,7 @@ public class CoralIntake extends SubsystemBase {
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
         SmartDashboard.putNumber("roller amps", rollerMotor.getOutputCurrent());
         SmartDashboard.putBoolean("hasCoral", hasCoral);
-        SmartDashboard.putNumber("absEncoder", absEncoder.getPosition());
+        //SmartDashboard.putNumber("absEncoder", absEncoder.getPosition());
         
 
         

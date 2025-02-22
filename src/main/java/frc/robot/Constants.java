@@ -50,7 +50,7 @@ public class Constants {
     public static class AutoConstants
     {
         //Can be 1, 2 or 3.  1 is the one closest to the center
-        public static final StartCage startingPosition = StartCage.edgeCage;
+        public static final StartCage startingPosition = StartCage.sigmaCage;
 
         //Can be 1 or 2. 1 is the one furthest from the starting position (to the right of the player)
         public static final TargetCoralStation targetStation = TargetCoralStation.leftStation;

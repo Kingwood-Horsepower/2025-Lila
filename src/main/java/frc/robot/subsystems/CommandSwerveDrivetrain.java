@@ -266,22 +266,29 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .withDriveRequestType(DriveRequestType.Velocity);
 
     //Unused as of now
-    private final PIDController xController = new PIDController(23.273, 0.56078, 0.0);
-    private final PIDController yController = new PIDController(23.273, 0.56078, 0.0);;
-    private final PIDController headingController = new PIDController(25.568, 1.1683, 0.0);
+    private final PIDController xController = new PIDController(1, 0.56078, 0.0);
+    private final PIDController yController = new PIDController(1, 0.56078, 0.0);;
+    private final PIDController headingController = new PIDController(1, 0.3, 0.0);
     
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
 
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
         Pose2d pose = getRobotPose();
+        System.out.println("est: " +pose.getTranslation());
+        System.out.println("right: " + Double.toString(sample.x) + Double.toString(sample.x));
 
-        // WE NEED TO APPLY PID AND FEED FORWARD
-        // use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
+        //WE NEED TO APPLY PID AND FEED FORWARD
+        //use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
+        // ChassisSpeeds speeds = new ChassisSpeeds(
+        //     sample.vx + xController.calculate(pose.getX(), sample.x),
+        //     sample.vy + yController.calculate(pose.getY(), sample.y),
+        //     sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
+        // );
         ChassisSpeeds speeds = new ChassisSpeeds(
             sample.vx + xController.calculate(pose.getX(), sample.x),
-            sample.vy + yController.calculate(pose.getY(), sample.y),
-            sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
+            sample.vy,
+            sample.omega
         );
 
         // Apply the generated speeds

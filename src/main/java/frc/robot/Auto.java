@@ -102,15 +102,15 @@ public class Auto {
             () -> {},
             coralIntake, elevator).until(elevator::getIsNearSetPoint);
         return Commands.sequence(
-            robotContainer.alignRobotWithAprilTag.withDeadline(setElevator),
-            robotContainer.scoreCoral,
+            robotContainer.getAlignWithAprilTagCommand().withDeadline(setElevator),
+            robotContainer.getScoreCoralComand(),
             nexTrajectory.resetOdometry(),
             nexTrajectory.cmd()
         );
     }
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
-                robotContainer.intakeCoral,
+                robotContainer.getIntakeCoralCommand(() -> coralIntake.hasCoral || robotContainer.driverController.b().getAsBoolean()),
                 new WaitUntilCommand(coralIntake :: hasCoral),
                 nexTrajectory.resetOdometry(),
                 nexTrajectory.cmd()
