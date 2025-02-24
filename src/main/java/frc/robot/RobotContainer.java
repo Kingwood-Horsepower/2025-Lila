@@ -6,6 +6,9 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.lang.ModuleLayer.Controller;
+import java.util.function.BooleanSupplier;
+
 import org.opencv.core.Mat;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -42,7 +45,7 @@ public class RobotContainer {
     //Data
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-    private final double translationVelocityMult = 0.15; // Cannot be more than 1
+    private final double translationVelocityMult = 0.4; // Cannot be more than 1
     private final double rotVelocityMult = .5;                                                                                      // max angular velocity
 
     //SwerveRequestes
@@ -64,7 +67,7 @@ public class RobotContainer {
 
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
-    private final CommandXboxController driverController = new CommandXboxController(0);
+    public final CommandXboxController driverController = new CommandXboxController(0);
     public final Trigger targeAquired = new Trigger(() -> camera.hasTarget());
         
     // SlewRaeLimiters
@@ -77,11 +80,11 @@ public class RobotContainer {
     private Command outTakeCoralCommand;
     private Command elevatorToZeroCommand;
 
-    public Command scoreCoral;
-    public Command intakeCoral;
+    private Command scoreCoral;
+    private Command intakeCoral;
     private Command incrementElevatorLevel;
 
-    public Command alignRobotWithAprilTag;
+    private Command alignRobotWithAprilTag;
 
 
     public RobotContainer() {     
@@ -95,30 +98,10 @@ public class RobotContainer {
     /* #region configureCommands */
     private void configureCommands() {
         // Setup Coral commands
-        //Score Coral
-        setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
-        outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
-        elevatorToZeroCommand = Commands.startEnd(
-            () -> {
-                elevator.setSetPoint(0.0);
-                elevator.setElevatorLevel(0);
-            }, () -> {}, coralIntake, elevator);
+        scoreCoral = getScoreCoralComand();
 
-        scoreCoral = Commands.sequence(
-            setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
-            new WaitCommand(.3),
-            outTakeCoralCommand.withTimeout(1.5),
-            elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
-            Commands.runOnce(coralIntake :: stowIntake, elevator, coralIntake)
-        );
-        //Intake Coral
-        intakeCoral = Commands.startEnd(
-            () -> {
-                coralIntake.runIntake(.07, .7);
-                elevator.setElevatorLevel(0);
-            },
-            () -> coralIntake.stowIntake(),
-            coralIntake, elevator).until(()-> elevator.getIsNearSetPoint() && coralIntake.getIsNearSetPoint());
+        intakeCoral = getIntakeCoralCommand(() -> coralIntake.hasCoral || !driverController.rightTrigger(0.01).getAsBoolean());
+
         //increment elevator
         incrementElevatorLevel = Commands.startEnd(
             () -> {
@@ -129,10 +112,8 @@ public class RobotContainer {
             () -> {},
             coralIntake, elevator).until(elevator::getIsNearSetPoint);
         //align robot with april tag
-         alignRobotWithAprilTag = drivetrain.applyRequest(() ->
-        drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDesiredDistanceToAprilTag-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
-        .withVelocityY(driverController.getLeftX() * MaxSpeed)
-        .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targeAquired);
+        alignRobotWithAprilTag = getAlignWithAprilTagCommand();
+
 
         
     }
@@ -182,7 +163,7 @@ public class RobotContainer {
         //coral intake command
         // uses stow
         driverController.rightTrigger(0.01).onTrue(                
-            intakeCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+            intakeCoral.onlyWhile(driverController.rightTrigger(0.01):: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
                 
 
 
@@ -196,7 +177,7 @@ public class RobotContainer {
             var visionEst = camera.getEstimatedGlobalRightPose();
             visionEst.ifPresent(
                     est -> {
-                        System.out.println(est.estimatedPose.getTranslation());
+                        //System.out.println("right: " +est.estimatedPose.getTranslation());
                         SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
 
@@ -207,7 +188,7 @@ public class RobotContainer {
             visionEst = camera.getEstimatedGlobalLeftPose();
             visionEst.ifPresent(
                     est -> {
-                        System.out.println(est.estimatedPose.getTranslation());
+                        //System.out.println("left: " + est.estimatedPose.getTranslation());
                         SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
         
@@ -225,7 +206,62 @@ public class RobotContainer {
     }
 
     public void autonomousPeriodic(){
-        //auto.PollAutoRoutine();
+        if(!driverController.b().getAsBoolean()){
+            auto.PollAutoRoutine();
+
+        }
     }
     /* #endregion */
+
+    public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake){
+        //Intake Coral
+        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.07, .7);}, ()->{}, coralIntake);
+                // intakeCoral = Commands.startEnd(
+                //     () -> {
+                //         coralIntake.runIntake(.07, .7);
+                //         elevator.setElevatorLevel(0);
+                //     },
+                //     () -> coralIntake.stowIntake(),
+                //     coralIntake, elevator).until(()-> elevator.getIsNearSetPoint() && coralIntake.getIsNearSetPoint());
+        Command setCor = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
+        Command el =Commands.startEnd(
+            () -> {
+                elevator.setElevatorLevel(0);
+            }, () -> {}, coralIntake, elevator);
+        return Commands.sequence(
+            setCor.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()).unless( elevator :: getIsNearZero),
+            el.until(elevator :: getIsNearZero),
+            runIntake.until(conditionForStoppingTheIntake),
+            Commands.runOnce(coralIntake :: stowIntake, elevator, coralIntake));
+
+    }
+    public Command getScoreCoralComand(){
+          //Score Coral
+          setCoralIntakeToLevelCommand = Commands.startEnd(()->{
+            if(elevator.getElevatorLevel() == 4) {
+                coralIntake.setSetPoint(0.25);
+            } else{coralIntake.setSetPoint(0.26);}
+         }, ()->{}, coralIntake, elevator );
+          outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
+          elevatorToZeroCommand = Commands.startEnd(
+              () -> {
+                  elevator.setElevatorLevel(0);
+              }, () -> {}, coralIntake, elevator);
+  
+          return Commands.sequence(
+              setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
+              new WaitCommand(.3),
+              outTakeCoralCommand.withTimeout(1.5),
+              elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
+              Commands.runOnce(coralIntake :: stowIntake, elevator, coralIntake)
+          );
+    }
+    public Command getAlignWithAprilTagCommand()
+    {
+        return  drivetrain.applyRequest(() ->
+        drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDesiredDistanceToAprilTag-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+        .withVelocityY(driverController.getLeftX() * MaxSpeed)
+        .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targeAquired);
+
+    }
 }

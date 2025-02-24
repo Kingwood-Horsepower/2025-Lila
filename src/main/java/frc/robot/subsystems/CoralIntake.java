@@ -38,7 +38,7 @@ public class CoralIntake extends SubsystemBase {
 
     private double setPoint = 0.0;
     private double velocity = 0.0;
-    private boolean hasCoral = false;
+    public boolean hasCoral = false;
 
     private final SparkMax rollerMotor = new SparkMax(rollerMotorID, MotorType.kBrushless);
     private final SparkMaxConfig rollerMotorConfig = new SparkMaxConfig();
@@ -122,7 +122,7 @@ public class CoralIntake extends SubsystemBase {
     public boolean getIsNearZero() {
         double tolerance = 1; // in encoder rotations
         double currPosition = armEncoder.getPosition(); 
-        if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
+        if ((currPosition > 0 - tolerance) && (currPosition < 0 + tolerance)) return true;
         return false;
     }
 
