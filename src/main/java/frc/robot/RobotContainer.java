@@ -169,7 +169,8 @@ public class RobotContainer {
         driverController.a().onTrue(decrementElevatorLevel.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));                
 
         //uses stow
-        driverController.rightTrigger(0.01).onTrue(scoreCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        driverController.rightTrigger(0.01).onTrue(Commands.run(() -> {System.out.println("Align with april tag");}));
+        driverController.rightTrigger(0.01).onFalse(scoreCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
         //coral intake command
         // uses stow

@@ -193,7 +193,7 @@ public Translation2d getCoralScoreTransform(int AprilTagId, boolean getRightCora
   int id =  getAprilTagId(AprilTagId);
 
   //Vector from the center to the april tag
-  Translation2d v = aprilTagFieldLayout.getTagPose(AprilTagId).get().getTranslation().toTranslation2d().minus(kReefCenter);
+  Translation2d v = aprilTagFieldLayout.getTagPose(id).get().getTranslation().toTranslation2d().minus(kReefCenter);
   double vMangnitude = v.getNorm();
   Translation2d vNormalized = new Translation2d(v.getX()/vMangnitude, v.getY()/vMangnitude);
   v = vNormalized.times(vMangnitude + kDistanceFromApriltagWhenScoring);
