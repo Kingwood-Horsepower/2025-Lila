@@ -13,6 +13,7 @@ import org.opencv.core.Mat;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -26,8 +27,12 @@ public class Constants {
     {
         public static final Distance kFieldLenght = Meters.of(12.29);
         public static final Distance kFieldWidth = Meters.of(2.87);
+
         public static final Transform3d kRobotToRightCam = new Transform3d(new Translation3d(Inches.of(5), Inches.of(-12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
         public static final Transform3d kRobotToLeftCam = new Transform3d(new Translation3d(Inches.of(5), Inches.of(12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
+        public static final Translation2d kReefCenter = new Translation2d(inchesToMeters(176.745), inchesToMeters(158.5));
+        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(24);
+        public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6);
 
         public static final   List<AprilTag> kApriltags = Arrays.asList(
             new AprilTag(21, new Pose3d(new Translation3d(Inches.of(169), Inches.of(113),  Inches.of(45)), new Rotation3d(0, 0, 3*Math.PI/2))),
@@ -35,7 +40,6 @@ public class Constants {
             new AprilTag(22, new Pose3d(new Translation3d(Inches.of(169), Inches.of(98),  Inches.of(6)), new Rotation3d(0, 0, Math.PI)))
             );
 
-        public static final double kDesiredDistanceToAprilTag = inchesToMeters(20);
     }
 
     public static class ElevatorConstants
@@ -54,6 +58,7 @@ public class Constants {
 
         //Can be 1 or 2. 1 is the one furthest from the starting position (to the right of the player)
         public static final TargetCoralStation targetStation = TargetCoralStation.leftStation;
+
 
         enum StartCage{
             edgeCage,
