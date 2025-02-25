@@ -273,8 +273,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
         Pose2d pose = getRobotPose();
-        System.out.println("est: " +pose.getTranslation());
-        System.out.println("right: " + Double.toString(sample.x) + Double.toString(sample.x));
+        //System.out.println("est: " +pose.getTranslation());
+        //System.out.println("right: " + Double.toString(sample.x) + "   y: " + Double.toString(sample.y));
+        System.out.println("Xdiff: " + (pose.getTranslation().getX()-sample.x));
 
         //WE NEED TO APPLY PID AND FEED FORWARD
         //use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)

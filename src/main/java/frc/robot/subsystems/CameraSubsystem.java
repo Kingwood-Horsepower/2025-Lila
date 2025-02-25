@@ -53,12 +53,12 @@ public class CameraSubsystem extends SubsystemBase {
 
   double ambiguityRight;
   boolean hasTargetRight = false;
-  double targetYawRight = 0;
+  PhotonTrackedTarget rightTarget;
   double targetRangeRight = 0;
 
   double ambiguityLeft;
   boolean hasTargetLeft = false;
-  double targetYawLeft = 0;
+  PhotonTrackedTarget leftTarget;
   double targetRangeLeft = 0;
 
   /** Creates a new CameraSubsystem. */
@@ -91,7 +91,7 @@ public class CameraSubsystem extends SubsystemBase {
     hasTargetRight = true;
     if(target != null){
       ambiguityRight = target.poseAmbiguity;
-      targetYawRight = target.getYaw();
+      rightTarget= target;
       targetRangeRight = PhotonUtils.calculateDistanceToTargetMeters(kRobotToRightCam.getZ(), aprilTagFieldLayout.getTagPose(target.fiducialId).get().getRotation().getY(), kRobotToRightCam.getRotation().getY(), Math.toRadians((target.getPitch())));
       return true;
     }
@@ -116,7 +116,7 @@ public class CameraSubsystem extends SubsystemBase {
     hasTargetLeft= true;
     if(target != null){
       ambiguityLeft = target.poseAmbiguity;
-      targetYawLeft = target.getYaw();
+      leftTarget = target;
       targetRangeLeft = PhotonUtils.calculateDistanceToTargetMeters(kRobotToRightCam.getZ(), aprilTagFieldLayout.getTagPose(target.fiducialId).get().getRotation().getY(), kRobotToRightCam.getRotation().getY(), Math.toRadians((target.getPitch())));
       return true;
     }
@@ -160,29 +160,19 @@ PhotonPipelineResult getBestLeftResult(){
   return leftResults.get(leftResults.size() - 1);
 }
 
-public PhotonPipelineResult getBestOverallResult(){
+public PhotonTrackedTarget getBestTarget(){
   if(hasTargetLeft && hasTargetRight) {
-    if(ambiguityLeft < ambiguityRight) return getBestLeftResult();
-    else return getBestRightResult();
-  } else if (hasTargetLeft) return getBestLeftResult();
-  else return getBestRightResult();
+    if(ambiguityLeft < ambiguityRight) return leftTarget;
+    else return rightTarget;
+  } else if (hasTargetLeft) return leftTarget;
+  else return rightTarget;
 }
 
 public boolean hasTarget(){
   return hasTargetLeft || hasTargetRight;
 }
 public double getTargetYaw(){
-    //Chose one with lowest ambiguity
-    if(hasTargetLeft && hasTargetRight)
-    if(ambiguityLeft < ambiguityRight){
-      return targetYawLeft;
-    }else 
-    return targetYawRight;
- //if only one actually has a target
-  if(hasTargetLeft)
-    return targetYawLeft;
-  else
-    return targetYawRight;
+    return getBestTarget().getYaw();
 }
 public double getTargetRange(){
   //Chose one with lowest ambiguity

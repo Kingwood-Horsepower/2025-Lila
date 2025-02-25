@@ -12,21 +12,18 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.AutoConstants.TargetCoralStation;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CoralIntake;
-import frc.robot.subsystems.Elevator;
+import frc.robot.CoralAndElevatorManager;
 
 import static frc.robot.Constants.AutoConstants.*;
 
 public class Auto {
     private final AutoFactory autoFactory;
-    
-    private final CoralIntake coralIntake;
-    private final Elevator elevator;
+    private final CoralAndElevatorManager coralAndElevatorManager;
     private final RobotContainer robotContainer;
 
     private final AutoRoutine autoRoutine;
 
-    public Auto(CommandSwerveDrivetrain driveSubsystem, CoralIntake _coralIntake, Elevator _elevator, RobotContainer _robotContainer)
+    public Auto(CommandSwerveDrivetrain driveSubsystem, CoralAndElevatorManager _CoralAndElevatorManager, RobotContainer _robotContainer)
     {   
         autoFactory = new AutoFactory(
             driveSubsystem::getRobotPose, // A function that returns the current robot pose
@@ -36,11 +33,11 @@ public class Auto {
             driveSubsystem // The drive subsystem
         );
 
-        coralIntake = _coralIntake;
-        elevator = _elevator;
+        coralAndElevatorManager = _CoralAndElevatorManager;
 
         robotContainer = _robotContainer;
-        autoRoutine = getAutoRoutine();
+        //autoRoutine = getAutoRoutine();
+        autoRoutine = getTestRoutine();
     }
     public void PollAutoRoutine()
     {
@@ -92,26 +89,35 @@ public class Auto {
 
         return routine;
     }
+    AutoRoutine getTestRoutine()
+    {
+        AutoRoutine routine = autoFactory.newRoutine("Test");
+        AutoTrajectory testTraj = routine.trajectory("Test");
+        AutoTrajectory testTrajReversed = routine.trajectory("TestR");
+
+        routine.active().onTrue(
+        Commands.sequence(
+            testTraj.resetOdometry(),
+            testTraj.cmd()
+        )
+        );
+        testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
+        return routine;
+    }
+
+
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
-        Command setElevator =Commands.startEnd(
-            () -> {
-                elevator.setElevatorLevel(4);
-                coralIntake.stowIntake();
-            },
-            () -> {},
-            coralIntake, elevator).until(elevator::getIsNearSetPoint);
         return Commands.sequence(
-            robotContainer.getAlignWithAprilTagCommand().withDeadline(setElevator),
-            robotContainer.getScoreCoralComand(),
+            robotContainer.getAlignWithAprilTagCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(4)),
+            coralAndElevatorManager.getScoreCoralComand(),
             nexTrajectory.resetOdometry(),
             nexTrajectory.cmd()
         );
     }
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
-                robotContainer.getIntakeCoralCommand(() -> coralIntake.hasCoral || robotContainer.driverController.b().getAsBoolean()),
-                new WaitUntilCommand(coralIntake :: hasCoral),
+                coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() || robotContainer.driverController.b().getAsBoolean()),
                 nexTrajectory.resetOdometry(),
                 nexTrajectory.cmd()
             );
