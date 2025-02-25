@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -68,7 +69,7 @@ public class RobotContainer {
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
     public final CommandXboxController driverController = new CommandXboxController(0);
-    public final Trigger targeAquired = new Trigger(() -> camera.hasTarget());
+    public final Trigger targetAquired = new Trigger(() -> camera.hasTarget());
         
     // SlewRaeLimiters
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
@@ -85,6 +86,7 @@ public class RobotContainer {
     private Command incrementElevatorLevel;
 
     private Command alignRobotWithAprilTag;
+    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, null);
 
 
     public RobotContainer() {     
@@ -113,6 +115,8 @@ public class RobotContainer {
             coralIntake, elevator).until(elevator::getIsNearSetPoint);
         //align robot with april tag
         alignRobotWithAprilTag = getAlignWithAprilTagCommand();
+
+
 
 
         
@@ -164,7 +168,10 @@ public class RobotContainer {
         // uses stow
         driverController.rightTrigger(0.01).onTrue(                
             intakeCoral.onlyWhile(driverController.rightTrigger(0.01):: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-                
+
+        driverController.povUp().onTrue(
+            driveToPoseCommand.onlyIf(() -> camera.getBestOverallResult().getBestTarget().getFiducialId() == 18));
+
 
 
     }
@@ -261,7 +268,7 @@ public class RobotContainer {
         return  drivetrain.applyRequest(() ->
         drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDesiredDistanceToAprilTag-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
         .withVelocityY(driverController.getLeftX() * MaxSpeed)
-        .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targeAquired);
+        .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
 
     }
 }

@@ -158,6 +158,14 @@ PhotonPipelineResult getBestLeftResult(){
   return leftResults.get(leftResults.size() - 1);
 }
 
+public PhotonPipelineResult getBestOverallResult(){
+  if(hasTargetLeft && hasTargetRight) {
+    if(ambiguityLeft < ambiguityRight) return getBestLeftResult();
+    else return getBestRightResult();
+  } else if (hasTargetLeft) return getBestLeftResult();
+  else return getBestRightResult();
+}
+
 public boolean hasTarget(){
   return hasTargetLeft || hasTargetRight;
 }
