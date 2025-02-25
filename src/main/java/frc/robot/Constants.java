@@ -73,11 +73,11 @@ public class Constants {
         public static Translation2d getStartingPosition(){
             switch (startingPosition) {
                 case edgeCage:
-                    return new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(286.779));
+                    return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(286.779));
                 case sigmaCage:
-                    return new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(242.855));
+                    return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(242.855));
                 case goonCage:             
-                    return new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(199.947));
+                    return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(199.947));
                 default:
                     return null;
             }
