@@ -112,6 +112,12 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putNumber("elevator level", elevatorLevel);
         System.out.println(elevatorLevel);
     }
+    public void decrementElevatorLevel(){
+        if (elevatorLevel == 0) elevatorLevel = 4;
+        else elevatorLevel -= 1;
+        SmartDashboard.putNumber("elevator level", elevatorLevel);
+        System.out.println(elevatorLevel);
+    }
 
     public void setElevatorLevel(){
         setSetPoint(ELEVATOR_LEVELS[elevatorLevel]);

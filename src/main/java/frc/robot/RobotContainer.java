@@ -77,13 +77,10 @@ public class RobotContainer {
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(1.3);
 
     // Coral Commands (Some command are public because used by the Auto class)
-    private Command setCoralIntakeToLevelCommand;
-    private Command outTakeCoralCommand;
-    private Command elevatorToZeroCommand;
-
     private Command scoreCoral;
     private Command intakeCoral;
     private Command incrementElevatorLevel;
+    private Command decrementElevatorLevel;
 
     private Command alignRobotWithAprilTag;
     private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, null);
@@ -113,6 +110,17 @@ public class RobotContainer {
             },
             () -> {},
             coralIntake, elevator).until(elevator::getIsNearSetPoint);
+
+        //decrement elevator 
+        decrementElevatorLevel = Commands.startEnd(
+            () -> {
+                elevator.decrementElevatorLevel();
+                elevator.setElevatorLevel();
+                coralIntake.stowIntake();
+            },
+            () -> {},
+            coralIntake, elevator).until(elevator::getIsNearSetPoint);
+        
         //align robot with april tag
         alignRobotWithAprilTag = getAlignWithAprilTagCommand();
 
@@ -121,9 +129,11 @@ public class RobotContainer {
 
         
     }
-    public Command getAutonomousCommand() {
+    public Command getAutonomousCommand() { 
         return Commands.print("No autonomous command configured");
+        
     }
+    
     /* #endregion */
 
     /* #region configureBindings */
@@ -159,19 +169,21 @@ public class RobotContainer {
         );
 
         // coral elevator increment level
-        driverController.y().onTrue(incrementElevatorLevel.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));        
+        driverController.y().onTrue(incrementElevatorLevel.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        driverController.a().onTrue(decrementElevatorLevel.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));                
 
         //uses stow
-        driverController.rightBumper().onTrue(scoreCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        driverController.rightTrigger(0.01).onTrue(Commands.run(() -> {System.out.println("Align with april tag");}));
+        driverController.rightTrigger(0.01).onFalse(scoreCoral.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
         //coral intake command
         // uses stow
-        driverController.rightTrigger(0.01).onTrue(                
-            intakeCoral.onlyWhile(driverController.rightTrigger(0.01):: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-
         driverController.povUp().onTrue(
             driveToPoseCommand.onlyIf(() -> camera.getBestOverallResult().getBestTarget().getFiducialId() == 18));
 
+        driverController.rightBumper().onTrue(                
+            intakeCoral.onlyWhile(driverController.rightBumper():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+                
 
 
     }
@@ -244,13 +256,15 @@ public class RobotContainer {
     }
     public Command getScoreCoralComand(){
           //Score Coral
-          setCoralIntakeToLevelCommand = Commands.startEnd(()->{
+          Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{
             if(elevator.getElevatorLevel() == 4) {
                 coralIntake.setSetPoint(0.25);
             } else{coralIntake.setSetPoint(0.26);}
          }, ()->{}, coralIntake, elevator );
-          outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
-          elevatorToZeroCommand = Commands.startEnd(
+
+          Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
+
+          Command elevatorToZeroCommand = Commands.startEnd(
               () -> {
                   elevator.setElevatorLevel(0);
               }, () -> {}, coralIntake, elevator);
@@ -266,7 +280,7 @@ public class RobotContainer {
     public Command getAlignWithAprilTagCommand()
     {
         return  drivetrain.applyRequest(() ->
-        drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDesiredDistanceToAprilTag-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+        drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
         .withVelocityY(driverController.getLeftX() * MaxSpeed)
         .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
 

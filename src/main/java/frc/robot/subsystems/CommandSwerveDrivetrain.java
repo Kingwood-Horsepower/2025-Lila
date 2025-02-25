@@ -269,8 +269,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final PIDController xController = new PIDController(1, 0.56078, 0.0);
     private final PIDController yController = new PIDController(1, 0.56078, 0.0);;
     private final PIDController headingController = new PIDController(1, 0.3, 0.0);
-    
-    SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
 
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
