@@ -52,6 +52,7 @@ public class Elevator extends SubsystemBase{
         ELEVATOR_L1_INCHES,
         ELEVATOR_L2_INCHES,
         ELEVATOR_L3_INCHES,
+        ELEVATOR_L4_INCHES,
         ELEVATOR_MAX_INCHES,
     };
 

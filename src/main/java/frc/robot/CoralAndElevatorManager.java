@@ -10,7 +10,7 @@ import frc.robot.subsystems.Elevator;
 
 public class CoralAndElevatorManager {
     private final Elevator elevator = new Elevator();
-    private final CoralIntake coralIntake = new CoralIntake(elevator);
+    private final CoralIntake coralIntake = new CoralIntake();
 
 
     public CoralAndElevatorManager(){
@@ -26,10 +26,10 @@ public class CoralAndElevatorManager {
 
     public Command getScoreCoralComand(){
           //Score Coral
-          Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{
-            if(elevator.getElevatorLevel() == 4) {
-                coralIntake.setSetPoint(0.25);
-            } else{coralIntake.setSetPoint(0.26);}
+          if(elevator.getElevatorLevel() == 4){
+            return scoreAtL4Command();
+          }
+          Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);
          }, ()->{}, coralIntake, elevator );
 
           Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
@@ -44,8 +44,37 @@ public class CoralAndElevatorManager {
               new WaitCommand(.3),
               outTakeCoralCommand.withTimeout(1.5),
               elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
-              Commands.runOnce(coralIntake :: stowIntake, elevator, coralIntake)
+              Commands.runOnce(this :: stowIntake, elevator, coralIntake)
           );
+    }
+    private Command scoreAtL4Command(){
+        Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.23);
+         }, ()->{}, coralIntake, elevator );
+
+         Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake, elevator );
+
+        Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
+        
+        Command elevatorToMaxCommand = Commands.startEnd(
+              () -> {
+                  elevator.setElevatorLevel(5);
+              }, () -> {}, elevator);
+
+        Command elevatorToZeroCommand = Commands.startEnd(
+              () -> {
+                  elevator.setElevatorLevel(0);
+              }, () -> {}, elevator);
+  
+          return Commands.sequence(
+              setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
+              new WaitCommand(.3),
+              //Fancy ahahah stuff
+              outTakeCoralCommand.withTimeout(1.5)
+              .alongWith(elevatorToMaxCommand.until(() -> elevator.getIsNearSetPoint())
+              .andThen(setCoralIntakeUp.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
+
+              elevatorToZeroCommand.until(() -> elevator.getIsNearZero()))),   
+              Commands.runOnce(this :: stowIntake, elevator, coralIntake));
     }
 
     public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake){
@@ -67,7 +96,7 @@ public class CoralAndElevatorManager {
             setCor.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()).unless( elevator :: getIsNearZero),
             el.until(elevator :: getIsNearZero),
             runIntake.until(conditionForStoppingTheIntake),
-            Commands.runOnce(coralIntake :: stowIntake, elevator, coralIntake));
+            Commands.runOnce(this :: stowIntake, elevator, coralIntake));
 
     }
     public Command getDecrementElevatorCommand(){
@@ -79,7 +108,7 @@ public class CoralAndElevatorManager {
                     () -> {
                         elevator.decrementElevatorLevel();
                         elevator.setElevatorLevel();
-                        coralIntake.stowIntake();
+                        stowIntake();
                     },
                     () -> {},
                     coralIntake, elevator).until(elevator::getIsNearSetPoint);
@@ -90,7 +119,7 @@ public class CoralAndElevatorManager {
             () -> {
                 elevator.incrementElevatorLevel();
                 elevator.setElevatorLevel();
-                coralIntake.stowIntake();
+                stowIntake();
             },
             () -> {},
             coralIntake, elevator).until(elevator::getIsNearSetPoint);
@@ -99,9 +128,17 @@ public class CoralAndElevatorManager {
         return Commands.startEnd(
             () -> {
                 elevator.setElevatorLevel(level);
-                coralIntake.stowIntake();
+                stowIntake();
             },
             () -> {});
+    }
+    private void stowIntake(){
+
+        // if i am not near zero, or not set to 0, or i have coral set to down position
+        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || coralIntake.hasCoral) coralIntake.setSetPoint(.26);
+        // set up
+        else coralIntake.setSetPoint(0.0);
+        coralIntake.setRollerVelocity(0.0);
     }
 
 }

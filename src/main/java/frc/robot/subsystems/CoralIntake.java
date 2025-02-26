@@ -22,8 +22,7 @@ import frc.robot.subsystems.Elevator;
 
 public class CoralIntake extends SubsystemBase {
     private final DigitalInput IRsensor = new DigitalInput(9); // false = broken
-    private final Elevator elevator;
-
+    
     private final int rollerMotorID = 23;
     private final int armMotorID = 24;
 
@@ -47,8 +46,7 @@ public class CoralIntake extends SubsystemBase {
     
     private final int ARM_GEAR_RATIO = 45; // this is the sprocket gear ratio now
 
-    public CoralIntake(Elevator elevator) {
-        this.elevator = elevator;
+    public CoralIntake() {
         // continue setup
         armMotorConfig
             .smartCurrentLimit(40)
@@ -100,15 +98,6 @@ public class CoralIntake extends SubsystemBase {
     public void runIntake(double setPoint, double velocity) {
         setSetPoint(setPoint);
         setRollerVelocity(velocity);
-    }
-
-    public void stowIntake(){
-
-        // if i am not near zero, or not set to 0, or i have coral set to down position
-        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || hasCoral) setSetPoint(.26);
-        // set up
-        else setSetPoint(0.0);
-        setRollerVelocity(0.0);
     }
 
     public boolean getIsNearSetPoint() {
