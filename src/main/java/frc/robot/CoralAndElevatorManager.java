@@ -18,9 +18,8 @@ public class CoralAndElevatorManager {
     }
     //Data Getter Methods
     public boolean hasCoral(){
-      return coralIntake.hasCoral;
+      return coralIntake.hasCoral();
     }
-
     //get Commands methods
 
 
@@ -79,7 +78,7 @@ public class CoralAndElevatorManager {
 
     public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake){
         //Intake Coral
-        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.07, .7);}, ()->{}, coralIntake);
+        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.05, .7);}, ()->{}, coralIntake);
                 // intakeCoral = Commands.startEnd(
                 //     () -> {
                 //         coralIntake.runIntake(.07, .7);
@@ -135,7 +134,7 @@ public class CoralAndElevatorManager {
     private void stowIntake(){
 
         // if i am not near zero, or not set to 0, or i have coral set to down position
-        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || coralIntake.hasCoral) coralIntake.setSetPoint(.26);
+        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || coralIntake.hasCoral()) coralIntake.setSetPoint(.26);
         // set up
         else coralIntake.setSetPoint(0.0);
         coralIntake.setRollerVelocity(0.0);

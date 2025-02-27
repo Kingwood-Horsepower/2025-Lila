@@ -126,7 +126,7 @@ public class AlgaeIntake extends SubsystemBase{
     public Command intake() {
         return Commands.startEnd(
             () -> runIntake(algaeDownPoint, -1.0),
-            () -> runIntake(algaeStorePoint, 0.0), 
+            () -> runIntake(algaeStorePoint, -.1), 
             this);
     }
 

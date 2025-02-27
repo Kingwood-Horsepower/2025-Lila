@@ -45,8 +45,8 @@ public class RobotContainer {
     //Data
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-    private final double translationVelocityMult = 0.4; // Cannot be more than 1
-    private final double rotVelocityMult = .5;                                                                                      // max angular velocity
+    private final double translationVelocityMult = 0.65; // Cannot be more than 1
+    private final double rotVelocityMult = .75;                                                                                      // max angular velocity
 
     //SwerveRequestes
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -116,15 +116,15 @@ public class RobotContainer {
         // driverController.getLeftX()))
         // ));
 
-        driverController.b().whileTrue(alignRobotWithAprilTag);
+        //driverController.b().whileTrue(alignRobotWithAprilTag);
 
         // algae intake command
-        driverController.leftBumper().whileTrue(
+        driverController.leftTrigger(0.1).whileTrue(
             algaeIntake.intake()
         );
 
         // algae score command
-        driverController.leftTrigger(0.1).whileTrue(
+        driverController.leftBumper().whileTrue(
             algaeIntake.score()
         );
 
@@ -132,19 +132,19 @@ public class RobotContainer {
         driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));                
 
-        //uses stow
-        driverController.rightTrigger(0.01).onTrue(Commands.run(() -> {System.out.println("Align with april tag");}));
-        driverController.rightTrigger(0.01).onFalse(coralAndElevatorManager.getScoreCoralComand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-
-        //coral intake command
+        // coral score command
         // uses stow
+        driverController.rightBumper().onTrue(Commands.run(() -> {System.out.println("Align with april tag");}));
+        driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+
+        // coral intake command
+        // uses stow
+   
+        driverController.rightTrigger(0.01).onTrue(              
+           coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        
         driverController.povUp().onTrue(
             driveToPoseCommand.onlyIf(() -> camera.getBestTarget().getFiducialId() == 18));
-
-        driverController.rightBumper().onTrue(                
-            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightBumper().getAsBoolean()).onlyWhile(driverController.rightBumper():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-                
-
 
     }
     /* #endregion */
