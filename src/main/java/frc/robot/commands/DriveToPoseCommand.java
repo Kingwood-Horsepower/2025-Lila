@@ -37,8 +37,8 @@ public class DriveToPoseCommand extends Command {
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(1, 1);
     private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 3);
 
-    private static final int TAG_TO_CHASE = 18;
-    private static final Pose3d GOAL = 
+    private int TAG_TO_CHASE = 18;
+    private Pose3d GOAL = 
         new Pose3d(
             new Translation3d(3.05, 3.87, 0.0),
             new Rotation3d(0.0, 0.0, Math.PI)
@@ -46,7 +46,7 @@ public class DriveToPoseCommand extends Command {
 
     private final CommandSwerveDrivetrain drivetrain;
     private final CameraSubsystem cameraSubsystem;
-    private final Supplier<Pose2d> poseProvider;
+    private final Supplier<Boolean> isRightBooleanSupplier;
 
     private final ProfiledPIDController xController = new ProfiledPIDController(3, 0, 0, X_CONSTRAINTS);
     private final ProfiledPIDController yController = new ProfiledPIDController(3, 0, 0, Y_CONSTRAINTS);
@@ -61,10 +61,10 @@ public class DriveToPoseCommand extends Command {
     *
     * @param drivetrain The subsystem used by this command.
     */
-    public DriveToPoseCommand(CommandSwerveDrivetrain drivetrain, CameraSubsystem cameraSubsystem, Supplier<Pose2d> poseProvider) {
+    public DriveToPoseCommand(CommandSwerveDrivetrain drivetrain, CameraSubsystem cameraSubsystem, Supplier<Boolean> _isRightBooleanSupplier) {
         this.drivetrain = drivetrain;
         this.cameraSubsystem = cameraSubsystem;
-        this.poseProvider = poseProvider;
+        this.isRightBooleanSupplier = _isRightBooleanSupplier;
         
         xController.setTolerance(0.2);
         yController.setTolerance(0.2);
@@ -76,7 +76,8 @@ public class DriveToPoseCommand extends Command {
 
     @Override
     public void initialize() {
-        //zero zomething?
+        TAG_TO_CHASE = cameraSubsystem.getBestTarget().fiducialId;
+        GOAL = new Pose3d(cameraSubsystem.getCoralScoreTransform(TAG_TO_CHASE, isRightBooleanSupplier.get()));
     }
 
     public void execute() {

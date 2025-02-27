@@ -27,6 +27,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -187,7 +188,7 @@ public double getTargetRange(){
   else 
     return targetRangeRight;
 }
-public Translation2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
+public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
   int id =  getAprilTagId(AprilTagId);
 
   //Vector from the center to the april tag
@@ -200,12 +201,12 @@ public Translation2d getCoralScoreTransform(int AprilTagId, boolean getRightCora
   Translation2d vPerpendicular = new Translation2d(-vNormalized.getY(), vNormalized.getX());
 
   if(getRightCoral)
-   return kReefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag)));
+   return new Pose2d(kReefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag))), new Rotation2d(aprilTagFieldLayout.getTagPose(id).get().getRotation().getZ() + Math.PI));
   else 
-  return kReefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag)));
+  return new Pose2d(kReefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag))), new Rotation2d(aprilTagFieldLayout.getTagPose(id).get().getRotation().getZ() + Math.PI));
 
 }
-public int getAprilTagId(int id){
+private int getAprilTagId(int id){
   //if the id is in the blue allience, return its id
   if(id> 15)
     return id;

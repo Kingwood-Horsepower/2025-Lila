@@ -151,8 +151,8 @@ public class RobotContainer {
 
     /* #region Other Methods*/
     public void UpdateRobotPosition() {
-        System.out.println("swerveRot: " + drivetrain.getRobotPose().getRotation().getRadians());
-        System.out.println("swervePos: " + drivetrain.getRobotPose().getTranslation());
+        //System.out.println("swerveRot: " + drivetrain.getRobotPose().getRotation().getRadians());
+        //System.out.println("swervePos: " + drivetrain.getRobotPose().getTranslation());
 
         if (camera != null) {
             //Right camera
