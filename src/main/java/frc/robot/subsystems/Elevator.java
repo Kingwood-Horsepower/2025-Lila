@@ -76,7 +76,7 @@ public class Elevator extends SubsystemBase{
             .velocityFF(0) // calculated using recalc
             .maxMotion
             //idk if i want to use the units library on top of the units math util, its very verbose
-            .maxVelocity(2000) // takes an rpm 
+            .maxVelocity(3500) // takes an rpm 
 
             .maxAcceleration(5000) // takes an rpm/s
             .allowedClosedLoopError(0.6)

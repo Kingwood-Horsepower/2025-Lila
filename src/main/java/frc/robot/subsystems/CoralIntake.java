@@ -44,15 +44,14 @@ public class CoralIntake extends SubsystemBase {
     private final SparkMaxConfig rollerMotorConfig = new SparkMaxConfig();
     private final SparkClosedLoopController rollerMotorController = rollerMotor.getClosedLoopController();
     private final RelativeEncoder rollerEncoder = rollerMotor.getEncoder();
-    
     private final int ARM_GEAR_RATIO = 45; // this is the sprocket gear ratio now
-
+ 
     public CoralIntake(Elevator elevator) {
         this.elevator = elevator;
         // continue setup
         armMotorConfig
             .smartCurrentLimit(40)
-            .idleMode(IdleMode.kBrake)
+            .idleMode(IdleMode.kBrake)  
             .inverted(true) 
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
