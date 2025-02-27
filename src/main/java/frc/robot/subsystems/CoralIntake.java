@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -20,11 +19,9 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.subsystems.Elevator;
 
 public class CoralIntake extends SubsystemBase {
     private final DigitalInput IRsensor = new DigitalInput(9); // false = broken
-    private final Elevator elevator;
 
     private final int rollerMotorID = 23;
     private final int armMotorID = 24;
@@ -37,7 +34,7 @@ public class CoralIntake extends SubsystemBase {
 
     private double setPoint = 0.0;
     private double velocity = 0.0;
-    public boolean hasCoral = false;
+    private boolean hasCoral = false;
 
     private final SparkMax rollerMotor = new SparkMax(rollerMotorID, MotorType.kBrushless);
     private final SparkMaxConfig rollerMotorConfig = new SparkMaxConfig();
@@ -46,8 +43,8 @@ public class CoralIntake extends SubsystemBase {
     
     private final int ARM_GEAR_RATIO = 3; // this is the sprocket gear ratio now
 
-    public CoralIntake(Elevator elevator) {
-        this.elevator = elevator;
+    public CoralIntake() {
+
         // continue setup
         
 
@@ -108,14 +105,6 @@ public class CoralIntake extends SubsystemBase {
         setRollerVelocity(velocity);
     }
 
-    public void stowIntake(){
-
-        // if i am not near zero, or not set to 0, or i have coral set to down position
-        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || hasCoral) setSetPoint(.26);
-        // set up
-        else setSetPoint(0.0);
-        setRollerVelocity(0.0);
-    }
 
     public boolean getIsNearSetPoint() {
         double tolerance = 0.1; // in small sprocket rotations
@@ -136,6 +125,11 @@ public class CoralIntake extends SubsystemBase {
         double threshold = 10;
         return (rollerMotor.getOutputCurrent() > threshold);
     }
+    
+    public boolean hasCoral()
+    {
+        return hasCoral;
+    }
 
     @Override
     public void periodic() {
@@ -153,9 +147,6 @@ public class CoralIntake extends SubsystemBase {
                 
         
     }
-    public boolean hasCoral()
-    {
-        return hasCoral;
-    }
+    
 
 }
