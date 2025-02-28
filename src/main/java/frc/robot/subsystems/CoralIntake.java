@@ -62,11 +62,12 @@ public class CoralIntake extends SubsystemBase {
             .inverted(true) 
             .closedLoop
             .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
-            .pid(.5, 0.0, 0.5)
+            .pid(.5, 0.0, 0.5) //!!! ELIA if you decide to stay with basic PID control, which has no jittering, and may be more accurate, but has some jerk, 
+                                     // you can tune the p value up to be faster, or down to be slower. dont have it too fast as it could lower the life
+                                     // span of the already pretty stressed motor down there
+                                     // you must tell aria to plug the throughbore encoder in, or you can call me
             .outputRange(-1, 1) //what does this do??
-            //.velocityFF(0) // calculated using recalc
-            .maxMotion
-            //idk if i want to use the units library on top of the units math util, its very verbose
+            .maxMotion // !!!ELIA if you decide to use kMaxPositionControl (see the bottom at line 149) you can tune the max velocity and acceleration of the motion here
             .maxVelocity(266) // takes an rpm 
             .maxAcceleration(500) // takes an rpm/s
             .allowedClosedLoopError(0.02)
@@ -144,7 +145,10 @@ public class CoralIntake extends SubsystemBase {
         // ill change this later
         double feedforward = 0;
         //Math.cos(setPoint*2*Math.PI)*kG;
-        armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, feedforward);//MAXMotionPositionControl
+
+        // !!!ELIA to add acceleration curve at the beggining of the motion, change ControlType.kPosition to ControlType.kMAxPositionControl.
+        // The sacrifice for this will be that the intake will jitter a small amount during setpoints
+        armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kPosition);//kMAXMotionPositionControl
         hasCoral = !IRsensor.get(); 
 
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
