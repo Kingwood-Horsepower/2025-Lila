@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 // }
 
 /** An example command that uses an example subsystem. */
-public class DriveToPoseCommand extends Command {
+public class AlignToStationCommand extends Command {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(1, 1);
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(1, 1);
@@ -42,7 +42,6 @@ public class DriveToPoseCommand extends Command {
 
     private final CommandSwerveDrivetrain drivetrain;
     private final CameraSubsystem cameraSubsystem;
-    private final Supplier<Boolean> isRightBooleanSupplier;
 
     private final ProfiledPIDController xController = new ProfiledPIDController(3, 0, 0, X_CONSTRAINTS);
     private final ProfiledPIDController yController = new ProfiledPIDController(3, 0, 0, Y_CONSTRAINTS);
@@ -57,10 +56,9 @@ public class DriveToPoseCommand extends Command {
     *
     * @param drivetrain The subsystem used by this command.
     */
-    public DriveToPoseCommand(CommandSwerveDrivetrain drivetrain, CameraSubsystem cameraSubsystem, Supplier<Boolean> _isRightBooleanSupplier) {
+    public AlignToStationCommand(CommandSwerveDrivetrain drivetrain, CameraSubsystem cameraSubsystem) {
         this.drivetrain = drivetrain;
         this.cameraSubsystem = cameraSubsystem;
-        this.isRightBooleanSupplier = _isRightBooleanSupplier;
         
         xController.setTolerance(0.2);
         yController.setTolerance(0.2);
@@ -72,8 +70,8 @@ public class DriveToPoseCommand extends Command {
 
     @Override
     public void initialize() {
-        TAG_TO_CHASE = cameraSubsystem.getBestDownTarget().fiducialId;
-        GOAL = new Pose3d(cameraSubsystem.getCoralScoreTransform(TAG_TO_CHASE, isRightBooleanSupplier.get()));
+        TAG_TO_CHASE = cameraSubsystem.getBestUpTarget().fiducialId;
+        GOAL = new Pose3d(cameraSubsystem.getStationPose2d(TAG_TO_CHASE));
     }
 
     public void execute() {

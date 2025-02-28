@@ -68,8 +68,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    System.out.println(RobotContainer.camera.getCoralScoreTransform(17, false));
-    System.out.println(RobotContainer.camera.getCoralScoreTransform(17, true));
+    //System.out.println(RobotContainer.camera.getCoralScoreTransform(17, false));
+    //System.out.println(RobotContainer.camera.getCoralScoreTransform(17, true));
+    System.out.println(RobotContainer.camera.getStationPose2d(12));
     m_robotContainer.resetPose();
     
   }
