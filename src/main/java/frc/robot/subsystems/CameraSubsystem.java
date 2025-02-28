@@ -222,7 +222,7 @@ private int getScoreCoralAprilTagId(int id){
       case 12: return 19;
       default:
       System.err.println("Wrong April Tag");
-       return -1;
+       return -1; 
     }
 
       

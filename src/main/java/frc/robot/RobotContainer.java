@@ -209,4 +209,7 @@ public class RobotContainer {
         .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
 
     }
+    public void getGoalCoralPose(){
+        
+    }
 }
