@@ -77,7 +77,7 @@ public class CoralAndElevatorManager {
               Commands.runOnce(this :: stowIntake, elevator, coralIntake));
     }
 
-    public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake){
+    public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake, double timer){
         //Intake Coral
         Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(armStowPositionPerpendicular-.05, .7);}, ()->{}, coralIntake);
                 // intakeCoral = Commands.startEnd(
@@ -95,14 +95,11 @@ public class CoralAndElevatorManager {
         return Commands.sequence(
             setCor.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()).unless( elevator :: getIsNearZero),
             el.until(elevator :: getIsNearZero),
-            runIntake.until(conditionForStoppingTheIntake),
+            runIntake.until(conditionForStoppingTheIntake).withTimeout(timer),
             Commands.runOnce(this :: stowIntake, elevator, coralIntake));
 
     }
-    public Command getDecrementElevatorCommand(){
-                //increment elevator
-                
-        
+    public Command getDecrementElevatorCommand(){       
                 //decrement elevator 
                 return Commands.startEnd(
                     () -> {
@@ -132,6 +129,8 @@ public class CoralAndElevatorManager {
             },
             () -> {});
     }
+
+    
     private void stowIntake(){
 
         // if i am not near zero, or not set to 0, or i have coral set to down position

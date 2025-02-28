@@ -46,7 +46,8 @@ public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
     private final double translationVelocityMult = 0.65; // Cannot be more than 1
-    private final double rotVelocityMult = .75;                                                                                      // max angular velocity
+    private final double rotVelocityMult = .75; 
+    private boolean isPointingRight;                                                                                     // max angular velocity
 
     //SwerveRequestes
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -77,7 +78,7 @@ public class RobotContainer {
 
     // Coral Commands (Some command are public because used by the Auto class)
   private Command alignRobotWithAprilTag;
-    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, null);
+    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, () -> isPointingRight);
 
 
     public RobotContainer() {     
@@ -134,7 +135,11 @@ public class RobotContainer {
 
         // coral elevator increment level
         driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));                
+        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); 
+        
+        //Change face direction
+        driverController.b().onTrue(Commands.runOnce(() -> isPointingRight = true));
+        driverController.x().onTrue(Commands.runOnce(() -> isPointingRight = false));
 
         // ======= CORAL BINDINGS =======
 
@@ -144,7 +149,7 @@ public class RobotContainer {
 
         // coral intake command
         driverController.rightTrigger(0.01).onTrue(              
-           coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+           coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean(), 5).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         
         // ======= CORAL AUTOMATION COMMANDS =======
         driverController.povUp().onTrue(
@@ -198,10 +203,10 @@ public class RobotContainer {
     }
 
     public void autonomousPeriodic(){
-        if(!driverController.b().getAsBoolean()){
-            auto.PollAutoRoutine();
-
-        }
+        auto.PollAutoRoutine();
+    }
+    public void disableAuto(){
+        auto.KillAutoRoutine();
     }
     /* #endregion */
 
