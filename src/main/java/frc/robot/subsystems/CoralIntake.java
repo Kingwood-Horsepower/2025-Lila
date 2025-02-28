@@ -36,7 +36,7 @@ public class CoralIntake extends SubsystemBase {
     private final RelativeEncoder altEncoder = armMotor.getAlternateEncoder();
 
 
-    private double setPoint = armStowPositionPerpendicular;
+    private double setPoint = 0; //armStowPositionPerpendicular
     private double velocity = 0.0;
     private boolean hasCoral = false;
 
@@ -52,7 +52,8 @@ public class CoralIntake extends SubsystemBase {
     public CoralIntake() {
 
         // continue setup
-        altEncoder.setPosition(armStowPositionPerpendicular);
+        //altEncoder.setPosition(armStowPositionPerpendicular);
+        SmartDashboard.putString("did i setPosition?", "a");
         
 
         armMotorConfig
@@ -81,7 +82,7 @@ public class CoralIntake extends SubsystemBase {
         rollerMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kCoast)
-            .inverted(false);
+            .inverted(true);
 
         rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -141,7 +142,8 @@ public class CoralIntake extends SubsystemBase {
     @Override
     public void periodic() {
         // ill change this later
-        double feedforward = Math.cos(setPoint*2*Math.PI)*kG;
+        double feedforward = 0;
+        //Math.cos(setPoint*2*Math.PI)*kG;
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, feedforward);//MAXMotionPositionControl
         hasCoral = !IRsensor.get(); 
 
