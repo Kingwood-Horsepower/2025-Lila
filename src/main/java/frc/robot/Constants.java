@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Constants {
     public static class CameraConstants
     {
+        public static final Distance kFieldLenght = Meters.of(12.29);
+        public static final Distance kFieldWidth = Meters.of(2.87);
 
         public static final Transform3d kRobotToRightCam = new Transform3d(new Translation3d(Inches.of(5), Inches.of(-12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
         public static final Transform3d kRobotToLeftCam = new Transform3d(new Translation3d(Inches.of(5), Inches.of(12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
@@ -32,6 +34,7 @@ public class Constants {
         public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(24);
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6);
         public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
+
 
         public static final   List<AprilTag> kApriltags = Arrays.asList(
             new AprilTag(21, new Pose3d(new Translation3d(Inches.of(169), Inches.of(113),  Inches.of(45)), new Rotation3d(0, 0, 3*Math.PI/2))),
@@ -51,6 +54,7 @@ public class Constants {
         public static final double ELEVATOR_L4_INCHES = 26.5;      //4
         public static final double ELEVATOR_MAX_INCHES = 27.8;    //Max
     }
+
     public static class AutoConstants
     {
         //Can be 1, 2 or 3.  1 is the one closest to the center
@@ -92,5 +96,27 @@ public class Constants {
     {
         public static final double ALGAE_DOWN_POINT = .11;
         public static final double ALGAE_STORE_POINT = .08;
+    }
+
+    public static class CoralIntakeConstants
+    {
+        /*notes on geometry
+        angle of lower bar limits
+        71 deg up
+        -60 deg down
+        angle of CoM onshape
+        12 deg up from lower bar
+        88 deg up
+        -44 deg down
+        weight of arm
+        10 lbs
+        values calculated in recalc aaaaa
+        */ 
+        public static final double kG = 0.59; //V
+        public static final double kV = 0.88; //Vs/rad
+        public static final double armStowPositionPerpendicular = 71/360;
+        public static final double armDownPositionPerpendicular = -44/360;
+        public static final double armScorePositionPerpendicular = armStowPositionPerpendicular - 0.26;
+        
     }
 }

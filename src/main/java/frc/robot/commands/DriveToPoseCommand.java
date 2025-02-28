@@ -37,12 +37,8 @@ public class DriveToPoseCommand extends Command {
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(1, 1);
     private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 3);
 
-    private int TAG_TO_CHASE = 18;
-    private Pose3d GOAL = 
-        new Pose3d(
-            new Translation3d(3.05, 3.87, 0.0),
-            new Rotation3d(0.0, 0.0, Math.PI)
-        );
+    private int TAG_TO_CHASE;
+    private Pose3d GOAL;
 
     private final CommandSwerveDrivetrain drivetrain;
     private final CameraSubsystem cameraSubsystem;
