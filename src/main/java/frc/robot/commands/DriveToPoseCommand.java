@@ -72,7 +72,7 @@ public class DriveToPoseCommand extends Command {
 
     @Override
     public void initialize() {
-        TAG_TO_CHASE = cameraSubsystem.getBestTarget().fiducialId;
+        TAG_TO_CHASE = cameraSubsystem.getBestDownTarget().fiducialId;
         GOAL = new Pose3d(cameraSubsystem.getCoralScoreTransform(TAG_TO_CHASE, isRightBooleanSupplier.get()));
     }
 

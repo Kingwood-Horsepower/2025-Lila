@@ -70,7 +70,7 @@ public class AlignToStationCommand extends Command {
 
     @Override
     public void initialize() {
-        TAG_TO_CHASE = cameraSubsystem.getBestTarget().fiducialId;
+        TAG_TO_CHASE = cameraSubsystem.getBestUpTarget().fiducialId;
         GOAL = new Pose3d(cameraSubsystem.getStationPose2d(TAG_TO_CHASE));
     }
 

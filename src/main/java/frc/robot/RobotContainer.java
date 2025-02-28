@@ -69,7 +69,7 @@ public class RobotContainer {
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
     public final CommandXboxController driverController = new CommandXboxController(0);
-    public final Trigger targetAquired = new Trigger(() -> camera.hasTarget());
+    public final Trigger targetAquired = new Trigger(() -> camera.hasDownTarget());
         
     // SlewRaeLimiters
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
@@ -153,7 +153,7 @@ public class RobotContainer {
         
         // ======= CORAL AUTOMATION COMMANDS =======
         driverController.povUp().onTrue(
-            driveToPoseCommand.onlyIf(() -> camera.hasTarget()));
+            driveToPoseCommand.onlyIf(() -> camera.hasDownTarget()));
 
         // left
         // driverController.rightBumper()
@@ -191,6 +191,18 @@ public class RobotContainer {
         
                         drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
                     });
+
+            //Up camera
+
+            visionEst = camera.getEstimatedGlobalUpPose();
+            visionEst.ifPresent(
+                    est -> {
+                        //System.out.println("up: " + est.estimatedPose.getTranslation());
+                        SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
+                        SmartDashboard.putNumber("CameraUpOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+        
+                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
+                    });
         }
 
     }
@@ -214,9 +226,9 @@ public class RobotContainer {
     public Command getAlignWithAprilTagCommand()
     {
         return  drivetrain.applyRequest(() ->
-        drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+        drive.withVelocityX((camera.getDownTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
         .withVelocityY(driverController.getLeftX() * MaxSpeed)
-        .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
+        .withRotationalRate(-1.0 * (camera.getDownTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
 
     }
     public void getGoalCoralPose(){

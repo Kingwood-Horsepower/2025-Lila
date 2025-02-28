@@ -44,13 +44,17 @@ public class CameraSubsystem extends SubsystemBase {
   
   PhotonCamera rightCamera = new PhotonCamera("RightCam");
   PhotonCamera leftCamera = new PhotonCamera("LeftCam");
+  PhotonCamera upCamera = new PhotonCamera("upCam");
 
   List<PhotonPipelineResult> rightResults = null;
   List<PhotonPipelineResult> leftResults = null;
+  List<PhotonPipelineResult> upResults = null;
   
   AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+
   PhotonPoseEstimator rightPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToRightCam);
   PhotonPoseEstimator leftPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToLeftCam);
+  PhotonPoseEstimator upPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToUpCam);
 
   double ambiguityRight;
   boolean hasTargetRight = false;
@@ -62,6 +66,11 @@ public class CameraSubsystem extends SubsystemBase {
   PhotonTrackedTarget leftTarget;
   double targetRangeLeft = 0;
 
+  double ambiguityUp;
+  boolean hasTargetUp = false;
+  PhotonTrackedTarget upTarget;
+  double targetRangeUp = 0;
+
   /** Creates a new CameraSubsystem. */
   public CameraSubsystem() {}
 
@@ -70,8 +79,11 @@ public class CameraSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     rightResults = rightCamera.getAllUnreadResults();
     leftResults = leftCamera.getAllUnreadResults();
+    upResults = upCamera.getAllUnreadResults();
+
     processRightResults();
     processLeftResults();
+    processUpResults();
   }
   public boolean processRightResults()
   {
@@ -123,6 +135,33 @@ public class CameraSubsystem extends SubsystemBase {
     }
     return false;
   }
+  public boolean processUpResults()
+  {
+    //Check if we have a frame
+    if (upResults.isEmpty())
+    {
+      hasTargetUp = false;
+      return false;
+    }
+    //Check if we have a target
+    if(!getBestUpResult().hasTargets())
+    {
+      hasTargetUp = false;
+      return false;
+    }
+    
+    var target = getBestUpResult().getBestTarget();
+    hasTargetUp = true;
+    if(target != null){
+      ambiguityUp = target.poseAmbiguity;
+      upTarget = target;
+      targetRangeUp = PhotonUtils.calculateDistanceToTargetMeters(kRobotToUpCam.getZ(), aprilTagFieldLayout.getTagPose(target.fiducialId).get().getRotation().getY(), kRobotToUpCam.getRotation().getY(), Math.toRadians((target.getPitch())));
+      return true;
+    }
+    return false;
+  }
+
+
  public Optional<EstimatedRobotPose> getEstimatedGlobalRightPose() {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
@@ -149,6 +188,20 @@ public class CameraSubsystem extends SubsystemBase {
     }
     return visionEst;
 }
+public Optional<EstimatedRobotPose> getEstimatedGlobalUpPose() {
+  Optional<EstimatedRobotPose> visionEst = Optional.empty();
+  
+  if(!upResults.isEmpty())
+  {
+    if(getBestUpResult().hasTargets())
+    {
+      visionEst = upPoseEstimator.update(getBestUpResult());
+    }
+
+  }
+  return visionEst;
+}
+
 
 
 
@@ -161,7 +214,11 @@ PhotonPipelineResult getBestLeftResult(){
   return leftResults.get(leftResults.size() - 1);
 }
 
-public PhotonTrackedTarget getBestTarget(){
+PhotonPipelineResult getBestUpResult(){
+  return upResults.get(upResults.size() - 1);
+}
+
+public PhotonTrackedTarget getBestDownTarget(){
   if(hasTargetLeft && hasTargetRight) {
     if(ambiguityLeft < ambiguityRight) return leftTarget;
     else return rightTarget;
@@ -169,13 +226,21 @@ public PhotonTrackedTarget getBestTarget(){
   else return rightTarget;
 }
 
-public boolean hasTarget(){
+public PhotonTrackedTarget getBestUpTarget(){
+  return upTarget;
+}
+
+public boolean hasUpTarget(){
+  return hasTargetUp;
+}
+
+public boolean hasDownTarget(){
   return hasTargetLeft || hasTargetRight;
 }
-public double getTargetYaw(){
-    return getBestTarget().getYaw();
+public double getDownTargetYaw(){
+    return getBestDownTarget().getYaw();
 }
-public double getTargetRange(){
+public double getDownTargetRange(){
   //Chose one with lowest ambiguity
   if(hasTargetLeft && hasTargetRight)
     if(ambiguityLeft < ambiguityRight){
@@ -188,6 +253,7 @@ public double getTargetRange(){
   else 
     return targetRangeRight;
 }
+
 public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
   int id =  getScoreCoralAprilTagId(AprilTagId);
 
