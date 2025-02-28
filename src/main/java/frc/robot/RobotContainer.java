@@ -134,8 +134,8 @@ public class RobotContainer {
         // ======= ELEVATOR BINDINGS =======
 
         // coral elevator increment level
-        driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); 
+        driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf)); 
         
         //Change face direction
         driverController.b().onTrue(Commands.runOnce(() -> isPointingRight = true));

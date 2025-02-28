@@ -116,9 +116,9 @@ public class Constants {
         */ 
         public static final double kG = 0.59; //V
         public static final double kV = 0.88; //Vs/rad
-        public static final double armStowPositionPerpendicular = 71/360;
-        public static final double armDownPositionPerpendicular = -44/360;
-        public static final double armScorePositionPerpendicular = armStowPositionPerpendicular - 0.26;
+        // public static final double armStowPositionPerpendicular = 71/360;
+        // public static final double armDownPositionPerpendicular = -44/360;
+        // public static final double armScorePositionPerpendicular = armStowPositionPerpendicular - 0.26;
         
     }
 }
