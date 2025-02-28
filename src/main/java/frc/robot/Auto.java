@@ -20,11 +20,13 @@ public class Auto {
     private final AutoFactory autoFactory;
     private final CoralAndElevatorManager coralAndElevatorManager;
     private final RobotContainer robotContainer;
+    private final CommandSwerveDrivetrain driveSubsystem;
 
     private final AutoRoutine autoRoutine;
 
-    public Auto(CommandSwerveDrivetrain driveSubsystem, CoralAndElevatorManager _CoralAndElevatorManager, RobotContainer _robotContainer)
+    public Auto(CommandSwerveDrivetrain _driveSubsystem, CoralAndElevatorManager _CoralAndElevatorManager, RobotContainer _robotContainer)
     {   
+        driveSubsystem = _driveSubsystem;
         autoFactory = new AutoFactory(
             driveSubsystem::getRobotPose, // A function that returns the current robot pose
             driveSubsystem::resetPose, // A function that resets the current robot pose to the provided Pose2d
@@ -109,6 +111,7 @@ public class Auto {
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
         return Commands.sequence(
+            Commands.runOnce(() -> {driveSubsystem.StopDriveTrain();}),
             robotContainer.getAlignWithAprilTagCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(4)),
             coralAndElevatorManager.getScoreCoralComand(),
             nexTrajectory.resetOdometry(),
@@ -117,7 +120,8 @@ public class Auto {
     }
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
-                coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() || robotContainer.driverController.b().getAsBoolean()),
+                Commands.runOnce(() -> {driveSubsystem.StopDriveTrain();}),
+                coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() || robotContainer.driverController.b().getAsBoolean(), 3),
                 nexTrajectory.resetOdometry(),
                 nexTrajectory.cmd()
             );

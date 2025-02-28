@@ -266,16 +266,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .withDriveRequestType(DriveRequestType.Velocity);
 
     //Unused as of now
-    private final PIDController xController = new PIDController(1, 0, 0);
-    private final PIDController yController = new PIDController(1, 0, 0);
-    private final PIDController headingController = new PIDController(1, 0, 0.0);
+    private final PIDController xController = new PIDController(5.8, 0, 0.5);
+    private final PIDController yController = new PIDController(5.8, 0, 0.5);
+    private final PIDController headingController = new PIDController(3.2, 0, 0.3);
 
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
         Pose2d pose = getRobotPose();
+ 
+        double rotation = Math.toRadians(pose.getRotation().getDegrees());
+        if(rotation > (Math.PI/2) && sample.heading < 0 ){
+            rotation -= (Math.PI * 2);
+        }
         //System.out.println("est: " +pose.getTranslation());
         //System.out.println("right: " + Double.toString(sample.x) + "   y: " + Double.toString(sample.y));
-        System.out.println("Xdiff: " + (pose.getTranslation().getX()-sample.x));
+        System.out.println("Degreediff: " + (rotation - sample.heading));
+        System.out.println("Pose: " + rotation);
+        //System.out.println("Degreediff: " + (sample.heading));
+        //System.out.println("Robpot: " + (pose.getRotation().getDegrees()));
 
         //WE NEED TO APPLY PID AND FEED FORWARD
         //use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
@@ -287,7 +295,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         ChassisSpeeds speeds = new ChassisSpeeds(
             sample.vx + xController.calculate(pose.getX(), sample.x),
             sample.vy,
-            sample.omega
+            sample.omega + headingController.calculate(rotation, sample.heading)
+        );
+
+        // Apply the generated speeds
+        this.setControl(trajectoryRequest.withSpeeds(speeds));
+    }
+    public void StopDriveTrain(){
+        ChassisSpeeds speeds = new ChassisSpeeds(
+            0,
+            0,
+            0
         );
 
         // Apply the generated speeds
@@ -298,7 +316,4 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.getState().Pose;
     }
 
-    {
-
-    }
 }

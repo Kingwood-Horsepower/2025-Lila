@@ -62,12 +62,14 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    m_robotContainer.disableAuto();
+  }
 
   @Override
   public void teleopInit() {
-    //System.out.println(RobotContainer.camera.getCoralScoreTransform(20, false));
-    //System.out.println(RobotContainer.camera.getCoralScoreTransform(19, false));
+    System.out.println(RobotContainer.camera.getCoralScoreTransform(17, false));
+    System.out.println(RobotContainer.camera.getCoralScoreTransform(17, true));
     m_robotContainer.resetPose();
     
   }

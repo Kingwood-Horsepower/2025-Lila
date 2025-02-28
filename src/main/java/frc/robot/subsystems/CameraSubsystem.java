@@ -189,7 +189,7 @@ public double getTargetRange(){
     return targetRangeRight;
 }
 public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
-  int id =  getAprilTagId(AprilTagId);
+  int id =  getScoreCoralAprilTagId(AprilTagId);
 
   //Vector from the center to the april tag
   Translation2d v = aprilTagFieldLayout.getTagPose(id).get().getTranslation().toTranslation2d().minus(kReefCenter);
@@ -206,7 +206,7 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
   return new Pose2d(kReefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag))), new Rotation2d(aprilTagFieldLayout.getTagPose(id).get().getRotation().getZ() + Math.PI));
 
 }
-private int getAprilTagId(int id){
+private int getScoreCoralAprilTagId(int id){
   //if the id is in the blue allience, return its id
   if(id> 15)
     return id;
@@ -226,6 +226,29 @@ private int getAprilTagId(int id){
     }
 
       
+  }
+}
+public Pose2d getStationPose2d(int AprilTagId){
+  int id =  getStationAprilTagId(AprilTagId);
+
+  Translation2d aprilTagTranslation2d =  aprilTagFieldLayout.getTagPose(id).get().getTranslation().toTranslation2d();
+  double rotation = id == 12 ?  Math.toRadians(234) : Math.toRadians(126);
+  
+
+  Translation2d fromAprilTagToRobot = new Translation2d(Math.cos(rotation), Math.sin(rotation));
+
+  return new Pose2d(aprilTagTranslation2d.plus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
+}
+
+private int getStationAprilTagId(int id){
+  //if the id is in the red alliance, convert it to its blue allience equivalent
+  switch (id) {
+    case 1:
+      return 13;
+    case 2:
+      return 12;
+    default:
+      return id;
   }
 }
 

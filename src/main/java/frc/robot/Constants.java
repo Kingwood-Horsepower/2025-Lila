@@ -25,14 +25,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Constants {
     public static class CameraConstants
     {
-        public static final Distance kFieldLenght = Meters.of(12.29);
-        public static final Distance kFieldWidth = Meters.of(2.87);
 
         public static final Transform3d kRobotToRightCam = new Transform3d(new Translation3d(Inches.of(5), Inches.of(-12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
         public static final Transform3d kRobotToLeftCam = new Transform3d(new Translation3d(Inches.of(5), Inches.of(12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
         public static final Translation2d kReefCenter = new Translation2d(inchesToMeters(176.745), inchesToMeters(158.5));
         public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(24);
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6);
+        public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
 
         public static final   List<AprilTag> kApriltags = Arrays.asList(
             new AprilTag(21, new Pose3d(new Translation3d(Inches.of(169), Inches.of(113),  Inches.of(45)), new Rotation3d(0, 0, 3*Math.PI/2))),
