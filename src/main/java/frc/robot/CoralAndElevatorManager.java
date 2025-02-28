@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
+import static frc.robot.Constants.CoralIntakeConstants.*;
 
 public class CoralAndElevatorManager {
     private final Elevator elevator = new Elevator();
@@ -28,7 +29,7 @@ public class CoralAndElevatorManager {
           if(elevator.getElevatorLevel() == 4){
             return scoreAtL4Command();
           }
-          Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);
+          Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(armScorePositionPerpendicular);
          }, ()->{}, coralIntake, elevator );
 
           Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
@@ -47,10 +48,10 @@ public class CoralAndElevatorManager {
           );
     }
     private Command scoreAtL4Command(){
-        Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.23);
+        Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(armStowPositionPerpendicular-.23);
          }, ()->{}, coralIntake, elevator );
 
-         Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake, elevator );
+         Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(armStowPositionPerpendicular-0.20);}, ()->{}, coralIntake, elevator );
 
         Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
         
@@ -78,7 +79,7 @@ public class CoralAndElevatorManager {
 
     public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake){
         //Intake Coral
-        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.05, .7);}, ()->{}, coralIntake);
+        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(armStowPositionPerpendicular-.05, .7);}, ()->{}, coralIntake);
                 // intakeCoral = Commands.startEnd(
                 //     () -> {
                 //         coralIntake.runIntake(.07, .7);
@@ -86,7 +87,7 @@ public class CoralAndElevatorManager {
                 //     },
                 //     () -> coralIntake.stowIntake(),
                 //     coralIntake, elevator).until(()-> elevator.getIsNearSetPoint() && coralIntake.getIsNearSetPoint());
-        Command setCor = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
+        Command setCor = Commands.startEnd(()->{coralIntake.setSetPoint(armScorePositionPerpendicular);}, ()->{}, coralIntake, elevator );
         Command el =Commands.startEnd(
             () -> {
                 elevator.setElevatorLevel(0);
@@ -134,9 +135,9 @@ public class CoralAndElevatorManager {
     private void stowIntake(){
 
         // if i am not near zero, or not set to 0, or i have coral set to down position
-        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || coralIntake.hasCoral()) coralIntake.setSetPoint(.26);
+        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || coralIntake.hasCoral()) coralIntake.setSetPoint(armScorePositionPerpendicular);
         // set up
-        else coralIntake.setSetPoint(0.0);
+        else coralIntake.setSetPoint(armStowPositionPerpendicular);
         coralIntake.setRollerVelocity(0.0);
     }
 
