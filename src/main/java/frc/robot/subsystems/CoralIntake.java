@@ -4,6 +4,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -15,10 +16,12 @@ import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import static frc.robot.Constants.CoralIntakeConstants.*;
 
 public class CoralIntake extends SubsystemBase {
     private final DigitalInput IRsensor = new DigitalInput(9); // false = broken
@@ -32,7 +35,8 @@ public class CoralIntake extends SubsystemBase {
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
     private final RelativeEncoder altEncoder = armMotor.getAlternateEncoder();
 
-    private double setPoint = 0.0;
+
+    private double setPoint = armStowPositionPerpendicular;
     private double velocity = 0.0;
     private boolean hasCoral = false;
 
@@ -43,9 +47,12 @@ public class CoralIntake extends SubsystemBase {
     
     private final int ARM_GEAR_RATIO = 3; // this is the sprocket gear ratio now
 
+    //private final ArmFeedforward feedforward = new ArmFeedforward(0, kG, 0, 0);
+
     public CoralIntake() {
 
         // continue setup
+        altEncoder.setPosition(armStowPositionPerpendicular);
         
 
         armMotorConfig
@@ -54,7 +61,7 @@ public class CoralIntake extends SubsystemBase {
             .inverted(true) 
             .closedLoop
             .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
-            .pid(1, 0.0, 0.0)
+            .pid(.5, 0.0, 0.5)
             .outputRange(-1, 1) //what does this do??
             //.velocityFF(0) // calculated using recalc
             .maxMotion
@@ -67,7 +74,7 @@ public class CoralIntake extends SubsystemBase {
             .alternateEncoder
             .countsPerRevolution(8192)
             .setSparkMaxDataPortConfig()
-            .inverted(true)
+            .inverted(false)
             ;
         armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     
@@ -134,7 +141,8 @@ public class CoralIntake extends SubsystemBase {
     @Override
     public void periodic() {
         // ill change this later
-        armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
+        double feedforward = Math.cos(setPoint*2*Math.PI)*kG;
+        armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, feedforward);//MAXMotionPositionControl
         hasCoral = !IRsensor.get(); 
 
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());

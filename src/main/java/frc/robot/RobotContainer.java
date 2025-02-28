@@ -119,6 +119,8 @@ public class RobotContainer {
 
         //driverController.b().whileTrue(alignRobotWithAprilTag);
 
+        // ======= ALGAE BINDINGS =======
+        
         // algae intake command
         driverController.leftTrigger(0.1).whileTrue(
             algaeIntake.intake()
@@ -129,6 +131,8 @@ public class RobotContainer {
             algaeIntake.score()
         );
 
+        // ======= ELEVATOR BINDINGS =======
+
         // coral elevator increment level
         driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); 
@@ -137,19 +141,25 @@ public class RobotContainer {
         driverController.b().onTrue(Commands.runOnce(() -> isPointingRight = true));
         driverController.x().onTrue(Commands.runOnce(() -> isPointingRight = false));
 
-        // coral score command
-        // uses stow
-        driverController.rightBumper().onTrue(Commands.run(() -> {System.out.println("Align with april tag");}));
-        driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        // ======= CORAL BINDINGS =======
+
+        // coral score commands
+        driverController.rightBumper().onTrue(Commands.run(() -> {}));
+        driverController.rightBumper().onFalse(coralAndElevatorManager.getScoreCoralComand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
         // coral intake command
-        // uses stow
-   
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean(), 5).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         
+        // ======= CORAL AUTOMATION COMMANDS =======
         driverController.povUp().onTrue(
-            driveToPoseCommand.onlyIf(() -> camera.getBestTarget().getFiducialId() == 18));
+            driveToPoseCommand.onlyIf(() -> camera.hasTarget()));
+
+        // left
+        // driverController.rightBumper()
+        //     .and(driverController.x()).onTrue(
+                
+        //     );
 
     }
     /* #endregion */
