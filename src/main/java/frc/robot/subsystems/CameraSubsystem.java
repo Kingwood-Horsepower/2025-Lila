@@ -171,8 +171,8 @@ public PhotonTrackedTarget getBestTarget(){
 public boolean hasTarget(){
   return hasTargetLeft || hasTargetRight;
 }
-public double getTargetYaw(){
-    return getBestTarget().getYaw();
+public double getTargetSkew(){
+    return getBestTarget().getSkew();
 }
 public double getTargetRange(){
   //Chose one with lowest ambiguity

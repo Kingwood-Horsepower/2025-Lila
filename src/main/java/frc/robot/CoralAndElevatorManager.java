@@ -25,10 +25,11 @@ public class CoralAndElevatorManager {
     //get Commands methods
     public Command getScoreCoralComand(){
         //Score Coral
+        //return scoreBelowL4Command();
         return new ConditionalCommand(scoreAtL4Command(), scoreBelowL4Command(), ()  -> elevator.getElevatorLevel() ==4);
     }
   private Command scoreAtL4Command(){
-      Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.23);
+      Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.22);
        }, ()->{}, coralIntake);
 
        Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake);
@@ -49,7 +50,7 @@ public class CoralAndElevatorManager {
             setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
             new WaitCommand(.3),
             //Fancy ahahah stuff
-            outTakeCoralCommand.withTimeout(1.5)
+            outTakeCoralCommand.withTimeout(2.5)
             .alongWith(elevatorToMaxCommand.until(() -> elevator.getIsNearSetPoint())
             .andThen(setCoralIntakeUp.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
 
@@ -75,7 +76,7 @@ public class CoralAndElevatorManager {
           return Commands.sequence(
               setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
               new WaitCommand(.3),
-              outTakeCoralCommand.withTimeout(1.5),
+              outTakeCoralCommand.withTimeout(2.5),
               elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
               Commands.runOnce(this :: stowIntake, elevator, coralIntake)
           );
@@ -104,7 +105,7 @@ public class CoralAndElevatorManager {
 
     }
     public Command getMoveRollersCommand(){
-        return Commands.startEnd(()->{coralIntake.runIntake(.05, .7);}, ()->{});
+        return Commands.startEnd(()->{coralIntake.runIntake(.05, .7);}, this :: stowIntake);
     }
     public Command getDecrementElevatorCommand(){
                 //increment elevator

@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -75,7 +76,7 @@ public class RobotContainer {
     // SlewRaeLimiters
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
-    private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(1.3);
+    private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
 
     // Coral Commands (Some command are public because used by the Auto class)
   private Command alignRobotWithAprilTag;
@@ -135,7 +136,7 @@ public class RobotContainer {
         driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));                
         
-        driverController.b().whileTrue(coralAndElevatorManager.getMoveRollersCommand());
+        //driverController.b().whileTrue(coralAndElevatorManager.getMoveRollersCommand());
 
         // coral score command
         // uses stow
@@ -145,6 +146,7 @@ public class RobotContainer {
         // coral intake command
         // uses stow
         driverController.start().onTrue(Commands.runOnce(() -> inputMult *= -1));
+        //driverController.back().whileTrue(getAlignWithAprilTagCommand());
    
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
@@ -216,10 +218,19 @@ public class RobotContainer {
 
     public Command getAlignWithAprilTagCommand()
     {
-        return  drivetrain.applyRequest(() ->
-        drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
-        .withVelocityY(driverController.getLeftX() * MaxSpeed)
-        .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
+        return new ConditionalCommand(alignDriveTrain(), Commands.runOnce(()->{}), camera::hasTarget);
+        
+        
 
+       
+    }
+    private Command alignDriveTrain(){
+        return  drivetrain.applyRequest(() ->  drive
+    //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
+            * MaxSpeed  * 0.2 )
+        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
+            * MaxSpeed * 0.2 )
+         .withRotationalRate(-1.0 * (camera.getTargetSkew()/50)* MaxAngularRate)).onlyWhile(targetAquired);
     }
 }
