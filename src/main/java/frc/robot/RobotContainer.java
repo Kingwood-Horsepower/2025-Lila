@@ -173,14 +173,12 @@ public class RobotContainer {
         // ======= CORAL AUTOMATION COMMANDS =======
         driverController.back().onTrue(
             getAlignWithReefCommand().onlyWhile(driverController.back()));
-        driverController.start().onTrue(getAlignWithStationCommand().onlyWhile(driverController.back()));
+        driverController.start().onTrue(Commands.runOnce(this::resetPose));
         
          // ======= CLIMBS COMMANDS =======
         driverController.povUp().onTrue(moveCageUpCommand);
         driverController.povDown().onTrue(moveCageDownCommand);
         
-
-        driverController.povUpRight().onTrue(Commands.runOnce(this::resetPose));
 
         // left
         // driverController.rightBumper()
