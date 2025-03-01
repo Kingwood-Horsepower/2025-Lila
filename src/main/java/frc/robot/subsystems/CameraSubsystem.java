@@ -50,7 +50,7 @@ public class CameraSubsystem extends SubsystemBase {
   List<PhotonPipelineResult> leftResults = null;
   List<PhotonPipelineResult> upResults = null;
   
-  AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+  AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
   PhotonPoseEstimator rightPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToRightCam);
   PhotonPoseEstimator leftPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToLeftCam);
@@ -303,7 +303,7 @@ public Pose2d getStationPose2d(int AprilTagId){
 
   Translation2d fromAprilTagToRobot = new Translation2d(Math.cos(rotation), Math.sin(rotation));
 
-  return new Pose2d(aprilTagTranslation2d.plus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
+  return new Pose2d(aprilTagTranslation2d.minus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
 }
 
 private int getStationAprilTagId(int id){

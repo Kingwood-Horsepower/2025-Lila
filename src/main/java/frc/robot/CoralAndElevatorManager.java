@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
@@ -28,10 +29,9 @@ public class CoralAndElevatorManager {
     }
     //get Commands methods
 
-
     public Command getScoreCoralComand(){
-        return scoreWhenNotAtL4Command();
-        //return new ConditionalCommand(scoreAtL4Command(), scoreWhenNotAtL4Command(), () -> getElevatorLevel() == 4);
+        // return scoreWhenNotAtL4Command();
+        return new ConditionalCommand(scoreAtL4Command(), scoreWhenNotAtL4Command(), () -> getElevatorLevel() == 4);
     }
     private Command scoreWhenNotAtL4Command(){
         //Score Coral

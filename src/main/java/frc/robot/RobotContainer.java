@@ -80,7 +80,6 @@ public class RobotContainer {
 
     // Coral Commands (Some command are public because used by the Auto class)
   private Command alignRobotWithAprilTag;
-    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, () -> isPointingRight);
     private Command moveCageUpCommand;
     private Command moveCageDownCommand;
 
@@ -171,8 +170,10 @@ public class RobotContainer {
         
         // ======= CORAL AUTOMATION COMMANDS =======
         driverController.back().onTrue(
-            driveToPoseCommand.onlyIf(() -> camera.hasDownTarget()));
+            getAlignWithReefCommand().onlyWhile(driverController.back()));
+        driverController.start().onTrue(getAlignWithStationCommand().onlyWhile(driverController.back()));
         
+         // ======= CLIMBS COMMANDS =======
         driverController.povUp().onTrue(moveCageUpCommand);
         driverController.povDown().onTrue(moveCageDownCommand);
 
