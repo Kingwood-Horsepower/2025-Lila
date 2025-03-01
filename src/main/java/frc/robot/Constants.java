@@ -96,7 +96,7 @@ public class Constants {
 
     public static class AlgaeConstants
     {
-        public static final double ALGAE_DOWN_POINT = .11;
+        public static final double ALGAE_DOWN_POINT = .12;
         public static final double ALGAE_STORE_POINT = .08;
     }
 

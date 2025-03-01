@@ -163,6 +163,8 @@ public class RobotContainer {
         // coral score commands
         driverController.rightBumper().onTrue(Commands.run(() -> {}));
         driverController.rightBumper().onFalse(coralAndElevatorManager.getScoreCoralComand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        
+        
 
         // coral intake command
         driverController.rightTrigger(0.01).onTrue(              
@@ -176,7 +178,9 @@ public class RobotContainer {
          // ======= CLIMBS COMMANDS =======
         driverController.povUp().onTrue(moveCageUpCommand);
         driverController.povDown().onTrue(moveCageDownCommand);
+        
 
+        driverController.povUpRight().onTrue(Commands.runOnce(this::resetPose));
 
         // left
         // driverController.rightBumper()

@@ -71,7 +71,7 @@ public class Robot extends TimedRobot {
     System.out.println(RobotContainer.camera.getCoralScoreTransform(8, false));
     System.out.println(RobotContainer.camera.getCoralScoreTransform(8, true));
     System.out.println(RobotContainer.camera.getStationPose2d(12));
-    m_robotContainer.resetPose();
+    //m_robotContainer.resetPose();
     
   }
 

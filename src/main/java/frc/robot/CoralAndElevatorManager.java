@@ -14,7 +14,7 @@ import static frc.robot.Constants.CoralIntakeConstants.*;
 
 public class CoralAndElevatorManager {
     private final Elevator elevator = new Elevator();
-    private final CoralIntake coralIntake = new CoralIntake();
+    private final CoralIntake coralIntake = new CoralIntake(elevator);
     private final RobotContainer robotContainer;
 
     public CoralAndElevatorManager(RobotContainer _robotContainer){
@@ -30,7 +30,7 @@ public class CoralAndElevatorManager {
     //get Commands methods
 
     public Command getScoreCoralComand(){
-        // return scoreWhenNotAtL4Command();
+        //return scoreWhenNotAtL4Command();
         return new ConditionalCommand(scoreAtL4Command(), scoreWhenNotAtL4Command(), () -> getElevatorLevel() == 4);
     }
     private Command scoreWhenNotAtL4Command(){
@@ -38,7 +38,7 @@ public class CoralAndElevatorManager {
         Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.0);
         }, ()->{}, coralIntake, elevator );
 
-         Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
+         Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), coralIntake);
 
          Command elevatorToZeroCommand = Commands.startEnd(
              () -> {
@@ -57,9 +57,9 @@ public class CoralAndElevatorManager {
         Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(.23);
          }, ()->{}, coralIntake, elevator );
 
-         Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake, elevator );
+         Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake);
 
-        Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
+        Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), coralIntake);
         
         Command elevatorToMaxCommand = Commands.startEnd(
               () -> {
