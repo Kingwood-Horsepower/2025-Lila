@@ -109,7 +109,8 @@ public class Auto {
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
         return Commands.sequence(
             Commands.runOnce(() -> {driveSubsystem.StopDriveTrain();}),
-            robotContainer.getAlignWithAprilTagCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(3)),
+            robotContainer.getAlignWithReefCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(3)),
+            //coralAndElevatorManager.getSetElevatorCommand(3),
             coralAndElevatorManager.getScoreCoralComand(),
             nexTrajectory.resetOdometry(),
             nexTrajectory.cmd()
