@@ -44,12 +44,13 @@ public class Constants {
 
     public static class ElevatorConstants
     {
-        // ELEVATOR LEVELS
+        //Elevator Levels
         public static final double ELEVATOR_HOME_INCHES = 0;    //0
         public static final double ELEVATOR_L1_INCHES = 3;      //1
-        public static final double ELEVATOR_L2_INCHES = 9;     //2
-        public static final double ELEVATOR_L3_INCHES = 15.5;     //3
-        public static final double ELEVATOR_MAX_INCHES = 27;    //4
+        public static final double ELEVATOR_L2_INCHES = 9;      //2
+        public static final double ELEVATOR_L3_INCHES = 15.5;   //3
+        public static final double ELEVATOR_L4_INCHES = 27;      //4
+        public static final double ELEVATOR_MAX_INCHES = 27.8;    //Max
     }
     public static class AutoConstants
     {
@@ -90,7 +91,7 @@ public class Constants {
 
     public static class AlgaeConstants
     {
-        public static final double ALGAE_DOWN_POINT = .11;
+        public static final double ALGAE_DOWN_POINT = .12;
         public static final double ALGAE_STORE_POINT = .08;
     }
 }

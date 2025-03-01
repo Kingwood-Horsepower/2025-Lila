@@ -23,6 +23,8 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -78,6 +80,7 @@ public class RobotContainer {
     // Coral Commands (Some command are public because used by the Auto class)
   private Command alignRobotWithAprilTag;
     private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, null);
+    private int inputMult =1;
 
 
     public RobotContainer() {     
@@ -101,9 +104,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(() -> drive
-                        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()) * translationVelocityMult
+                        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
                                 * MaxSpeed)
-                        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()) * translationVelocityMult
+                        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
                                 * MaxSpeed)
                         .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
                                 * rotVelocityMult * MaxAngularRate)));
@@ -139,6 +142,7 @@ public class RobotContainer {
 
         // coral intake command
         // uses stow
+        driverController.start().onTrue(Commands.runOnce(() -> inputMult *= -1));
    
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
@@ -193,7 +197,19 @@ public class RobotContainer {
 
         }
     }
+    public void disabledAuto(){
+        auto.KillAutoRoutine();
+        drivetrain.stopRobot();
+    }
     /* #endregion */
+    int getInputMult(){
+        boolean isBlue = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() == Alliance.Blue : false;
+        if(isBlue){
+            return -1 * inputMult;
+        }else{
+            return 1 * inputMult;
+        }
+    }
 
 
     public Command getAlignWithAprilTagCommand()

@@ -22,6 +22,7 @@ public class Auto {
     private final RobotContainer robotContainer;
 
     private final AutoRoutine autoRoutine;
+    private final CommandSwerveDrivetrain drivetrain;
 
     public Auto(CommandSwerveDrivetrain driveSubsystem, CoralAndElevatorManager _CoralAndElevatorManager, RobotContainer _robotContainer)
     {   
@@ -34,7 +35,7 @@ public class Auto {
         );
 
         coralAndElevatorManager = _CoralAndElevatorManager;
-
+        drivetrain = driveSubsystem;
         robotContainer = _robotContainer;
         //autoRoutine = getAutoRoutine();
         autoRoutine = getTestRoutine();
@@ -101,7 +102,8 @@ public class Auto {
             testTraj.cmd()
         )
         );
-        testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
+        testTraj.done().onTrue(Commands.runOnce(drivetrain::stopRobot));
+        //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
         return routine;
     }
 

@@ -50,7 +50,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    m_robotContainer.disabledAuto();
+  }
 
   @Override
   public void teleopInit() {

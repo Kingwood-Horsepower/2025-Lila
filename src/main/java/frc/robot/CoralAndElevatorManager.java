@@ -29,11 +29,11 @@ public class CoralAndElevatorManager {
     }
   private Command scoreAtL4Command(){
       Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.23);
-       }, ()->{}, coralIntake, elevator );
+       }, ()->{}, coralIntake);
 
-       Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake, elevator );
+       Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake);
 
-      Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0), elevator, coralIntake);
+      Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0));
       
       Command elevatorToMaxCommand = Commands.startEnd(
             () -> {
