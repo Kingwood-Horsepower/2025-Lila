@@ -44,7 +44,7 @@ public class CameraSubsystem extends SubsystemBase {
   
   PhotonCamera rightCamera = new PhotonCamera("RightCam");
   PhotonCamera leftCamera = new PhotonCamera("LeftCam");
-  PhotonCamera upCamera = new PhotonCamera("upCam");
+  PhotonCamera upCamera = new PhotonCamera("UpCam");
 
   List<PhotonPipelineResult> rightResults = null;
   List<PhotonPipelineResult> leftResults = null;

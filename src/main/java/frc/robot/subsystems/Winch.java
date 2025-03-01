@@ -20,7 +20,7 @@ public class Winch extends SubsystemBase{
     private final SparkMaxConfig winchMotorConfig = new SparkMaxConfig();
     //private final SparkClosedLoopController winchMotorController = winchMotor.getClosedLoopController();
 
-    Winch() {
+    public Winch() {
         winchMotorConfig
         .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)

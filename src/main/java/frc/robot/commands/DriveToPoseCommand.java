@@ -77,6 +77,7 @@ public class DriveToPoseCommand extends Command {
     }
 
     public void execute() {
+    
         drivetrain.setControl(
             drive.withVelocityX(xController.calculate(drivetrain.getRobotPose().getX(), GOAL.toPose2d().getX()))
                  .withVelocityY(yController.calculate(drivetrain.getRobotPose().getY(), GOAL.toPose2d().getY()))

@@ -34,11 +34,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.commands.AlignToStationCommand;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CameraSubsystem;
+import frc.robot.subsystems.Winch;
 import frc.robot.CoralAndElevatorManager;
 
 public class RobotContainer {
@@ -63,8 +65,8 @@ public class RobotContainer {
     public static CameraSubsystem camera = new CameraSubsystem(); // this was public static final
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Auto auto;
-    private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager();
-    
+    private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager(this);
+    private final Winch winch = new Winch();
 
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -79,7 +81,8 @@ public class RobotContainer {
     // Coral Commands (Some command are public because used by the Auto class)
   private Command alignRobotWithAprilTag;
     private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, () -> isPointingRight);
-
+    private Command moveCageUpCommand;
+    private Command moveCageDownCommand;
 
     public RobotContainer() {     
         configureCommands();
@@ -93,6 +96,21 @@ public class RobotContainer {
     private void configureCommands() {    
         //align robot with april tag
         alignRobotWithAprilTag = getAlignWithAprilTagCommand();       
+        moveCageUpCommand = Commands.sequence(
+            coralAndElevatorManager.getSetElevatorCommand(0),
+            Commands.runOnce(() -> algaeIntake.setSetPoint(Constants.AlgaeConstants.ALGAE_DOWN_POINT)),
+            winch.winchForwardCommand().until(driverController.rightBumper())
+        );
+        moveCageUpCommand = Commands.sequence(
+            Commands.runOnce(() -> algaeIntake.setSetPoint(Constants.AlgaeConstants.ALGAE_DOWN_POINT)),
+            coralAndElevatorManager.getSetElevatorCommand(0),
+            winch.winchForwardCommand().onlyWhile(driverController.povUp())
+        );
+        moveCageDownCommand = Commands.sequence(
+            Commands.runOnce(() -> algaeIntake.setSetPoint(Constants.AlgaeConstants.ALGAE_DOWN_POINT)),
+            coralAndElevatorManager.getSetElevatorCommand(0),
+            winch.winchReverseCommand().onlyWhile(driverController.povDown())
+        );
     }
     
     /* #endregion */
@@ -152,8 +170,12 @@ public class RobotContainer {
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean(), 5).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         
         // ======= CORAL AUTOMATION COMMANDS =======
-        driverController.povUp().onTrue(
+        driverController.back().onTrue(
             driveToPoseCommand.onlyIf(() -> camera.hasDownTarget()));
+        
+        driverController.povUp().onTrue(moveCageUpCommand);
+        driverController.povDown().onTrue(moveCageDownCommand);
+
 
         // left
         // driverController.rightBumper()
@@ -231,6 +253,14 @@ public class RobotContainer {
         .withRotationalRate(-1.0 * (camera.getDownTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
 
     }
+    public Command getAlignWithReefCommand(){
+       Command driveComm = new DriveToPoseCommand(drivetrain, camera, () -> isPointingRight);
+       return driveComm.onlyIf(() -> camera.hasDownTarget());
+    }
+    public Command getAlignWithStationCommand(){
+        Command driveComm = new AlignToStationCommand(drivetrain, camera);
+        return driveComm.onlyIf(() -> camera.hasUpTarget());
+     }
     public void getGoalCoralPose(){
         //iuhiuhi
         //help

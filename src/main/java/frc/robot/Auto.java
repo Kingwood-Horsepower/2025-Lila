@@ -53,41 +53,38 @@ public class Auto {
     AutoRoutine getAutoRoutine()
     {
         AutoRoutine routine = autoFactory.newRoutine("Autonomous");
-        AutoTrajectory goToCoralStation = getStartingAutoTrajectory(routine);
+        AutoTrajectory goToCoralReef = getStartingAutoTrajectory(routine);
 
         //custom starting trajectory based on the starting position and the targetStation
+        //Go to the coral (coral 1 if station 2, coral 9 if station 1)
        routine.active().onTrue(
         Commands.sequence(
-            goToCoralStation.resetOdometry(),
-            goToCoralStation.cmd()
-        )
-        );
-        //Move colar intake in the correct position
-
-        AutoTrajectory goToCoral1 = routine.trajectory("Coral1S2");
-        AutoTrajectory goToCoral9 = routine.trajectory("Coral9S1");
-
-        //Go to the coral (coral 1 if station 2, coral 9 if station 1)
-        if(targetStation == TargetCoralStation.rightStation){
-            goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral9));
-        }else{
-            goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral1));
-        }
+            goToCoralReef.resetOdometry(),
+            goToCoralReef.cmd()
+        ));
         //Score Coral and come back to the station
-        AutoTrajectory goToCoral1R = routine.trajectory("Coral1S2R");
-        AutoTrajectory goToCoral9R = routine.trajectory("Coral9S1R");
+        AutoTrajectory coral2toStation2 = routine.trajectory("Coral2S2R");
+        AutoTrajectory coral9toStation1= routine.trajectory("Coral9S1R");
 
-        goToCoral1.done().onTrue(ScoreCoralAndComeBack(goToCoral1R));     
-        goToCoral9.done().onTrue(ScoreCoralAndComeBack(goToCoral9R));
-
-        AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
+        if(targetStation == TargetCoralStation.rightStation){
+            goToCoralReef.done().onTrue(ScoreCoralAndComeBack(coral9toStation1));
+        }else{
+            goToCoralReef.done().onTrue(ScoreCoralAndComeBack(coral2toStation2));
+        }
+        
+        //Intake Coral and go to the reef
+        AutoTrajectory goToCoral1 = routine.trajectory("Coral1S2");
         AutoTrajectory goToCoral10 = routine.trajectory("Coral10S1");
 
-        goToCoral1R.done().onTrue(IntakeCoralAndGo(goToCoral2));
-        goToCoral9R.done().onTrue(IntakeCoralAndGo(goToCoral10));
+        coral2toStation2.done().onTrue(IntakeCoralAndGo(goToCoral1));     
+        coral9toStation1.done().onTrue(IntakeCoralAndGo(goToCoral10));
 
+        //Score and go back
+        AutoTrajectory coral1toStation2 = routine.trajectory("Coral1S2R");
+        AutoTrajectory coral10toStation1 = routine.trajectory("Coral10S1R");
 
-
+        goToCoral1.done().onTrue(ScoreCoralAndComeBack(coral1toStation2));
+        goToCoral10.done().onTrue(ScoreCoralAndComeBack(coral10toStation1));
 
         return routine;
     }
@@ -112,7 +109,7 @@ public class Auto {
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
         return Commands.sequence(
             Commands.runOnce(() -> {driveSubsystem.StopDriveTrain();}),
-            robotContainer.getAlignWithAprilTagCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(4)),
+            robotContainer.getAlignWithAprilTagCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(3)),
             coralAndElevatorManager.getScoreCoralComand(),
             nexTrajectory.resetOdometry(),
             nexTrajectory.cmd()
