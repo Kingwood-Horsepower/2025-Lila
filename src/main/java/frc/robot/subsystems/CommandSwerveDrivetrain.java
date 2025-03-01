@@ -266,9 +266,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .withDriveRequestType(DriveRequestType.Velocity);
 
     //Unused as of now
-    private final PIDController xController = new PIDController(1, 0.56078, 0.0);
-    private final PIDController yController = new PIDController(1, 0.56078, 0.0);;
-    private final PIDController headingController = new PIDController(1, 0.3, 0.0);
+    private final PIDController xController = new PIDController(5.6, 0, 0.4);
+    private final PIDController yController = new PIDController(5.6, 0, 0.4);
+    private final PIDController headingController = new PIDController(2.8, 0, 0.3);
 
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
@@ -293,12 +293,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // Apply the generated speeds
         this.setControl(trajectoryRequest.withSpeeds(speeds));
     }
+    public void stopRobot(){
+        ChassisSpeeds speeds = new ChassisSpeeds(
+            0, 0, 0
+        );
+
+        // Apply the generated speeds
+        this.setControl(trajectoryRequest.withSpeeds(speeds));
+
+    }
     public Pose2d getRobotPose()
     {
         return this.getState().Pose;
     }
 
-    {
-
-    }
 }
