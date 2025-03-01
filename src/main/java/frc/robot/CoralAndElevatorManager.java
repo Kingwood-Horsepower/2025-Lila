@@ -103,6 +103,9 @@ public class CoralAndElevatorManager {
             Commands.runOnce(this :: stowIntake, elevator, coralIntake));
 
     }
+    public Command getMoveRollersCommand(){
+        return Commands.startEnd(()->{coralIntake.runIntake(.05, .7);}, ()->{});
+    }
     public Command getDecrementElevatorCommand(){
                 //increment elevator
                 

@@ -134,10 +134,12 @@ public class RobotContainer {
         // coral elevator increment level
         driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));                
+        
+        driverController.b().whileTrue(coralAndElevatorManager.getMoveRollersCommand());
 
         // coral score command
         // uses stow
-        driverController.rightBumper().onTrue(Commands.run(() -> {System.out.println("Align with april tag");}));
+        driverController.rightBumper().onTrue(Commands.run(() -> {}));
         driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
         // coral intake command
@@ -147,8 +149,8 @@ public class RobotContainer {
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         
-        driverController.povUp().onTrue(
-            driveToPoseCommand.onlyIf(() -> camera.getBestTarget().getFiducialId() == 18));
+        //driverController.povUp().onTrue(
+            //driveToPoseCommand.onlyIf(() -> camera.getBestTarget().getFiducialId() == 18));
 
     }
     /* #endregion */
