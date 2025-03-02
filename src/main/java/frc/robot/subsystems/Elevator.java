@@ -27,8 +27,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase{
 
-    DigitalInput magneticLimitSwitch = new DigitalInput(1);
-    DigitalInput IRZero = new DigitalInput(8);
+    DigitalInput magneticLimitSwitch = new DigitalInput(8);
+    //DigitalInput IRZero = new DigitalInput(8);
 
     private final int leadMotorID = 21;
     private final int followMotorID = 19;
@@ -144,6 +144,13 @@ public class Elevator extends SubsystemBase{
         return false;
     }
 
+    private boolean getIsSuperNearZero() {
+        double tolerance = .3; // in encoder rotations
+        double currPosition = leadEncoder.getPosition();
+        if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
+        return false;
+    }
+
     public void zeroElevator() {
         leadEncoder.setPosition(0.0);
         followEncoder.setPosition(0.0);
@@ -158,7 +165,11 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
 
         leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
-        isZerod = !IRZero.get();
+        isZerod = magneticLimitSwitch.get();
+        if(isZerod && !getIsSuperNearZero()) {
+            System.out.println("RESETTING ELEVATOR ENCODERS");
+            resetEncoders();
+        }
 
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
