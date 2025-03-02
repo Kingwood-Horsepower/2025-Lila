@@ -27,6 +27,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -43,13 +44,17 @@ public class CameraSubsystem extends SubsystemBase {
   
   PhotonCamera rightCamera = new PhotonCamera("RightCam");
   PhotonCamera leftCamera = new PhotonCamera("LeftCam");
+  PhotonCamera upCamera = new PhotonCamera("UpCam");
 
   List<PhotonPipelineResult> rightResults = null;
   List<PhotonPipelineResult> leftResults = null;
+  List<PhotonPipelineResult> upResults = null;
   
   AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+
   PhotonPoseEstimator rightPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToRightCam);
   PhotonPoseEstimator leftPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToLeftCam);
+  PhotonPoseEstimator upPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToUpCam);
 
   double ambiguityRight;
   boolean hasTargetRight = false;
@@ -61,6 +66,11 @@ public class CameraSubsystem extends SubsystemBase {
   PhotonTrackedTarget leftTarget;
   double targetRangeLeft = 0;
 
+  double ambiguityUp;
+  boolean hasTargetUp = false;
+  PhotonTrackedTarget upTarget;
+  double targetRangeUp = 0;
+
   /** Creates a new CameraSubsystem. */
   public CameraSubsystem() {}
 
@@ -69,8 +79,11 @@ public class CameraSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     rightResults = rightCamera.getAllUnreadResults();
     leftResults = leftCamera.getAllUnreadResults();
+    upResults = upCamera.getAllUnreadResults();
+
     processRightResults();
     processLeftResults();
+    processUpResults();
   }
   public boolean processRightResults()
   {
@@ -122,6 +135,33 @@ public class CameraSubsystem extends SubsystemBase {
     }
     return false;
   }
+  public boolean processUpResults()
+  {
+    //Check if we have a frame
+    if (upResults.isEmpty())
+    {
+      hasTargetUp = false;
+      return false;
+    }
+    //Check if we have a target
+    if(!getBestUpResult().hasTargets())
+    {
+      hasTargetUp = false;
+      return false;
+    }
+    
+    var target = getBestUpResult().getBestTarget();
+    hasTargetUp = true;
+    if(target != null){
+      ambiguityUp = target.poseAmbiguity;
+      upTarget = target;
+      targetRangeUp = PhotonUtils.calculateDistanceToTargetMeters(kRobotToUpCam.getZ(), aprilTagFieldLayout.getTagPose(target.fiducialId).get().getRotation().getY(), kRobotToUpCam.getRotation().getY(), Math.toRadians((target.getPitch())));
+      return true;
+    }
+    return false;
+  }
+
+
  public Optional<EstimatedRobotPose> getEstimatedGlobalRightPose() {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
@@ -148,6 +188,20 @@ public class CameraSubsystem extends SubsystemBase {
     }
     return visionEst;
 }
+public Optional<EstimatedRobotPose> getEstimatedGlobalUpPose() {
+  Optional<EstimatedRobotPose> visionEst = Optional.empty();
+  
+  if(!upResults.isEmpty())
+  {
+    if(getBestUpResult().hasTargets())
+    {
+      visionEst = upPoseEstimator.update(getBestUpResult());
+    }
+
+  }
+  return visionEst;
+}
+
 
 
 
@@ -160,7 +214,11 @@ PhotonPipelineResult getBestLeftResult(){
   return leftResults.get(leftResults.size() - 1);
 }
 
-public PhotonTrackedTarget getBestTarget(){
+PhotonPipelineResult getBestUpResult(){
+  return upResults.get(upResults.size() - 1);
+}
+
+public PhotonTrackedTarget getBestDownTarget(){
   if(hasTargetLeft && hasTargetRight) {
     if(ambiguityLeft < ambiguityRight) return leftTarget;
     else return rightTarget;
@@ -168,13 +226,21 @@ public PhotonTrackedTarget getBestTarget(){
   else return rightTarget;
 }
 
-public boolean hasTarget(){
+public PhotonTrackedTarget getBestUpTarget(){
+  return upTarget;
+}
+
+public boolean hasUpTarget(){
+  return hasTargetUp;
+}
+
+public boolean hasDownTarget(){
   return hasTargetLeft || hasTargetRight;
 }
-public double getTargetSkew(){
-    return getBestTarget().getSkew();
+public double getDownTargetSkew(){
+    return getBestDownTarget().getSkew();
 }
-public double getTargetRange(){
+public double getDownTargetRange(){
   //Chose one with lowest ambiguity
   if(hasTargetLeft && hasTargetRight)
     if(ambiguityLeft < ambiguityRight){
@@ -187,8 +253,9 @@ public double getTargetRange(){
   else 
     return targetRangeRight;
 }
-public Translation2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
-  int id =  getAprilTagId(AprilTagId);
+
+public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
+  int id =  getScoreCoralAprilTagId(AprilTagId);
 
   //Vector from the center to the april tag
   Translation2d v = aprilTagFieldLayout.getTagPose(id).get().getTranslation().toTranslation2d().minus(kReefCenter);
@@ -200,12 +267,12 @@ public Translation2d getCoralScoreTransform(int AprilTagId, boolean getRightCora
   Translation2d vPerpendicular = new Translation2d(-vNormalized.getY(), vNormalized.getX());
 
   if(getRightCoral)
-   return kReefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag)));
+   return new Pose2d(kReefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag))), new Rotation2d(aprilTagFieldLayout.getTagPose(id).get().getRotation().getZ() + Math.PI));
   else 
-  return kReefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag)));
+  return new Pose2d(kReefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag))), new Rotation2d(aprilTagFieldLayout.getTagPose(id).get().getRotation().getZ() + Math.PI));
 
 }
-public int getAprilTagId(int id){
+private int getScoreCoralAprilTagId(int id){
   //if the id is in the blue allience, return its id
   if(id> 15)
     return id;
@@ -221,10 +288,33 @@ public int getAprilTagId(int id){
       case 12: return 19;
       default:
       System.err.println("Wrong April Tag");
-       return -1;
+       return -1; 
     }
 
       
+  }
+}
+public Pose2d getStationPose2d(int AprilTagId){
+  int id =  getStationAprilTagId(AprilTagId);
+
+  Translation2d aprilTagTranslation2d =  aprilTagFieldLayout.getTagPose(id).get().getTranslation().toTranslation2d();
+  double rotation = id == 12 ?  Math.toRadians(234) : Math.toRadians(126);
+  
+
+  Translation2d fromAprilTagToRobot = new Translation2d(Math.cos(rotation), Math.sin(rotation));
+
+  return new Pose2d(aprilTagTranslation2d.plus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
+}
+
+private int getStationAprilTagId(int id){
+  //if the id is in the red alliance, convert it to its blue allience equivalent
+  switch (id) {
+    case 1:
+      return 13;
+    case 2:
+      return 12;
+    default:
+      return id;
   }
 }
 
