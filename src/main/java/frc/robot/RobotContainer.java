@@ -146,7 +146,10 @@ public class RobotContainer {
         // coral intake command
         // uses stow
         driverController.start().onTrue(Commands.runOnce(() -> inputMult *= -1));
-        driverController.b().whileTrue(getAlignWithAprilTagCommand());
+        
+        driverController.b().whileTrue(slowDriveTrainCommand());
+
+        //driverController.b().whileTrue(getAlignWithAprilTagCommand());
         driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(camera.hasDownTarget() ? camera.getDownTargetSkew() : -100)));
    
         driverController.rightTrigger(0.01).onTrue(              
@@ -236,5 +239,15 @@ public class RobotContainer {
          .withRotationalRate(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew())* 2* MaxAngularRate : 0)).andThen(
             Commands.runOnce(() ->System.out.println(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew()/3)* MaxAngularRate : 0))
          );
+    }
+    private Command slowDriveTrainCommand(){
+        return  drivetrain.applyRequest(() ->  drive
+    //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
+            * MaxSpeed  * 0.2 )
+        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
+            * MaxSpeed * 0.2 )
+            .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
+            * rotVelocityMult * MaxAngularRate * 0.2));
     }
 }
