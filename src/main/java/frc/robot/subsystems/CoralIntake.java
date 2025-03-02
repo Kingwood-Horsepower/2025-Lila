@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -37,6 +38,7 @@ public class CoralIntake extends SubsystemBase {
     private double setPoint = 0.0;
     private double velocity = 0.0;
     public boolean hasCoral = false;
+    private final double RollerCurrentThreshold = 11;
 
     private final SparkMax rollerMotor = new SparkMax(rollerMotorID, MotorType.kBrushless);
     private final SparkMaxConfig rollerMotorConfig = new SparkMaxConfig();
@@ -113,12 +115,35 @@ public class CoralIntake extends SubsystemBase {
         return false;
     }
 
+    private Timer currentTimer = new Timer(); 
+
+    private double runIntakeCurrentTimer() {
+        if(rollerMotor.getOutputCurrent() < RollerCurrentThreshold) {
+            currentTimer.stop();
+            currentTimer.reset();
+            return 0;
+        }
+        else if (currentTimer.get() > 0) return currentTimer.get();
+        else {
+           currentTimer.start();
+           return 0;
+        } 
+    }
+
+    private boolean getIsIntakedCurrent(){
+        double timeThreshold = 0.7;
+        return (currentTimer.get() > timeThreshold);
+    }
+
     @Override
     public void periodic() {
         // ill change this later
         armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
         hasCoral = !IRsensor.get(); 
-
+        runIntakeCurrentTimer();
+        if(getIsIntakedCurrent() == true) hasCoral = true;
+        else if (getIsIntakedCurrent() == false && rollerEncoder.getVelocity() < 0) hasCoral = false;
+     
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
         SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
