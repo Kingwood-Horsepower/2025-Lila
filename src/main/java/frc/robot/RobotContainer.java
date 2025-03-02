@@ -146,7 +146,8 @@ public class RobotContainer {
         // coral intake command
         // uses stow
         driverController.start().onTrue(Commands.runOnce(() -> inputMult *= -1));
-        //driverController.back().whileTrue(getAlignWithAprilTagCommand());
+        driverController.b().whileTrue(getAlignWithAprilTagCommand());
+        driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(camera.hasTarget() ? camera.getTargetSkew() : 0)));
    
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
@@ -218,7 +219,8 @@ public class RobotContainer {
 
     public Command getAlignWithAprilTagCommand()
     {
-        return new ConditionalCommand(alignDriveTrain(), Commands.runOnce(()->{}), camera::hasTarget);
+        //return new ConditionalCommand(alignDriveTrain(), Commands.runOnce(()->{}), camera::hasTarget);
+        return alignDriveTrain();
         
         
 
@@ -231,6 +233,8 @@ public class RobotContainer {
             * MaxSpeed  * 0.2 )
         .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
             * MaxSpeed * 0.2 )
-         .withRotationalRate(-1.0 * (camera.getTargetSkew()/50)* MaxAngularRate)).onlyWhile(targetAquired);
+         .withRotationalRate(camera.hasTarget() ? -1.0 * (camera.getTargetSkew())* 2* MaxAngularRate : 0)).andThen(
+            Commands.runOnce(() ->System.out.println(camera.hasTarget() ? -1.0 * (camera.getTargetSkew()/3)* MaxAngularRate : 0))
+         );
     }
 }

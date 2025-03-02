@@ -28,35 +28,39 @@ public class CoralAndElevatorManager {
         //return scoreBelowL4Command();
         return new ConditionalCommand(scoreAtL4Command(), scoreBelowL4Command(), ()  -> elevator.getElevatorLevel() ==4);
     }
-  private Command scoreAtL4Command(){
-      Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.22);
-       }, ()->{}, coralIntake);
+    private Command scoreAtL4Command(){
+        Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0));
+        return outTakeCoralCommand.withTimeout(2.5);
+    }
+//   private Command scoreAtL4Command(){
+//       Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{coralIntake.setSetPoint(0.22);
+//        }, ()->{}, coralIntake);
 
-       Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake);
+//        Command setCoralIntakeUp = Commands.startEnd(()->{coralIntake.setSetPoint(0.20);}, ()->{}, coralIntake);
 
-      Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0));
+//       Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0));
       
-      Command elevatorToMaxCommand = Commands.startEnd(
-            () -> {
-                elevator.setElevatorLevel(5);
-            }, () -> {}, elevator);
+//       Command elevatorToMaxCommand = Commands.startEnd(
+//             () -> {
+//                 elevator.setElevatorLevel(5);
+//             }, () -> {}, elevator);
 
-      Command elevatorToZeroCommand = Commands.startEnd(
-            () -> {
-                elevator.setElevatorLevel(0);
-            }, () -> {}, elevator);
+//       Command elevatorToZeroCommand = Commands.startEnd(
+//             () -> {
+//                 elevator.setElevatorLevel(0);
+//             }, () -> {}, elevator);
 
-        return Commands.sequence(
-            setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
-            new WaitCommand(.3),
-            //Fancy ahahah stuff
-            outTakeCoralCommand.withTimeout(2.5)
-            .alongWith(elevatorToMaxCommand.until(() -> elevator.getIsNearSetPoint())
-            .andThen(setCoralIntakeUp.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
+//         return Commands.sequence(
+//             setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
+//             new WaitCommand(.3),
+//             //Fancy ahahah stuff
+//             outTakeCoralCommand.withTimeout(2.5)
+//             .alongWith(elevatorToMaxCommand.until(() -> elevator.getIsNearSetPoint())
+//             .andThen(setCoralIntakeUp.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
 
-            elevatorToZeroCommand.until(() -> elevator.getIsNearZero()))),   
-            Commands.runOnce(this :: stowIntake, elevator, coralIntake));
-  }
+//             elevatorToZeroCommand.until(() -> elevator.getIsNearZero()))),   
+//             Commands.runOnce(this :: stowIntake, elevator, coralIntake));
+//   }
 
     public Command scoreBelowL4Command(){
           //Score Coral
