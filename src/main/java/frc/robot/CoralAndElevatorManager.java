@@ -101,16 +101,18 @@ public class CoralAndElevatorManager {
             () -> {
                 elevator.setElevatorLevel(1);
             }, () -> {}, coralIntake, elevator);
+
         Command setElevatorLevelZero =Commands.startEnd(
             () -> {
                 elevator.setElevatorLevel(0);
-            }, () -> {}, coralIntake, elevator);
+            }, () -> {}, elevator);
+
         return Commands.sequence(
             setCoralDown.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()).unless( elevator :: getIsNearZero),
             setElevatorLevelOne.until(elevator :: getIsNearSetPoint),
-            runIntake.until(conditionForStoppingTheIntake),
-            //setElevatorLevelZero.until(elevator :: getIsNearZero),
-            Commands.runOnce(this :: stowIntake, elevator, coralIntake));
+            runIntake.until(conditionForStoppingTheIntake),       
+            setElevatorLevelZero.until(elevator :: getIsNearZero),
+            Commands.runOnce(this :: stowIntake, coralIntake, elevator));
 
     }
     public Command getMoveRollersCommand(){
