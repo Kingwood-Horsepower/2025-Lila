@@ -127,6 +127,7 @@ public class CameraSubsystem extends SubsystemBase {
     
     var target = getBestLeftResult().getBestTarget();
     hasTargetLeft= true;
+    System.out.println("leftTarg");
     if(target != null){
       ambiguityLeft = target.poseAmbiguity;
       leftTarget = target;

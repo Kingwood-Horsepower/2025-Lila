@@ -14,6 +14,7 @@ import org.opencv.core.Mat;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -87,6 +88,7 @@ public class RobotContainer {
   private Command alignRobotWithAprilTag;
     private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, null);
     private int inputMult =1;
+    private boolean isInRobotCentric = false;
 
 
     public RobotContainer() {     
@@ -109,13 +111,14 @@ public class RobotContainer {
     private void configureBindings() {
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive
+                drivetrain.applyRequest(() -> {if (isInRobotCentric){return slowDriveTrainRequest();}
+                        else{return drive
                         .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
                                 * MaxSpeed)
                         .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
                                 * MaxSpeed)
                         .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
-                                * rotVelocityMult * MaxAngularRate)));
+                                * rotVelocityMult * MaxAngularRate);}}));
 
         // driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
         //driverController.a().onTrue((Commands.runOnce(SignalLogger::start)));
@@ -146,13 +149,13 @@ public class RobotContainer {
         // coral score command
         // uses stow
         driverController.rightBumper().onTrue(Commands.run(() -> {}));
-        driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand(() -> !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
         // coral intake command
         // uses stow
         driverController.start().onTrue(Commands.runOnce(() -> inputMult *= -1));
         
-        driverController.b().whileTrue(slowDriveTrainCommand());
+        driverController.b().onTrue(Commands.runOnce(() -> isInRobotCentric = !isInRobotCentric));
 
         //driverController.b().whileTrue(getAlignWithAprilTagCommand());
         driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(camera.hasDownTarget() ? camera.getDownTargetSkew() : -100)));
@@ -213,6 +216,8 @@ public class RobotContainer {
     public void disabledAuto(){
         auto.KillAutoRoutine();
         drivetrain.stopRobot();
+        isInRobotCentric = false;
+        inputMult =1;
     }
     /* #endregion */
     int getInputMult(){
@@ -245,14 +250,14 @@ public class RobotContainer {
             Commands.runOnce(() ->System.out.println(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew()/3)* MaxAngularRate : 0))
          );
     }
-    private Command slowDriveTrainCommand(){
-        return  drivetrain.applyRequest(() ->  driveRoboCentric
+    private SwerveRequest slowDriveTrainRequest(){
+        return  driveRoboCentric
     //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
         .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
             * MaxSpeed  * 0.2 )
         .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
             * MaxSpeed * 0.2 )
             .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
-            * rotVelocityMult * MaxAngularRate * 0.4));
+            * rotVelocityMult * MaxAngularRate * 0.4);
     }
 }

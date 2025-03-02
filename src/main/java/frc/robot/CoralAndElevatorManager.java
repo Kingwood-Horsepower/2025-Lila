@@ -23,10 +23,10 @@ public class CoralAndElevatorManager {
     }
 
     //get Commands methods
-    public Command getScoreCoralComand(){
+    public Command getScoreCoralComand(BooleanSupplier conditionForStoppingTheIntake){
         //Score Coral
         //return scoreBelowL4Command();
-        return new ConditionalCommand(scoreAtL4Command(), scoreBelowL4Command(), ()  -> elevator.getElevatorLevel() ==4);
+        return new ConditionalCommand(scoreAtL4Command(), scoreBelowL4Command(conditionForStoppingTheIntake), ()  -> elevator.getElevatorLevel() ==4);
     }
     // private Command scoreAtL4Command(){
     //     Command outTakeCoralCommand = Commands.startEnd(() -> coralIntake.setRollerVelocity(-1), () -> coralIntake.setRollerVelocity(0));
@@ -62,7 +62,7 @@ public class CoralAndElevatorManager {
             Commands.runOnce(this :: stowIntake, elevator, coralIntake));
   }
 
-    public Command scoreBelowL4Command(){
+    public Command scoreBelowL4Command(BooleanSupplier conditionForStoppingTheIntake){
           //Score Coral
           Command setCoralIntakeToLevelCommand = Commands.startEnd(()->{
             if(elevator.getElevatorLevel() == 4) {
@@ -80,7 +80,7 @@ public class CoralAndElevatorManager {
           return Commands.sequence(
               setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
               new WaitCommand(.3),
-              outTakeCoralCommand.withTimeout(2.5),
+              outTakeCoralCommand.until(conditionForStoppingTheIntake),
               elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
               Commands.runOnce(this :: stowIntake, elevator, coralIntake)
           );
