@@ -163,8 +163,9 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
         SmartDashboard.putNumber("elevator setpoint", setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
-        //SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
+        SmartDashboard.putNumber("elevator level", getElevatorLevel());
         SmartDashboard.putBoolean("isZerod", isZerod);
+        SmartDashboard.putBoolean("is near zero", getIsNearZero());
 
     }
 

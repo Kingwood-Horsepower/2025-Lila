@@ -57,6 +57,11 @@ public class RobotContainer {
             .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// (not) Use open-loop control for drive motors
            //.withSteerRequestType(SteerRequestType.);
+    private final SwerveRequest.RobotCentric driveRoboCentric = new SwerveRequest.RobotCentric()
+           .withDeadband(MaxSpeed * 0.01)
+           .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
+           .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// (not) Use open-loop control for drive motors
+          //.withSteerRequestType(SteerRequestType.);
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     
@@ -241,13 +246,13 @@ public class RobotContainer {
          );
     }
     private Command slowDriveTrainCommand(){
-        return  drivetrain.applyRequest(() ->  drive
+        return  drivetrain.applyRequest(() ->  driveRoboCentric
     //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
         .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
             * MaxSpeed  * 0.2 )
         .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
             * MaxSpeed * 0.2 )
             .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
-            * rotVelocityMult * MaxAngularRate * 0.2));
+            * rotVelocityMult * MaxAngularRate * 0.4));
     }
 }

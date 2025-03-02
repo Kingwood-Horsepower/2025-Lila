@@ -293,13 +293,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // Apply the generated speeds
         this.setControl(trajectoryRequest.withSpeeds(speeds));
     }
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     public void stopRobot(){
         ChassisSpeeds speeds = new ChassisSpeeds(
             0, 0, 0
         );
 
         // Apply the generated speeds
-        this.setControl(trajectoryRequest.withSpeeds(speeds));
+        this.setControl(brake);
 
     }
     public Pose2d getRobotPose()
