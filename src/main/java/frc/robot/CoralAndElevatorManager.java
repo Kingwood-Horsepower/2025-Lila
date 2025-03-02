@@ -88,7 +88,7 @@ public class CoralAndElevatorManager {
 
     public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake){
         //Intake Coral
-        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.05, .7);}, ()->{}, coralIntake);
+        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.04, .7);}, ()->{}, coralIntake);
                 // intakeCoral = Commands.startEnd(
                 //     () -> {
                 //         coralIntake.runIntake(.07, .7);
@@ -96,15 +96,20 @@ public class CoralAndElevatorManager {
                 //     },
                 //     () -> coralIntake.stowIntake(),
                 //     coralIntake, elevator).until(()-> elevator.getIsNearSetPoint() && coralIntake.getIsNearSetPoint());
-        Command setCor = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
-        Command el =Commands.startEnd(
+        Command setCoralDown = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
+        Command setElevatorLevelOne =Commands.startEnd(
             () -> {
-                elevator.setElevatorLevel(0);
+                elevator.setElevatorLevel(1);
+            }, () -> {}, coralIntake, elevator);
+        Command setElevatorLevelZero =Commands.startEnd(
+            () -> {
+                elevator.setElevatorLevel(1);
             }, () -> {}, coralIntake, elevator);
         return Commands.sequence(
-            setCor.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()).unless( elevator :: getIsNearZero),
-            el.until(elevator :: getIsNearZero),
+            setCoralDown.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()).unless( elevator :: getIsNearZero),
+            setElevatorLevelOne.until(elevator :: getIsNearSetPoint),
             runIntake.until(conditionForStoppingTheIntake),
+            setElevatorLevelZero.until(elevator :: getIsNearZero),
             Commands.runOnce(this :: stowIntake, elevator, coralIntake));
 
     }
