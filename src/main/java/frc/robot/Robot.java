@@ -67,18 +67,18 @@ public class Robot extends TimedRobot {
       m_robotContainer.UpdateRobotPosition();
     }
 
-    CommandScheduler.getInstance()
-      .onCommandInitialize(
-          command ->
-              // Shuffleboard.addEventMarker(
-              //     "Command initialized", command.getName(), EventImportance.kNormal));
-              SmartDashboard.putString("commands", "initialize " + command.getName()));
-    CommandScheduler.getInstance()
-      .onCommandFinish(
-          command ->
-              // Shuffleboard.addEventMarker(
-              //     "Command finished", command.getName(), EventImportance.kNormal));
-              SmartDashboard.putString("commands", "end command " + command.getName()));
+    // CommandScheduler.getInstance()
+    //   .onCommandInitialize(
+    //       command ->
+    //           // Shuffleboard.addEventMarker(
+    //           //     "Command initialized", command.getName(), EventImportance.kNormal));
+    //           SmartDashboard.putString("commands", "initialize " + command.getName()));
+    // CommandScheduler.getInstance()
+    //   .onCommandFinish(
+    //       command ->
+    //           // Shuffleboard.addEventMarker(
+    //           //     "Command finished", command.getName(), EventImportance.kNormal));
+    //           SmartDashboard.putString("commands", "end command " + command.getName()));
   }
 
   @Override

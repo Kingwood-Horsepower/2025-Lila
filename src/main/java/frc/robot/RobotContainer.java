@@ -71,7 +71,7 @@ public class RobotContainer {
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
     public final CommandXboxController driverController = new CommandXboxController(0);
-    public final Trigger targetAquired = new Trigger(() -> camera.hasTarget());
+    public final Trigger targetAquired = new Trigger(() -> camera.hasDownTarget());
         
     // SlewRaeLimiters
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
@@ -146,8 +146,11 @@ public class RobotContainer {
         // coral intake command
         // uses stow
         driverController.start().onTrue(Commands.runOnce(() -> inputMult *= -1));
-        driverController.b().whileTrue(getAlignWithAprilTagCommand());
-        driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(camera.hasTarget() ? camera.getTargetSkew() : 0)));
+        
+        driverController.b().whileTrue(slowDriveTrainCommand());
+
+        //driverController.b().whileTrue(getAlignWithAprilTagCommand());
+        driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(camera.hasDownTarget() ? camera.getDownTargetSkew() : -100)));
    
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
@@ -233,8 +236,18 @@ public class RobotContainer {
             * MaxSpeed  * 0.2 )
         .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
             * MaxSpeed * 0.2 )
-         .withRotationalRate(camera.hasTarget() ? -1.0 * (camera.getTargetSkew())* 2* MaxAngularRate : 0)).andThen(
-            Commands.runOnce(() ->System.out.println(camera.hasTarget() ? -1.0 * (camera.getTargetSkew()/3)* MaxAngularRate : 0))
+         .withRotationalRate(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew())* 2* MaxAngularRate : 0)).andThen(
+            Commands.runOnce(() ->System.out.println(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew()/3)* MaxAngularRate : 0))
          );
+    }
+    private Command slowDriveTrainCommand(){
+        return  drivetrain.applyRequest(() ->  drive
+    //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
+            * MaxSpeed  * 0.2 )
+        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
+            * MaxSpeed * 0.2 )
+            .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
+            * rotVelocityMult * MaxAngularRate * 0.2));
     }
 }
