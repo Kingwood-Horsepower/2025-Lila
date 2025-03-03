@@ -83,6 +83,7 @@ public class RobotContainer {
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
+    private final SlewRateLimiter driveLimiterSlowRot = new SlewRateLimiter(1.1);
 
     // Coral Commands (Some command are public because used by the Auto class)
   private Command alignRobotWithAprilTag;
@@ -257,7 +258,7 @@ public class RobotContainer {
             * MaxSpeed  * 0.2 )
         .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
             * MaxSpeed * 0.2 )
-            .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
+        .withRotationalRate(driveLimiterSlowRot.calculate(driverController.getRightX()) * -1
             * rotVelocityMult * MaxAngularRate * 0.4);
     }
 }

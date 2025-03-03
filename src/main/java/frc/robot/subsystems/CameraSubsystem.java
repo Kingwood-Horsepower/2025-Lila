@@ -90,7 +90,6 @@ public class CameraSubsystem extends SubsystemBase {
     //Check if we have a frame
     if (rightResults.isEmpty())
     {
-      hasTargetRight = false;
       return false;
     }
     //Check if we have a target
@@ -115,7 +114,6 @@ public class CameraSubsystem extends SubsystemBase {
     //Check if we have a frame
     if (leftResults.isEmpty())
     {
-      hasTargetLeft = false;
       return false;
     }
     //Check if we have a target
@@ -127,7 +125,6 @@ public class CameraSubsystem extends SubsystemBase {
     
     var target = getBestLeftResult().getBestTarget();
     hasTargetLeft= true;
-    System.out.println("leftTarg");
     if(target != null){
       ambiguityLeft = target.poseAmbiguity;
       leftTarget = target;
@@ -141,7 +138,6 @@ public class CameraSubsystem extends SubsystemBase {
     //Check if we have a frame
     if (upResults.isEmpty())
     {
-      hasTargetUp = false;
       return false;
     }
     //Check if we have a target
@@ -239,6 +235,7 @@ public boolean hasDownTarget(){
   return hasTargetLeft || hasTargetRight;
 }
 public double getDownTargetSkew(){
+    System.out.println("skew" + getBestDownTarget().getSkew());
     return getBestDownTarget().getSkew();
 }
 public double getDownTargetRange(){
