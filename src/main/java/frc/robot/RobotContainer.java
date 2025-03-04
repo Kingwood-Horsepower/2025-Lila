@@ -199,6 +199,9 @@ public class RobotContainer {
                     });
         }
 
+        SmartDashboard.putString("Robot Translation", drivetrain.getRobotPose().getTranslation().toString());
+        SmartDashboard.putNumber("Robot rotation", Math.toDegrees(drivetrain.getRobotPose().getRotation().getDegrees()));
+
     }
 
     public void resetPose() {
