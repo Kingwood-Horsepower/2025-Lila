@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.AutoConstants.TargetCoralStation;
+import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.CoralAndElevatorManager;
 
 import static frc.robot.Constants.AutoConstants.*;
 
@@ -48,6 +48,7 @@ public class Auto {
     {
         autoRoutine.kill();
     }
+    
     @SuppressWarnings("unused")
     AutoRoutine getAutoRoutine()
     {

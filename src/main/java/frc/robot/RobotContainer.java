@@ -162,7 +162,7 @@ public class RobotContainer {
         driverController.b().onTrue(Commands.runOnce(() -> isInRobotCentric = !isInRobotCentric));
 
         //driverController.b().whileTrue(getAlignWithAprilTagCommand());
-        driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(camera.hasDownTarget() ? camera.getDownTargetSkew() : -100)));
+        driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(visionManager.getBestDownTargetOptional().isPresent() ? visionManager.getBestDownTargetOptional().get().getSkew() : -100)));
    
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
@@ -181,6 +181,9 @@ public class RobotContainer {
         //var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d(Math.PI));
         var startPose = new Pose2d(AutoConstants.getStartingPosition(), new Rotation2d(Math.PI));
         drivetrain.resetPose(startPose);
+    }
+    public void UpdateRobotPosition(){
+        visionManager.UpdateRobotPosition();
     }
 
     public void autonomousPeriodic(){
@@ -209,31 +212,28 @@ public class RobotContainer {
     public Command getAlignWithAprilTagCommand()
     {
         //return new ConditionalCommand(alignDriveTrain(), Commands.runOnce(()->{}), camera::hasTarget);
-        return alignDriveTrain();
-        
-        
-
-       
+        //return alignDriveTrain();   
+        return null;      
     }
-    private Command alignDriveTrain(){
-        return  drivetrain.applyRequest(() ->  drive
-    //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
-        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
-            * MaxSpeed  * 0.2 )
-        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
-            * MaxSpeed * 0.2 )
-         .withRotationalRate(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew())* 2* MaxAngularRate : 0)).andThen(
-            Commands.runOnce(() ->System.out.println(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew()/3)* MaxAngularRate : 0))
-         );
-    }
+    // private Command alignDriveTrain(){
+    //     return  drivetrain.applyRequest(() ->  drive
+    // //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
+    //     .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
+    //         * MaxSpeed  * 0.2 )
+    //     .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
+    //         * MaxSpeed * 0.2 )
+    //      .withRotationalRate(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew())* 2* MaxAngularRate : 0)).andThen(
+    //         Commands.runOnce(() ->System.out.println(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew()/3)* MaxAngularRate : 0))
+    //      );
+    // }
     private SwerveRequest slowDriveTrainRequest(){
         return  driveRoboCentric
     //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
-        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
+        .withVelocityX(-driverController.getLeftY()* translationVelocityMult
             * MaxSpeed  * 0.2 )
-        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
+        .withVelocityY(-driverController.getLeftX() * translationVelocityMult
             * MaxSpeed * 0.2 )
-        .withRotationalRate(driveLimiterSlowRot.calculate(driverController.getRightX()) * -1
+        .withRotationalRate(driverController.getRightX()* -1
             * rotVelocityMult * MaxAngularRate * 0.4);
     }
 

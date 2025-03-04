@@ -78,6 +78,7 @@ public class DriveToPoseCommand extends Command {
     @Override
     public void initialize() {
         //zero zomething?
+       // GOAL = visionManager.getRobotScoringPosition(true).get();
     }
 
     public void execute() {

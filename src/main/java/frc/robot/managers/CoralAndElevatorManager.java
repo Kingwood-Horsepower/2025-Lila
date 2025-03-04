@@ -88,7 +88,7 @@ public class CoralAndElevatorManager {
 
     public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake){
         //Intake Coral
-        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.04, .7);}, ()->{}, coralIntake);
+        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.00, .7);}, ()->{}, coralIntake);
                 // intakeCoral = Commands.startEnd(
                 //     () -> {
                 //         coralIntake.runIntake(.07, .7);
@@ -99,7 +99,7 @@ public class CoralAndElevatorManager {
         Command setCoralDown = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
         Command setElevatorLevelOne =Commands.startEnd(
             () -> {
-                elevator.setElevatorLevel(1);
+                elevator.setElevatorLevel(0);
             }, () -> {}, coralIntake, elevator);
 
         Command setElevatorLevelZero =Commands.startEnd(
@@ -111,12 +111,12 @@ public class CoralAndElevatorManager {
             setCoralDown.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()).unless( elevator :: getIsNearZero),
             setElevatorLevelOne.until(elevator :: getIsNearSetPoint),
             runIntake.until(conditionForStoppingTheIntake),       
-            setElevatorLevelZero.until(elevator :: getIsNearZero),
+            //setElevatorLevelZero.until(elevator :: getIsNearSetPoint)
             Commands.runOnce(this :: stowIntake, coralIntake, elevator));
 
     }
     public Command getMoveRollersCommand(){
-        return Commands.startEnd(()->{coralIntake.runIntake(.05, .7);}, this :: stowIntake);
+        return Commands.startEnd(()->{coralIntake.runIntake(.00, .7);}, this :: stowIntake);
     }
     public Command getDecrementElevatorCommand(){
                 //increment elevator
