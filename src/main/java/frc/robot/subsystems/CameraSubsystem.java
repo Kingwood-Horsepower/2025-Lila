@@ -85,7 +85,7 @@ public class CameraSubsystem extends SubsystemBase {
     processLeftResults();
     processUpResults();
   }
-  public boolean processRightResults()
+  private boolean processRightResults()
   {
     //Check if we have a frame
     if (rightResults.isEmpty())
@@ -109,7 +109,7 @@ public class CameraSubsystem extends SubsystemBase {
     }
     return false;
   }
-  public boolean processLeftResults()
+  private boolean processLeftResults()
   {
     //Check if we have a frame
     if (leftResults.isEmpty())
@@ -133,7 +133,7 @@ public class CameraSubsystem extends SubsystemBase {
     }
     return false;
   }
-  public boolean processUpResults()
+  private boolean processUpResults()
   {
     //Check if we have a frame
     if (upResults.isEmpty())
@@ -234,10 +234,7 @@ public boolean hasUpTarget(){
 public boolean hasDownTarget(){
   return hasTargetLeft || hasTargetRight;
 }
-public double getDownTargetSkew(){
-    System.out.println("skew" + getBestDownTarget().getSkew());
-    return getBestDownTarget().getSkew();
-}
+
 public double getDownTargetRange(){
   //Chose one with lowest ambiguity
   if(hasTargetLeft && hasTargetRight)

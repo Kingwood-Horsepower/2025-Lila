@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 
+import frc.robot.managers.VisionManager;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -45,7 +46,7 @@ public class DriveToPoseCommand extends Command {
         );
 
     private final CommandSwerveDrivetrain drivetrain;
-    private final CameraSubsystem cameraSubsystem;
+    private final VisionManager visionManager;
     private final Supplier<Pose2d> poseProvider;
 
     private final ProfiledPIDController xController = new ProfiledPIDController(3, 0, 0, X_CONSTRAINTS);
@@ -61,9 +62,9 @@ public class DriveToPoseCommand extends Command {
     *
     * @param drivetrain The subsystem used by this command.
     */
-    public DriveToPoseCommand(CommandSwerveDrivetrain drivetrain, CameraSubsystem cameraSubsystem, Supplier<Pose2d> poseProvider) {
+    public DriveToPoseCommand(CommandSwerveDrivetrain drivetrain, VisionManager _visionManager, Supplier<Pose2d> poseProvider) {
         this.drivetrain = drivetrain;
-        this.cameraSubsystem = cameraSubsystem;
+        visionManager = _visionManager;
         this.poseProvider = poseProvider;
         
         xController.setTolerance(0.2);

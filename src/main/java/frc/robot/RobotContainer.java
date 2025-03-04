@@ -42,10 +42,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.managers.VisionManager;
+import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CameraSubsystem;
-import frc.robot.CoralAndElevatorManager;
 
 public class RobotContainer {
     //Data
@@ -69,8 +70,9 @@ public class RobotContainer {
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     
     // Subsystems
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public static CameraSubsystem camera = new CameraSubsystem(); // this was public static final
+    private final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private final VisionManager visionManager =  new VisionManager(drivetrain);
+
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Auto auto;
     private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager();
@@ -79,7 +81,6 @@ public class RobotContainer {
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
     public final CommandXboxController driverController = new CommandXboxController(0);
-    public final Trigger targetAquired = new Trigger(() -> camera.hasDownTarget());
         
     // SlewRaeLimiters
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
@@ -89,7 +90,7 @@ public class RobotContainer {
 
     // Coral Commands (Some command are public because used by the Auto class)
   private Command alignRobotWithAprilTag;
-    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, camera, null);
+    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, visionManager, null);
     private int inputMult =1;
     private boolean isInRobotCentric = false;
 
@@ -152,7 +153,7 @@ public class RobotContainer {
         // coral score command
         // uses stow
         driverController.rightBumper().onTrue(Commands.run(() -> {}));
-        driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand(() -> !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand(() -> !driverController.rightBumper().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
         // coral intake command
         // uses stow
@@ -173,38 +174,7 @@ public class RobotContainer {
     /* #endregion */
 
     /* #region Other Methods*/
-    public void UpdateRobotPosition() {
-        //System.out.println("swerveRot: " + drivetrain.getRobotPose().getRotation().getRadians());
-        //System.out.println("swervePos: " + drivetrain.getRobotPose().getTranslation());
 
-        if (camera != null) {
-            //Right camera
-            var visionEst = camera.getEstimatedGlobalRightPose();
-            visionEst.ifPresent(
-                    est -> {
-                        //System.out.println("right: " +est.estimatedPose.getTranslation());
-                        SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
-
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
-                    });
-            //Left camera
-
-            visionEst = camera.getEstimatedGlobalLeftPose();
-            visionEst.ifPresent(
-                    est -> {
-                        //System.out.println("left: " + est.estimatedPose.getTranslation());
-                        SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
-        
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
-                    });
-        }
-
-        SmartDashboard.putString("Robot Translation", drivetrain.getRobotPose().getTranslation().toString());
-        SmartDashboard.putNumber("Robot rotation", Math.toDegrees(drivetrain.getRobotPose().getRotation().getDegrees()));
-
-    }
 
     public void resetPose() {
         // The first pose in an autonomous path is often a good choice.
