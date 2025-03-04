@@ -165,11 +165,11 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
 
         leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
-        isZerod = magneticLimitSwitch.get();
-        if(isZerod && !getIsSuperNearZero()) {
-            System.out.println("RESETTING ELEVATOR ENCODERS");
-            resetEncoders();
-        }
+        // isZerod = magneticLimitSwitch.get();
+        // if(isZerod && !getIsSuperNearZero()) {
+        //     System.out.println("RESETTING ELEVATOR ENCODERS");
+        //     resetEncoders();
+        // }
 
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
