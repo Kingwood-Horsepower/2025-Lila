@@ -11,18 +11,23 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.AlternateEncoderConfig;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.subsystems.Elevator;
+//import frc.robot.subsystems.Elevator;
 
 public class CoralIntake extends SubsystemBase {
     private final DigitalInput IRsensor = new DigitalInput(9); // false = broken
+    //private final Elevator elevator;
+
     private final int rollerMotorID = 23;
     private final int armMotorID = 24;
 
@@ -30,7 +35,7 @@ public class CoralIntake extends SubsystemBase {
     private final SparkMaxConfig armMotorConfig = new SparkMaxConfig();
     private final SparkClosedLoopController armMotorController = armMotor.getClosedLoopController();
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
-    //private final AbsoluteEncoder absEncoder = armMotor.getAbsoluteEncoder();
+    private final RelativeEncoder altEncoder = armMotor.getAlternateEncoder();
     
     //look at revlib for arm motor: getForwardLimitSwitch
     //look at revlib for intake motor: getOutputCurrent
@@ -38,46 +43,44 @@ public class CoralIntake extends SubsystemBase {
     private double setPoint = 0.0;
     private double velocity = 0.0;
     public boolean hasCoral = false;
-    private final double RollerCurrentThreshold = 11;
 
     private final SparkMax rollerMotor = new SparkMax(rollerMotorID, MotorType.kBrushless);
     private final SparkMaxConfig rollerMotorConfig = new SparkMaxConfig();
     private final SparkClosedLoopController rollerMotorController = rollerMotor.getClosedLoopController();
     private final RelativeEncoder rollerEncoder = rollerMotor.getEncoder();
-    private final int ARM_GEAR_RATIO = 45; // this is the sprocket gear ratio now
- 
+    
+    private final int GEARBOX_RATIO = 15; // this is the sprocket gear ratio now
+    private final int SPROCKET_RATIO = 3;
+
+    
+    private final TrapezoidProfile.Constraints ARM_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(5000.0/15*0.1, 5);
+    private final ProfiledPIDController armController = new ProfiledPIDController(10, 0, 0, ARM_ROTATION_CONSTRAINTS);
+
     public CoralIntake() {
-        // continue setup
+
         armMotorConfig
             .smartCurrentLimit(40)
-            .idleMode(IdleMode.kBrake)  
-            .inverted(true) 
-            .closedLoop
-            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .pid(0.3, 0.0, 0.1)
-            .outputRange(-1, 1) //what does this do??
-            .velocityFF(0) // calculated using recalc
-            .maxMotion
-            //idk if i want to use the units library on top of the units math util, its very verbose
-            .maxVelocity(3000) // takes an rpm 
-            .maxAcceleration(5000) // takes an rpm/s
-            .allowedClosedLoopError(0.6)
-            ; // <- this semicolon is important
-        armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+            .idleMode(IdleMode.kBrake)
+            .inverted(true);
+        armMotorConfig
+            .alternateEncoder
+            .inverted(true)
+            .countsPerRevolution(8192);
+        armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     
         rollerMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kCoast)
             .inverted(false);
-
         rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+        armController.setIntegratorRange(-0.5, 0.5);
     }
 
     /**
      * Command arm to setpoint
      * 
-     * @param setPoint FUCKING NUMBER FROM 0 TO 0.12, THE SUBSYSTEM MULTIPLIES THIS NUMBER BY THE GEAR RATIO. 
+     * @param setPoint rotations of the big sprocket
      */
     public void setSetPoint(double setPoint) {
         if (setPoint == this.setPoint) return;
@@ -92,18 +95,27 @@ public class CoralIntake extends SubsystemBase {
     /**
      * Command arm to setpoint and run intake
      * 
-     * @param setPoint THE SUBSYSTEM MULTIPLIES THIS NUMBER BY THE GEAR RATIO. 
-     * @param velocity velocity of the intake motor, idk what the range is
+     * @param setPoint rotations of the big sprocket, ~ 0, 0.3
+     * @param velocity velocity of the intake motor,   -1, 1 
      */
     public void runIntake(double setPoint, double velocity) {
         setSetPoint(setPoint);
         setRollerVelocity(velocity);
     }
 
+    // public void stowIntake(){
+
+    //     // if i am not near zero, or not set to 0, or i have coral set to down position
+    //     if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || hasCoral) setSetPoint(.26);
+    //     // set up
+    //     else setSetPoint(0.0);
+    //     setRollerVelocity(0.0);
+    // }
+
     public boolean getIsNearSetPoint() {
         double tolerance = 1; // in encoder rotations
         double currPosition = armEncoder.getPosition();
-        double targetPosition = setPoint*ARM_GEAR_RATIO; 
+        double targetPosition = setPoint*SPROCKET_RATIO; 
         if ((currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance)) return true;
         return false;
     }
@@ -115,44 +127,27 @@ public class CoralIntake extends SubsystemBase {
         return false;
     }
 
-    private Timer currentTimer = new Timer(); 
-
-    private double runIntakeCurrentTimer() {
-        if(rollerMotor.getOutputCurrent() < RollerCurrentThreshold) {
-            currentTimer.stop();
-            currentTimer.reset();
-            return 0;
-        }
-        else if (currentTimer.get() > 0) return currentTimer.get();
-        else {
-           currentTimer.start();
-           return 0;
-        } 
-    }
-
-    private boolean getIsIntakedCurrent(){
-        double timeThreshold = 0.7;
-        return (currentTimer.get() > timeThreshold);
+    public boolean runningHighAmps(){
+        double threshold = 10;
+        return (rollerMotor.getOutputCurrent() > threshold);
     }
 
     @Override
     public void periodic() {
         // ill change this later
-        armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
+        //armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
+        armMotor.setVoltage(armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
+        SmartDashboard.putNumber("applied voltage", armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
         hasCoral = !IRsensor.get(); 
-        // runIntakeCurrentTimer();
-        // if(getIsIntakedCurrent() == true) hasCoral = true;
-        // else if (getIsIntakedCurrent() == false && rollerEncoder.getVelocity() < 0) hasCoral = false;
-     
+
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
         SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());
+        SmartDashboard.putNumber("arm setPoint", setPoint*SPROCKET_RATIO);
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
+        SmartDashboard.putNumber("arm alt encoder", altEncoder.getPosition());
         SmartDashboard.putNumber("roller amps", rollerMotor.getOutputCurrent());
         SmartDashboard.putBoolean("hasCoral", hasCoral);
-        //SmartDashboard.putNumber("absEncoder", absEncoder.getPosition());
-        
-
-        
+                
         
     }
     public boolean hasCoral()
