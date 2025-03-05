@@ -2,6 +2,8 @@ package frc.robot.managers;
 
 import static frc.robot.Constants.AutoConstants.getStartingPosition;
 
+import com.ctre.phoenix6.Utils;
+
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -60,8 +62,10 @@ public class VisionManager {
                         //System.out.println("right: " +est.estimatedPose.getTranslation());
                         SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
-
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
+                        
+                       
+                        
+                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                     });
             //Left camera
 
@@ -72,7 +76,7 @@ public class VisionManager {
                         SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
         
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
+                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                     });
         }
 

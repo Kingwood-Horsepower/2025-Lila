@@ -26,6 +26,8 @@ public class CoralAndElevatorManager {
     public Command getScoreCoralComand(BooleanSupplier conditionForStoppingTheIntake){
         //Score Coral
         //return scoreBelowL4Command();
+        if (conditionForStoppingTheIntake.getAsBoolean()) System.out.println("conditionForStoppingTheIntake is true and the outTake coral command should end");
+        //else System.out.println("conditional is false");
         return new ConditionalCommand(scoreAtL4Command(), scoreBelowL4Command(conditionForStoppingTheIntake), ()  -> elevator.getElevatorLevel() ==4);
     }
     // private Command scoreAtL4Command(){
@@ -88,19 +90,13 @@ public class CoralAndElevatorManager {
 
     public Command getIntakeCoralCommand(BooleanSupplier conditionForStoppingTheIntake){
         //Intake Coral
-        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.00, .7);}, ()->{}, coralIntake);
-                // intakeCoral = Commands.startEnd(
-                //     () -> {
-                //         coralIntake.runIntake(.07, .7);
-                //         elevator.setElevatorLevel(0);
-                //     },
-                //     () -> coralIntake.stowIntake(),
-                //     coralIntake, elevator).until(()-> elevator.getIsNearSetPoint() && coralIntake.getIsNearSetPoint());
+        Command runIntake = Commands.startEnd(()->{coralIntake.runIntake(.04, .7);}, ()->{}, coralIntake);
         Command setCoralDown = Commands.startEnd(()->{coralIntake.setSetPoint(0.26);}, ()->{}, coralIntake, elevator );
         Command setElevatorLevelOne =Commands.startEnd(
             () -> {
-                elevator.setElevatorLevel(0);
+                elevator.setElevatorLevel(1);
             }, () -> {}, coralIntake, elevator);
+
 
         Command setElevatorLevelZero =Commands.startEnd(
             () -> {
@@ -111,7 +107,7 @@ public class CoralAndElevatorManager {
             setCoralDown.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()).unless( elevator :: getIsNearZero),
             setElevatorLevelOne.until(elevator :: getIsNearSetPoint),
             runIntake.until(conditionForStoppingTheIntake),       
-            //setElevatorLevelZero.until(elevator :: getIsNearSetPoint)
+            setElevatorLevelZero.until(elevator :: getIsNearSetPoint),
             Commands.runOnce(this :: stowIntake, coralIntake, elevator));
 
     }
@@ -168,6 +164,7 @@ public class CoralAndElevatorManager {
             coralIntake.setSetPoint(0.0);
             System.out.println("stow up");
         }
+        System.out.println("stop rollers");
         coralIntake.setRollerVelocity(0.0);
     }
 
