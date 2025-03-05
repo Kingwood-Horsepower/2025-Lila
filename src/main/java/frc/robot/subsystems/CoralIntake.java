@@ -103,18 +103,9 @@ public class CoralIntake extends SubsystemBase {
         setRollerVelocity(velocity);
     }
 
-    // public void stowIntake(){
-
-    //     // if i am not near zero, or not set to 0, or i have coral set to down position
-    //     if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || hasCoral) setSetPoint(.26);
-    //     // set up
-    //     else setSetPoint(0.0);
-    //     setRollerVelocity(0.0);
-    // }
-
     public boolean getIsNearSetPoint() {
         double tolerance = 1; // in encoder rotations
-        double currPosition = armEncoder.getPosition();
+        double currPosition = altEncoder.getPosition();
         double targetPosition = setPoint*SPROCKET_RATIO; 
         if ((currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance)) return true;
         return false;
@@ -122,7 +113,7 @@ public class CoralIntake extends SubsystemBase {
 
     public boolean getIsNearZero() {
         double tolerance = 1; // in encoder rotations
-        double currPosition = armEncoder.getPosition(); 
+        double currPosition = altEncoder.getPosition(); 
         if ((currPosition > 0 - tolerance) && (currPosition < 0 + tolerance)) return true;
         return false;
     }
