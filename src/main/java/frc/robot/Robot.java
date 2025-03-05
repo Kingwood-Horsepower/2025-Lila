@@ -25,6 +25,10 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
+    if(m_robotContainer != null){
+      m_robotContainer.UpdateRobotPosition();
+    }
+    //m_
   }
 
   @Override
@@ -65,10 +69,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() 
   {
-    if(m_robotContainer != null){
-      m_robotContainer.UpdateRobotPosition();
-    }
-    //m_robotContainer.sendSwerveData();
+    //robotContainer.sendSwerveData();
     // CommandScheduler.getInstance()
     //   .onCommandInitialize(
     //       command ->
