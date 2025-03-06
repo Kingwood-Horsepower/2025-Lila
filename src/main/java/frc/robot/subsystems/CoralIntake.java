@@ -104,18 +104,16 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public boolean getIsNearSetPoint() {
-        double tolerance = 1; // in encoder rotations
+        double tolerance = .1; // in encoder rotations
         double currPosition = altEncoder.getPosition();
         double targetPosition = setPoint*SPROCKET_RATIO; 
-        if ((currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance)) return true;
-        return false;
+        return Math.abs(currPosition-targetPosition) < tolerance;
     }
 
     public boolean getIsNearZero() {
-        double tolerance = 1; // in encoder rotations
+        double tolerance = .1; // in encoder rotations
         double currPosition = altEncoder.getPosition(); 
-        if ((currPosition > 0 - tolerance) && (currPosition < 0 + tolerance)) return true;
-        return false;
+        return Math.abs(currPosition) < tolerance;
     }
 
     public boolean runningHighAmps(){
@@ -138,6 +136,7 @@ public class CoralIntake extends SubsystemBase {
         SmartDashboard.putNumber("arm alt encoder", altEncoder.getPosition());
         SmartDashboard.putNumber("roller amps", rollerMotor.getOutputCurrent());
         SmartDashboard.putBoolean("hasCoral", hasCoral);
+        SmartDashboard.putNumber("getPositionError", armController.getPositionError());
                 
         
     }
