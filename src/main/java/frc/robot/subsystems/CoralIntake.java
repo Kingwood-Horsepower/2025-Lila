@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 //import frc.robot.subsystems.Elevator;
 
 public class CoralIntake extends SubsystemBase {
-    private final DigitalInput IRsensor = new DigitalInput(9); // false = broken
+    private final DigitalInput IRsensor = new DigitalInput(4); // false = broken
     //private final Elevator elevator;
 
     private final int rollerMotorID = 23;
