@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.StateMachine.PlayerStateMachine;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.managers.VisionManager;
@@ -77,10 +78,11 @@ public class RobotContainer {
     private final Auto auto;
     private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager();
     
-
+    
     // Other references
     private final Telemetry logger = new Telemetry(MaxSpeed);
     public final CommandXboxController driverController = new CommandXboxController(0);
+    private final PlayerStateMachine stateMachine = new PlayerStateMachine(driverController);
         
     // SlewRaeLimiters
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
@@ -169,6 +171,24 @@ public class RobotContainer {
         
         //driverController.povUp().onTrue(
             //driveToPoseCommand.onlyIf(() -> camera.getBestTarget().getFiducialId() == 18));
+
+        //---STATE MACHINE ---
+        //Only prints stuff right now
+        driverController.rightBumper().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onBumper();}));
+
+        driverController.rightTrigger().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onTrigger();}));
+
+        driverController.y().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onY();}));
+
+        driverController.a().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onA();}));
+
+        driverController.back().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onBack();}));
+
 
     }
     /* #endregion */
