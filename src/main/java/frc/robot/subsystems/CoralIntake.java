@@ -1,25 +1,20 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.AlternateEncoderConfig;
-import com.revrobotics.spark.config.EncoderConfig;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 //import frc.robot.subsystems.Elevator;
@@ -104,21 +99,34 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public boolean getIsNearSetPoint() {
-        double tolerance = .1; // in encoder rotations
-        double currPosition = altEncoder.getPosition();
-        double targetPosition = setPoint*SPROCKET_RATIO; 
+        double tolerance = 1; // in encoder rotations
+        double currPosition = armEncoder.getPosition();
+        double targetPosition = setPoint*SPROCKET_RATIO*GEARBOX_RATIO; 
         return Math.abs(currPosition-targetPosition) < tolerance;
     }
 
+    /**
+     * Marked for Deprecation
+     */    
     public boolean getIsNearZero() {
-        double tolerance = .1; // in encoder rotations
-        double currPosition = altEncoder.getPosition(); 
+        double tolerance = 1; // in encoder rotations
+        double currPosition = armEncoder.getPosition(); 
         return Math.abs(currPosition) < tolerance;
     }
 
     public boolean runningHighAmps(){
         double threshold = 10;
         return (rollerMotor.getOutputCurrent() > threshold);
+    }
+
+    /**
+     * Move the Coral Intake to the setPoint and return when finished
+     * 
+     * @param setPoint setpoint to move the arm to
+     */    
+    public Command moveToSetPoint(double setPoint) {
+        if (setPoint == this.setPoint) return Commands.none();
+        return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
     }
 
     @Override

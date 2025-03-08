@@ -21,6 +21,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.CoralAndElevatorState;
 
 public class Constants {
     public static class CameraConstants
@@ -49,11 +50,25 @@ public class Constants {
     {
         //Elevator Levels
         public static final double ELEVATOR_HOME_INCHES = 0;    //0
-        public static final double ELEVATOR_L1_INCHES = 2;      //1
+        public static final double ELEVATOR_L1_INCHES = 1.5;      //1
         public static final double ELEVATOR_L2_INCHES = 9;      //2
         public static final double ELEVATOR_L3_INCHES = 15.75;   //3
         public static final double ELEVATOR_L4_INCHES = 27;      //4
         public static final double ELEVATOR_MAX_INCHES = 27.8;    //Max
+
+
+        public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0, 0);
+        public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26, .26);
+        public static final CoralAndElevatorState L1 = new CoralAndElevatorState(4, .26, .26);
+        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(9, .26, .26);
+        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(15.75, .26, .26);
+        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(27, .23, .23);
+        public static final CoralAndElevatorState L4END = new CoralAndElevatorState(27.8, .23, .23);
+        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(1.5, .04, .04, 1, STOW_UP, STOW_UP);
+        public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(9, .26, .23, -1);
+        public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(15.75, .26, .23, -1);
+        
+
     }
     public static class AutoConstants
     {
@@ -90,8 +105,6 @@ public class Constants {
 
     }
     
-
-
     public static class AlgaeConstants
     {
         public static final double ALGAE_DOWN_POINT = .12;

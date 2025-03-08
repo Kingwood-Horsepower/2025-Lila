@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -9,20 +8,14 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
-import static edu.wpi.first.units.Units.*;
-import static edu.wpi.first.math.util.Units.*;
 import static frc.robot.Constants.ElevatorConstants.*;
 
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase{
@@ -60,7 +53,7 @@ public class Elevator extends SubsystemBase{
     private int elevatorLevel = 0;
     private boolean isZerod = true;
     
-    private double ElevatorMaxExtensionInches = ELEVATOR_MAX_INCHES;
+    //private double ElevatorMaxExtensionInches = ELEVATOR_MAX_INCHES;
     //private String maxExtensionPreferenceKey = "Elevator Max Extension Inches";
 
     public Elevator() {
@@ -137,6 +130,9 @@ public class Elevator extends SubsystemBase{
         return false;
     }
 
+    /**
+     * Marked for Deprecation
+     */    
     public boolean getIsNearZero() {
         double tolerance = 5; // in encoder rotations
         double currPosition = leadEncoder.getPosition();
@@ -144,21 +140,26 @@ public class Elevator extends SubsystemBase{
         return false;
     }
 
-    private boolean getIsSuperNearZero() {
-        double tolerance = .3; // in encoder rotations
-        double currPosition = leadEncoder.getPosition();
-        if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
-        return false;
-    }
-
-    public void zeroElevator() {
-        leadEncoder.setPosition(0.0);
-        followEncoder.setPosition(0.0);
-    }
+    // private boolean getIsSuperNearZero() {
+    //     double tolerance = .3; // in encoder rotations
+    //     double currPosition = leadEncoder.getPosition();
+    //     if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
+    //     return false;
+    // }
 
     public void resetEncoders() {
         leadEncoder.setPosition(0.0);
         followEncoder.setPosition(0.0);
+    }
+
+    /**
+     * Move the Elevator to the setPoint and return when finished
+     * 
+     * @param setPoint setpoint to move the arm to
+     */    
+    public Command moveToSetPoint(double setPoint) {
+        if (setPoint == this.setPoint) return Commands.none();
+        return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
     }
 
     @Override
