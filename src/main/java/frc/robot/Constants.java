@@ -26,23 +26,18 @@ import frc.robot.CoralAndElevatorState;
 public class Constants {
     public static class CameraConstants
     {
-        public static final Distance kFieldLenght = Meters.of(12.29);
-        public static final Distance kFieldWidth = Meters.of(2.87);
-
         public static final Transform3d kRobotToRightCam = new Transform3d(new Translation3d(Inches.of(7), Inches.of(-12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
         public static final Transform3d kRobotToLeftCam = new Transform3d(new Translation3d(Inches.of(7), Inches.of(12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
         public static final Transform3d kRobotToUpCam = new Transform3d(new Translation3d(Inches.of(3.682), Inches.of(0), Inches.of(-37.079)), new Rotation3d(0, Math.toRadians(15), 0)); 
 
-        public static final Translation2d kReefCenter = new Translation2d(inchesToMeters(176.745), inchesToMeters(158.5));
+        public static final Translation2d kBlueReefCenter = new Translation2d(inchesToMeters(176.745), inchesToMeters(158.5));
+        public static final Translation2d kRedReefCenter = new Translation2d(inchesToMeters(514.13), inchesToMeters(158.5));
+
+        public static final int[] kReefIDs = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
+
         public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(24);
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6);
         public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
-
-        public static final   List<AprilTag> kApriltags = Arrays.asList(
-            new AprilTag(21, new Pose3d(new Translation3d(Inches.of(169), Inches.of(113),  Inches.of(45)), new Rotation3d(0, 0, 3*Math.PI/2))),
-            new AprilTag(4, new Pose3d(new Translation3d(Inches.of(376), Inches.of(0),  Inches.of(23.6)), new Rotation3d(0, 0,Math.PI/2))),
-            new AprilTag(22, new Pose3d(new Translation3d(Inches.of(169), Inches.of(98),  Inches.of(6)), new Rotation3d(0, 0, Math.PI)))
-            );
 
     }
 
