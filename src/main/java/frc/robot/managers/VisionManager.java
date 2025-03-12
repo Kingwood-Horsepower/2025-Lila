@@ -1,9 +1,12 @@
 package frc.robot.managers;
 
 import static frc.robot.Constants.AutoConstants.getStartingPosition;
+import static frc.robot.Constants.CameraConstants.kReefIDs;
 
 import com.ctre.phoenix6.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -93,16 +96,44 @@ public class VisionManager {
         SmartDashboard.putNumber("Robot rotation", Math.toDegrees(drivetrain.getRobotPose().getRotation().getDegrees()));
     }
 
-    public Optional<Pose2d> getRobotScoringPosition(boolean isRightCoral){
-        Optional<Pose2d> pose = Optional.empty();
+    public Pose2d getRobotScoringPosition(boolean isRightCoral){
         var target = getBestDownTargetOptional();
         if(target.isPresent()){
-            pose = Optional.of(camera.getCoralScoreTransform(target.get().fiducialId, isRightCoral));
+
+            int targetId = target.get().fiducialId;
+            for (int reefId : kReefIDs) {
+                if (targetId == reefId) {
+                    return camera.getCoralScoreTransform(targetId, isRightCoral);
+                }           
+            }
         }
-        return pose;
+        // if we don't have a target, estimate the closest april tag based on the robot's current position
+
+        System.out.println("No target found, using estimate using robot position");
+
+        List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
+        for (int id : kReefIDs) {
+            reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral));
+        }
+        return drivetrain.getRobotPose().nearest(reefPoses);
+
     }
 
-    public Optional<Pose2d> getRobotIntakePosition(){
+    /**
+     * Returns the closest scoring position of the robot.
+     * Authomatically determines if the robot is closer to the right or left coral
+     */    
+    public Pose2d getClosestRobotScoringPosition()
+    {
+        Pose2d rightPose = getRobotScoringPosition(true);
+        Pose2d leftPose = getRobotScoringPosition(false);
+
+        return drivetrain.getRobotPose().nearest(List.of(rightPose, leftPose));
+
+    }
+
+    //Does not work currently
+    private Optional<Pose2d> getRobotIntakePosition(){
         Optional<Pose2d> pose = Optional.empty();
         var target = getBestUpTargetOptional();
         if(target.isPresent()){
