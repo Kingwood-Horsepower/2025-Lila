@@ -14,5 +14,13 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/tag to align to",
+    "type": "double",
+    "value": 18.0,
+    "properties": {
+      "persistent": true
+    }
   }
 ]
