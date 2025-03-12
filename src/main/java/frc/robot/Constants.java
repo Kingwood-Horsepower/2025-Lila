@@ -34,8 +34,9 @@ public class Constants {
         public static final Transform3d kRobotToUpCam = new Transform3d(new Translation3d(Inches.of(3.682), Inches.of(0), Inches.of(-37.079)), new Rotation3d(0, Math.toRadians(15), 0)); 
 
         public static final Translation2d kReefCenter = new Translation2d(inchesToMeters(176.745), inchesToMeters(158.5));
-        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(24);
-        public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6);
+
+        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(20);
+        public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5);
         public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
 
         public static final   List<AprilTag> kApriltags = Arrays.asList(
@@ -51,8 +52,8 @@ public class Constants {
         //Elevator Levels
         public static final double ELEVATOR_HOME_INCHES = 0;    //0
         public static final double ELEVATOR_L1_INCHES = 1.5;      //1
-        public static final double ELEVATOR_L2_INCHES = 9;      //2
-        public static final double ELEVATOR_L3_INCHES = 15.75;   //3
+        public static final double ELEVATOR_L2_INCHES = 8.5;      //2
+        public static final double ELEVATOR_L3_INCHES = 14.5;   //3
         public static final double ELEVATOR_L4_INCHES = 27;      //4
         public static final double ELEVATOR_MAX_INCHES = 27.8;    //Max
 
