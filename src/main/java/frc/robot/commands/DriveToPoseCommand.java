@@ -5,6 +5,7 @@ import frc.robot.managers.VisionManager;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.photonvision.PhotonCamera;
@@ -13,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -20,26 +22,18 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
-// public Command getAlignWithAprilTagCommand()
-// {
-//     return  drivetrain.applyRequest(() ->
-//     drive.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDesiredDistanceToAprilTag-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
-//     .withVelocityY(driverController.getLeftX() * MaxSpeed)
-//     .withRotationalRate(-1.0 * (camera.getTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
-
-// }
-
-/** An example command that uses an example subsystem. */
+/** drive to score command!!! yay. */
 public class DriveToPoseCommand extends Command {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-    private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(1, 1);
-    private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(1, 1);
-    private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 3);
+    private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 2);
+    private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(10,2);
+    private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 10);
 
-    private static final int TAG_TO_CHASE = 18;
-    private static final Pose3d GOAL = 
+    private int tagToChase = 17;
+    private Pose3d goal = 
         new Pose3d(
             new Translation3d(3.05, 3.87, 0.0),
             new Rotation3d(0.0, 0.0, Math.PI)
@@ -47,14 +41,22 @@ public class DriveToPoseCommand extends Command {
 
     private final CommandSwerveDrivetrain drivetrain;
     private final VisionManager visionManager;
-    private final Supplier<Pose2d> poseProvider;
+    private final CameraSubsystem cameraSubsystem;
 
-    private final ProfiledPIDController xController = new ProfiledPIDController(3, 0, 0, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(3, 0, 0, Y_CONSTRAINTS);
-    private final ProfiledPIDController thetaController = new ProfiledPIDController(2, 0, 0, THETA_CONSTRAINTS);
+    private BooleanSupplier isRight;
+
+    private final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.2, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
+    private final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
+
+    // private final PIDController xController = new PIDController(10, 0, 0);
+    // private final PIDController yController = new PIDController(10, 0, 0);
+    // private final PIDController thetaController = new PIDController(10, 0, 0);
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
        .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
+    
+    
 
 
     /**
@@ -62,10 +64,12 @@ public class DriveToPoseCommand extends Command {
     *
     * @param drivetrain The subsystem used by this command.
     */
-    public DriveToPoseCommand(CommandSwerveDrivetrain drivetrain, VisionManager _visionManager, Supplier<Pose2d> poseProvider) {
+    public DriveToPoseCommand(CommandSwerveDrivetrain drivetrain, VisionManager visionManager,BooleanSupplier isRight) {
+        
         this.drivetrain = drivetrain;
-        visionManager = _visionManager;
-        this.poseProvider = poseProvider;
+        this.visionManager = visionManager;
+        this.isRight = isRight;
+        this.cameraSubsystem = visionManager.getCameraSubsystem();
         
         xController.setTolerance(0.2);
         yController.setTolerance(0.2);
@@ -77,21 +81,47 @@ public class DriveToPoseCommand extends Command {
 
     @Override
     public void initialize() {
+        //tagToChase = (tagToChase-17+1)%6+17;
+        //tagToChase = tagToChase != 22 ? tagToChase+1 : 17;
         //zero zomething?
-       // GOAL = visionManager.getRobotScoringPosition(true).get();
+
+        //getCoralScoreTransform(int AprilTagId, boolean getRightCoral)
+        //GOAL = visionManager.getRobotScoringPosition(true).get();
+        xController.reset(drivetrain.getRobotPose().getX());
+        yController.reset(drivetrain.getRobotPose().getY());
+        thetaController.reset(drivetrain.getRobotPose().getRotation().getRadians());
+        tagToChase = visionManager.getBestDownTargetOptional().get().getFiducialId();
+        goal = new Pose3d(cameraSubsystem.getCoralScoreTransform(tagToChase, isRight.getAsBoolean()));
+        System.out.print(" tag id" + tagToChase);
     }
 
     public void execute() {
-        drivetrain.setControl(
-            drive.withVelocityX(xController.calculate(drivetrain.getRobotPose().getX(), GOAL.toPose2d().getX()))
-                 .withVelocityY(yController.calculate(drivetrain.getRobotPose().getY(), GOAL.toPose2d().getY()))
-                 .withRotationalRate(thetaController.calculate(drivetrain.getRobotPose().getRotation().getRadians(), GOAL.toPose2d().getRotation().getRadians())));
+        double xSpeed = xController.calculate(drivetrain.getRobotPose().getX(), goal.toPose2d().getX());
+        double ySpeed = yController.calculate(drivetrain.getRobotPose().getY(), goal.toPose2d().getY());
+        double thetaSpeed = thetaController.calculate(drivetrain.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
 
-        
+        System.out.print(" xerror " + xController.getPositionError());
+        System.out.print(" yerror " + yController.getPositionError());
+
+        drivetrain.setControl(
+            drive.withVelocityX(-xSpeed)
+                 .withVelocityY(-ySpeed)
+                 .withRotationalRate(thetaSpeed)
+        );
     }
+
+    public boolean getIsNear(double current, double target) {
+        double tolerance = 0.03;
+        return Math.abs(current-target) < tolerance;
+    }
+
+
   
     @Override
     public boolean isFinished() {
-        return (xController.atGoal() && yController.atGoal() && thetaController.atGoal());
+        return getIsNear(drivetrain.getRobotPose().getX(), goal.toPose2d().getX())
+        && getIsNear(drivetrain.getRobotPose().getY(), goal.toPose2d().getY())
+        && getIsNear(drivetrain.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
+        //return (xController.atGoal() && yController.atGoal() && thetaController.atGoal());
     }
   }

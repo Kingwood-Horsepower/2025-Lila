@@ -100,8 +100,8 @@ public class VisionManager {
             pose = Optional.of(camera.getCoralScoreTransform(target.get().fiducialId, isRightCoral));
         }
         return pose;
-
     }
+
     public Optional<Pose2d> getRobotIntakePosition(){
         Optional<Pose2d> pose = Optional.empty();
         var target = getBestUpTargetOptional();
@@ -110,6 +110,10 @@ public class VisionManager {
         }
         return pose;
 
+    }
+
+    public CameraSubsystem getCameraSubsystem() {
+        return camera;
     }
 
 }

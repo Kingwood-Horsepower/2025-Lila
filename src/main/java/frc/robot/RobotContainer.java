@@ -13,7 +13,7 @@ import org.opencv.core.Mat;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -28,6 +28,7 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -39,6 +40,7 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.AlgaeConstants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.StateMachine.PlayerStateMachine;
 import frc.robot.commands.DriveToPoseCommand;
@@ -47,7 +49,7 @@ import frc.robot.managers.VisionManager;
 import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CameraSubsystem;
+import frc.robot.subsystems.Winch;
 
 public class RobotContainer {
     //Data
@@ -60,8 +62,8 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.01)
             .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// (not) Use open-loop control for drive motors
-           //.withSteerRequestType(SteerRequestType.);
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)// (not) Use open-loop control for drive motors
+            .withSteerRequestType(SteerRequestType.MotionMagicExpo);
     private final SwerveRequest.RobotCentric driveRoboCentric = new SwerveRequest.RobotCentric()
            .withDeadband(MaxSpeed * 0.01)
            .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
@@ -75,6 +77,7 @@ public class RobotContainer {
     private final VisionManager visionManager =  new VisionManager(drivetrain);
 
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
+    private final Winch winch = new Winch();
     private final Auto auto;
     private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager();
     
@@ -90,9 +93,12 @@ public class RobotContainer {
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
     private final SlewRateLimiter driveLimiterSlowRot = new SlewRateLimiter(1.1);
 
+    public static final String tagKey = "tag to align to";
+    private static int tag = 21;
+
     // Coral Commands (Some command are public because used by the Auto class)
-  private Command alignRobotWithAprilTag;
-    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, visionManager, null);
+  //private Command alignRobotWithAprilTag;
+    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, visionManager, this :: isRight);
     private int inputMult =1;
     private boolean isInRobotCentric = false;
 
@@ -103,15 +109,23 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
         resetPose();
         auto = new Auto(drivetrain, coralAndElevatorManager, this);
+
+        if (!Preferences.containsKey(tagKey)) {
+            Preferences.setDouble(tagKey, tag);
+        }
     }
 
     /* #region configureCommands */
     private void configureCommands() {    
         //align robot with april tag
-        alignRobotWithAprilTag = getAlignWithAprilTagCommand();       
+        //alignRobotWithAprilTag = getAlignWithAprilTagCommand();       
     }
     
     /* #endregion */
+
+    public void loadPreferences() {
+        tag = Preferences.getInt(tagKey, tag);
+    }
 
     /* #region configureBindings */
     private void configureBindings() {
@@ -147,8 +161,8 @@ public class RobotContainer {
         );
 
         // coral elevator increment level
-        driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));                
+        driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));                
         
         //driverController.b().whileTrue(coralAndElevatorManager.getMoveRollersCommand());
 
@@ -169,11 +183,35 @@ public class RobotContainer {
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         
-        //driverController.povUp().onTrue(
-            //driveToPoseCommand.onlyIf(() -> camera.getBestTarget().getFiducialId() == 18));
-
+        driverController.povRight().onTrue(driveToPoseCommand);
+        driverController.povLeft().onTrue(driveToPoseCommand);
         //---STATE MACHINE ---
         //Only prints stuff right now
+
+        // driverController.povUp().onTrue(Commands.startEnd(
+        //     ()-> {
+        //         algaeIntake.setSetPoint(AlgaeConstants.ALGAE_DOWN_POINT);
+        //         winch.runWinch(-1);
+        //     },
+        //     ()->winch.runWinch(0), 
+        //     winch, algaeIntake));
+
+        //             driverController.povDown().onTrue(Commands.startEnd(
+        //             ()-> {
+        //                 algaeIntake.setSetPoint(AlgaeConstants.ALGAE_DOWN_POINT);
+        //                 winch.runWinch(1);
+        //             },
+        //             ()->winch.runWinch(0), 
+        //             winch, algaeIntake));
+
+        //             driverController.povCenter().onTrue(Commands.startEnd(
+        //             ()-> {
+        //                 algaeIntake.setSetPoint(AlgaeConstants.ALGAE_DOWN_POINT);
+        //                 winch.runWinch(0);
+        //             },
+        //             ()->winch.runWinch(0), 
+        //             winch, algaeIntake));
+
         driverController.rightBumper().onTrue(Commands.runOnce(
             () -> {stateMachine.getPlayerState().onBumper();}));
 
@@ -195,7 +233,9 @@ public class RobotContainer {
 
     /* #region Other Methods*/
 
-
+    public boolean isRight(){
+        return driverController.povRight().getAsBoolean();
+    }
     public void resetPose() {
         // The first pose in an autonomous path is often a good choice.
         //var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d(Math.PI));
@@ -204,6 +244,8 @@ public class RobotContainer {
     }
     public void UpdateRobotPosition(){
         visionManager.UpdateRobotPosition();
+        SmartDashboard.putBoolean("Has Target", visionManager.getBestDownTargetOptional().isPresent());
+        
     }
 
     public void autonomousPeriodic(){
