@@ -98,7 +98,7 @@ public class RobotContainer {
 
     // Coral Commands (Some command are public because used by the Auto class)
   //private Command alignRobotWithAprilTag;
-    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, visionManager, this :: isRight);
+    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, visionManager, ()->driverController.povRight().getAsBoolean());
     private int inputMult =1;
     private boolean isInRobotCentric = false;
 
@@ -233,9 +233,6 @@ public class RobotContainer {
 
     /* #region Other Methods*/
 
-    public boolean isRight(){
-        return driverController.povRight().getAsBoolean();
-    }
     public void resetPose() {
         // The first pose in an autonomous path is often a good choice.
         //var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d(Math.PI));
