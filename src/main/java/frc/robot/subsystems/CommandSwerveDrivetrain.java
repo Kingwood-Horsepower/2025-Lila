@@ -339,5 +339,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         return this.getState().Pose;
     }
+    public ChassisSpeeds getRobotSpeeds()
+    {
+        return this.getState().Speeds;
+    }
 
 }

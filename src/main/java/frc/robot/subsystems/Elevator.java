@@ -12,6 +12,8 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import static frc.robot.Constants.ElevatorConstants.*;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -56,24 +58,27 @@ public class Elevator extends SubsystemBase{
     //private double ElevatorMaxExtensionInches = ELEVATOR_MAX_INCHES;
     //private String maxExtensionPreferenceKey = "Elevator Max Extension Inches";
 
+    private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(2000, 9000);
+    private final ProfiledPIDController elevatorController = new ProfiledPIDController(.1, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
+
     public Elevator() {
         leadMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)
             .inverted(false)
-            .closedLoop
-            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            // .closedLoop
+            // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
 
-            .pid(0.5, 0, 0)
+            // .pid(0.5, 0, 0)
 
-            .outputRange(-1, 1)
-            .velocityFF(0) // calculated using recalc
-            .maxMotion
-            //idk if i want to use the units library on top of the units math util, its very verbose
-            .maxVelocity(5000) // takes an rpm 
+            // .outputRange(-1, 1)
+            // .velocityFF(0) // calculated using recalc
+            // .maxMotion
+            // //idk if i want to use the units library on top of the units math util, its very verbose
+            // .maxVelocity(5000) // takes an rpm 
 
-            .maxAcceleration(9000) // takes an rpm/s
-            .allowedClosedLoopError(0.6)
+            // .maxAcceleration(9000) // takes an rpm/s
+            // .allowedClosedLoopError(0.6)
 
             ; // <- this semicolon is important
         leadMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -169,7 +174,8 @@ public class Elevator extends SubsystemBase{
     @Override
     public void periodic() {
 
-        leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+        //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
+        leadMotor.setVoltage(elevatorController.calculate(leadEncoder.getPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
         isZerod = !limitSwitch.get();
         // if(isZerod && !getIsSuperNearZero()) {
         //     System.out.println("RESETTING ELEVATOR ENCODERS");

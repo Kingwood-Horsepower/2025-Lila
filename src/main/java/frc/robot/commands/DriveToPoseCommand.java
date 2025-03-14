@@ -49,9 +49,6 @@ public class DriveToPoseCommand extends Command {
     private final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
     private final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
 
-    // private final PIDController xController = new PIDController(10, 0, 0);
-    // private final PIDController yController = new PIDController(10, 0, 0);
-    // private final PIDController thetaController = new PIDController(10, 0, 0);
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
        .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
@@ -81,12 +78,11 @@ public class DriveToPoseCommand extends Command {
 
     @Override
     public void initialize() {
-        // reset controllers
+        // reset controllers to current robot position and speeds
 
-        // reset(double measuredPosition, double measuredVelocity)
-        xController.reset(drivetrain.getRobotPose().getX());
-        yController.reset(drivetrain.getRobotPose().getY());
-        thetaController.reset(drivetrain.getRobotPose().getRotation().getRadians());
+        xController.reset(drivetrain.getRobotPose().getX(), drivetrain.getRobotSpeeds().vxMetersPerSecond);
+        yController.reset(drivetrain.getRobotPose().getY(), drivetrain.getRobotSpeeds().vyMetersPerSecond);
+        thetaController.reset(drivetrain.getRobotPose().getRotation().getRadians(),  drivetrain.getRobotSpeeds().omegaRadiansPerSecond);
         // tagToChase = visionManager.getBestDownTargetOptional().get().getFiducialId();
         // goal = new Pose3d(cameraSubsystem.getCoralScoreTransform(tagToChase, isRight.getAsBoolean()));
         goal = new Pose3d(visionManager.getRobotScoringPosition(isRight.getAsBoolean()));

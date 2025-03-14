@@ -55,7 +55,7 @@ public class RobotContainer {
     //Data
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-    private final double translationVelocityMult = 0.65; // Cannot be more than 1
+    private final double translationVelocityMult = .7; // .65
     private final double rotVelocityMult = .75;                                                                                      // max angular velocity
 
     //SwerveRequestes
@@ -99,6 +99,7 @@ public class RobotContainer {
     // Coral Commands (Some command are public because used by the Auto class)
   //private Command alignRobotWithAprilTag;
     private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, visionManager, ()->driverController.povRight().getAsBoolean());
+    private Command jiggleRollers = coralAndElevatorManager.getCoralIntake().jiggleIntakeLol(()->coralAndElevatorManager.getCoralIntake().getRollerEncoderPosition());
     private int inputMult =1;
     private boolean isInRobotCentric = false;
 
@@ -184,7 +185,7 @@ public class RobotContainer {
    
         elevatorLimitSwitch.onTrue(Commands.runOnce(()->coralAndElevatorManager.getElevator().resetEncoders()));
 
-        driverController.x().onTrue(coralAndElevatorManager.getCoralIntake().jiggleIntakeLol());
+        driverController.x().onTrue(jiggleRollers);
 
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
