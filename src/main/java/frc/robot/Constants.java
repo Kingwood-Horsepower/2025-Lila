@@ -38,6 +38,7 @@ public class Constants {
         public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(20);
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5);
         public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
+        public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(0.5); // center of the intake is 5 inches to the left of the center of the rboto
 
     }
 
@@ -45,10 +46,10 @@ public class Constants {
     {
         //Elevator Levels
         public static final double ELEVATOR_HOME_INCHES = 0;    //0
-        public static final double ELEVATOR_L1_INCHES = 1.5;      //1
-        public static final double ELEVATOR_L2_INCHES = 8.5;      //2
-        public static final double ELEVATOR_L3_INCHES = 14.5;   //3
-        public static final double ELEVATOR_L4_INCHES = 27;      //4
+        public static final double ELEVATOR_L1_INCHES = 2;      //1
+        public static final double ELEVATOR_L2_INCHES = 8.25;      //2
+        public static final double ELEVATOR_L3_INCHES = 14.25;   //3
+        public static final double ELEVATOR_L4_INCHES = 27.8;      //4
         public static final double ELEVATOR_MAX_INCHES = 27.8;    //Max
 
 

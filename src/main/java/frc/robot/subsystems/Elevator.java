@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase{
 
-    DigitalInput magneticLimitSwitch = new DigitalInput(8);
+    DigitalInput limitSwitch = new DigitalInput(8);
     //DigitalInput IRZero = new DigitalInput(8);
 
     private final int leadMotorID = 21;
@@ -64,7 +64,7 @@ public class Elevator extends SubsystemBase{
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
 
-            .pid(0.1, 0, 0)
+            .pid(0.5, 0, 0)
 
             .outputRange(-1, 1)
             .velocityFF(0) // calculated using recalc
@@ -72,7 +72,7 @@ public class Elevator extends SubsystemBase{
             //idk if i want to use the units library on top of the units math util, its very verbose
             .maxVelocity(5000) // takes an rpm 
 
-            .maxAcceleration(7000) // takes an rpm/s
+            .maxAcceleration(9000) // takes an rpm/s
             .allowedClosedLoopError(0.6)
 
             ; // <- this semicolon is important
@@ -140,6 +140,10 @@ public class Elevator extends SubsystemBase{
         return false;
     }
 
+    public boolean getIsLimitSwitchZerod() {
+        return isZerod;
+    }
+
     // private boolean getIsSuperNearZero() {
     //     double tolerance = .3; // in encoder rotations
     //     double currPosition = leadEncoder.getPosition();
@@ -166,7 +170,7 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
 
         leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
-        // isZerod = magneticLimitSwitch.get();
+        isZerod = !limitSwitch.get();
         // if(isZerod && !getIsSuperNearZero()) {
         //     System.out.println("RESETTING ELEVATOR ENCODERS");
         //     resetEncoders();
@@ -176,7 +180,7 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
         SmartDashboard.putNumber("elevator setpoint", setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
         SmartDashboard.putNumber("elevator level", getElevatorLevel());
-        SmartDashboard.putBoolean("elevator isZerod", isZerod);
+        SmartDashboard.putBoolean("is zeroed limitwsitch", isZerod);
         SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
         SmartDashboard.putBoolean("elevator is near setpoint", getIsNearSetPoint());
 

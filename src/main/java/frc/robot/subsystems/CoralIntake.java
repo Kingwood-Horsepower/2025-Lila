@@ -1,11 +1,13 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
@@ -28,7 +30,7 @@ public class CoralIntake extends SubsystemBase {
 
     private final SparkMax armMotor = new SparkMax(armMotorID, MotorType.kBrushless);
     private final SparkMaxConfig armMotorConfig = new SparkMaxConfig();
-    private final SparkClosedLoopController armMotorController = armMotor.getClosedLoopController();
+    //private final SparkClosedLoopController armMotorController = armMotor.getClosedLoopController();
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
     private final RelativeEncoder altEncoder = armMotor.getAlternateEncoder();
     
@@ -66,7 +68,13 @@ public class CoralIntake extends SubsystemBase {
         rollerMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kCoast)
-            .inverted(false);
+            .inverted(false)
+            // .closedLoop
+            // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            // .pid(1, 0.0, 0.0)
+            // .outputRange(-1, 1) //what does this do??
+            // .velocityFF(0) // calculated using recalc
+            ;
         rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         armController.setIntegratorRange(-0.5, 0.5);
@@ -87,6 +95,34 @@ public class CoralIntake extends SubsystemBase {
         rollerMotor.set(velocity);
     }
 
+    public void moveRollerPosition(double distance) {
+        rollerMotorController.setReference(distance, ControlType.kPosition);
+    }
+
+    private boolean getRollerIsNearPosition(double targetPosition) {
+        return Math.abs(rollerEncoder.getPosition()-targetPosition) < .05;
+    }
+
+    public Command jiggleIntakeLol() {
+        double startDistance = rollerEncoder.getPosition();
+        double jiggleStartDistance = -0.5 + startDistance;
+        double jiggleDistance = 0.3;
+        return Commands.sequence(
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(startDistance), this).until(() -> getRollerIsNearPosition(startDistance))
+        );
+    }
+    
     /**
      * Command arm to setpoint and run intake
      * 
@@ -132,6 +168,7 @@ public class CoralIntake extends SubsystemBase {
     @Override
     public void periodic() {
         // ill change this later
+        // edit, i changed it
         //armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
         armMotor.setVoltage(armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
         SmartDashboard.putNumber("applied voltage", armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));

@@ -87,10 +87,34 @@ public class CoralAndElevatorStateManager {
         );
     }
 
+    public Command jiggle() {
+        return Commands.sequence(
+            moveToState(STOW_UP),
+            
+            moveToState(STOW_UP)
+        );
+    }
+
     public void incrementELevatorScoringLevel() {
         scoringLevel = (scoringLevel + 1) % 5;
         moveToState(scoringStates[scoringLevel]);
     }
+
+    public void decrementELevatorScoringLevel() {
+        scoringLevel = (scoringLevel - 1) % 5;
+        moveToState(scoringStates[scoringLevel]);
+    }
+
+    public void incrementDeAlgaeifyScoringLevel() {
+        deAlgaeifyLevel = (deAlgaeifyLevel + 1) % 3;
+        moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+    }
+
+    public void decrementDeAlgaeifyScoringLevel() {
+        deAlgaeifyLevel = (deAlgaeifyLevel - 1) % 3;
+        moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+    }
+
 
 
 

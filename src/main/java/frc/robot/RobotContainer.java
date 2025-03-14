@@ -102,6 +102,8 @@ public class RobotContainer {
     private int inputMult =1;
     private boolean isInRobotCentric = false;
 
+    private Trigger elevatorLimitSwitch = new Trigger(()-> coralAndElevatorManager.getElevator().getIsLimitSwitchZerod());
+
 
     public RobotContainer() {     
         configureCommands();
@@ -178,8 +180,12 @@ public class RobotContainer {
         driverController.b().onTrue(Commands.runOnce(() -> isInRobotCentric = !isInRobotCentric));
 
         //driverController.b().whileTrue(getAlignWithAprilTagCommand());
-        driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(visionManager.getBestDownTargetOptional().isPresent() ? visionManager.getBestDownTargetOptional().get().getSkew() : -100)));
+        //driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(visionManager.getBestDownTargetOptional().isPresent() ? visionManager.getBestDownTargetOptional().get().getSkew() : -100)));
    
+        elevatorLimitSwitch.onTrue(Commands.runOnce(()->coralAndElevatorManager.getElevator().resetEncoders()));
+
+        driverController.x().onTrue(coralAndElevatorManager.getCoralIntake().jiggleIntakeLol());
+
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         
@@ -257,6 +263,11 @@ public class RobotContainer {
         isInRobotCentric = false;
         inputMult =1;
     }
+
+    // public void teleopInit() {
+    //     coralAndElevatorManager.getElevator().resetEncoders();
+    // }
+
     /* #endregion */
     int getInputMult(){
         boolean isBlue = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() == Alliance.Blue : false;

@@ -81,17 +81,15 @@ public class DriveToPoseCommand extends Command {
 
     @Override
     public void initialize() {
-        //tagToChase = (tagToChase-17+1)%6+17;
-        //tagToChase = tagToChase != 22 ? tagToChase+1 : 17;
-        //zero zomething?
+        // reset controllers
 
-        //getCoralScoreTransform(int AprilTagId, boolean getRightCoral)
-        //GOAL = visionManager.getRobotScoringPosition(true).get();
+        // reset(double measuredPosition, double measuredVelocity)
         xController.reset(drivetrain.getRobotPose().getX());
         yController.reset(drivetrain.getRobotPose().getY());
         thetaController.reset(drivetrain.getRobotPose().getRotation().getRadians());
-        tagToChase = visionManager.getBestDownTargetOptional().get().getFiducialId();
-        goal = new Pose3d(cameraSubsystem.getCoralScoreTransform(tagToChase, isRight.getAsBoolean()));
+        // tagToChase = visionManager.getBestDownTargetOptional().get().getFiducialId();
+        // goal = new Pose3d(cameraSubsystem.getCoralScoreTransform(tagToChase, isRight.getAsBoolean()));
+        goal = new Pose3d(visionManager.getRobotScoringPosition(isRight.getAsBoolean()));
         System.out.print(" tag id" + tagToChase);
     }
 
@@ -100,8 +98,8 @@ public class DriveToPoseCommand extends Command {
         double ySpeed = yController.calculate(drivetrain.getRobotPose().getY(), goal.toPose2d().getY());
         double thetaSpeed = thetaController.calculate(drivetrain.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
 
-        System.out.print(" xerror " + xController.getPositionError());
-        System.out.print(" yerror " + yController.getPositionError());
+        // System.out.print(" xerror " + xController.getPositionError());
+        // System.out.print(" yerror " + yController.getPositionError());
 
         drivetrain.setControl(
             drive.withVelocityX(-xSpeed)
