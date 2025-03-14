@@ -218,11 +218,11 @@ public class RobotContainer {
         //             ()->winch.runWinch(0), 
         //             winch, algaeIntake));
 
-        driverController.rightBumper().onTrue(Commands.runOnce(
-            () -> {stateMachine.getPlayerState().onBumper();}));
+        driverController.rightBumper().onChange(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onBumper(driverController.rightBumper().getAsBoolean());}));
 
-        driverController.rightTrigger().onTrue(Commands.runOnce(
-            () -> {stateMachine.getPlayerState().onTrigger();}));
+        driverController.rightTrigger().onChange(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onTrigger(driverController.rightTrigger().getAsBoolean());}));
 
         driverController.y().onTrue(Commands.runOnce(
             () -> {stateMachine.getPlayerState().onY();}));
