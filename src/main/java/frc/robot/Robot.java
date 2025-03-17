@@ -69,7 +69,7 @@ public class Robot extends TimedRobot {
       m_robotContainer.swerveDriveManager.setStartPose();
     }
     isAutoStarted = false;
-    m_robotContainer.visionManager.printScoringPosition();
+    
     //m_robotContainer.loadPreferences();
   
   }
@@ -109,5 +109,7 @@ public class Robot extends TimedRobot {
   public void testExit() {}
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    m_robotContainer.visionManager.printScoringPosition();
+  }
 }

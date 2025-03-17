@@ -148,13 +148,8 @@ public class VisionManager {
     }
 
     //Does not work currently
-    private Optional<Pose2d> getRobotIntakePosition(){
-        Optional<Pose2d> pose = Optional.empty();
-        var target = getBestUpTargetOptional();
-        if(target.isPresent()){
-            pose = Optional.of(camera.getStationPose2d(target.get().fiducialId));
-        }
-        return pose;
+    public Pose2d getRobotIntakePosition(int id){
+        return camera.getStationPose2d(id);
 
     }
 
