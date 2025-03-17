@@ -148,7 +148,7 @@ public class VisionManager {
     }
 
     //Does not work currently
-    private Pose2d getRobotIntakePosition(int id){
+    public Pose2d getRobotIntakePosition(int id){
         return camera.getStationPose2d(id);
 
     }
