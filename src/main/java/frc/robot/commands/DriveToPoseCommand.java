@@ -100,8 +100,8 @@ public class DriveToPoseCommand extends Command {
 
     public void execute() {
         ChassisSpeeds speeds = new ChassisSpeeds(
-            -xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
-            -yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
+            xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
+            yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
             thetaController.calculate(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians())
         );
 

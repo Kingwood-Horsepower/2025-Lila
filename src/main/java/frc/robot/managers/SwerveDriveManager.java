@@ -130,8 +130,8 @@ public class SwerveDriveManager {
         //WE NEED TO APPLY PID AND FEED FORWARD
         //use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
         ChassisSpeeds speeds = new ChassisSpeeds(
-            sample.vx - xController.calculate(pose.getX(), sample.x),
-            sample.vy - yController.calculate(pose.getY(), sample.y),
+            sample.vx + xController.calculate(pose.getX(), sample.x),
+            sample.vy + yController.calculate(pose.getY(), sample.y),
             sample.omega + thetaController.calculate(pose.getRotation().getRadians(), sample.heading)
         );
         // Apply the generated speeds
