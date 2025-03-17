@@ -71,8 +71,8 @@ public class DriveToPoseCommand extends Command {
         
         addRequirements(swerveDriveManager.getDrivetrain());
     }
-
-    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager, Supplier<Pose3d> goal) {
+    //Changed the order of the parameters to make it not ambiguous (the program cannot distinguish a Pose3D supplier for a boolean supplier, was getting angry)     
+    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, Supplier<Pose3d> goal, VisionManager visionManager) {
         
         this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;
