@@ -86,7 +86,17 @@ public class DriveToPoseCommand extends Command {
         thetaController.reset(swerveDriveManager.getRobotPose().getRotation().getRadians());
         // tagToChase = visionManager.getBestDownTargetOptional().get().getFiducialId();
         // goal = new Pose3d(cameraSubsystem.getCoralScoreTransform(tagToChase, isRight.getAsBoolean()));
-        goal = new Pose3d(visionManager.getRobotScoringPosition(isRight.getAsBoolean()));
+
+        //In the auto routine, this value is null 
+        if(isRight == null)
+        {
+            goal = new Pose3d(visionManager.getClosestRobotScoringPosition());
+        }
+        else
+        {
+            goal = new Pose3d(visionManager.getRobotScoringPosition(isRight.getAsBoolean()));
+        }
+
         System.out.print(" tag id" + tagToChase);
     }
 

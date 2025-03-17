@@ -66,7 +66,7 @@ public class RobotContainer {
     private final CommandXboxController driverController = new CommandXboxController(0);
     private final PlayerStateMachine stateMachine = new PlayerStateMachine(driverController);
     public final SwerveDriveManager swerveDriveManager = new SwerveDriveManager(driverController);
-    private final VisionManager visionManager =  new VisionManager(swerveDriveManager);
+    public final VisionManager visionManager =  new VisionManager(swerveDriveManager);
         
 
     // public static final String tagKey = "tag to align to";

@@ -69,6 +69,7 @@ public class Robot extends TimedRobot {
       m_robotContainer.swerveDriveManager.setStartPose();
     }
     isAutoStarted = false;
+    m_robotContainer.visionManager.printScoringPosition();
     //m_robotContainer.loadPreferences();
   
   }

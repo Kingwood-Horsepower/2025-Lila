@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.ejml.equation.IntegerSequence.For;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -41,6 +42,13 @@ public class VisionManager {
         SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(0));
         SmartDashboard.putString("Robot Translation", "0");
         SmartDashboard.putNumber("Robot rotation", Math.toDegrees(0));
+    }
+
+    public void printScoringPosition(){
+        for (int id : kReefIDs) {
+            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true).toString());
+            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false).toString());
+        }
     }
 
     /**

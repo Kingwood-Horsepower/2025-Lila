@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.AutoConstants.TargetCoralStation;
+import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.subsystems.AlgaeIntake;
@@ -40,6 +41,8 @@ public class Auto {
         robotContainer = _robotContainer;
         //autoRoutine = getAutoRoutine();
         autoRoutine = getTestRoutine();
+
+        
     }
     public void PollAutoRoutine()
     {
@@ -104,7 +107,7 @@ public class Auto {
             testTraj.cmd()
         )
         );
-        testTraj.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
+        testTraj.done().onTrue(ScoreCoralAndComeBack(testTrajReversed));
         //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
         return routine;
     }
@@ -112,17 +115,20 @@ public class Auto {
 
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
+        Command driveToPoseCommand = new DriveToPoseCommand(swerveDriveManager, robotContainer.visionManager, null);
         return Commands.sequence(
-            //robotContainer.getAlignWithAprilTagCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(4)),
-            //coralAndElevatorManager.getScoreCoralComand(),
-            Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
+            Commands.runOnce(swerveDriveManager::stopRobot),
+            driveToPoseCommand.withDeadline(coralAndElevatorManager.getSetElevatorCommand(3)),
+            coralAndElevatorManager.getScoreCoralComand(() -> false), //Should be hasCoral in the future
+            Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
             nexTrajectory.cmd()
         );
     }
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
-             //   coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() || robotContainer.driverController.b().getAsBoolean()),
-                Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
+                Commands.runOnce(swerveDriveManager::stopRobot),
+                coralAndElevatorManager.getIntakeCoralCommand(() -> false), //Should be hasCoral in the future
+                Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
                 nexTrajectory.cmd()
             );
     }

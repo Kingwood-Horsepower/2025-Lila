@@ -110,6 +110,8 @@ public class CoralIntake extends SubsystemBase {
         return rollerEncoder.getPosition();
     }
 
+    
+
     public Command jiggleIntakeLol(DoubleSupplier currentRollerEncoderPosition) {
         double startDistance = currentRollerEncoderPosition.getAsDouble();
         double jiggleStartDistance = -1 + startDistance;
@@ -117,20 +119,20 @@ public class CoralIntake extends SubsystemBase {
         return Commands.sequence(
             //Commands.runOnce(() -> System.out.print(startDistance)),
             Commands.runOnce(() -> System.out.println("running jiggle")),
-            Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-1), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition()-1)),
             
             //,
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance + jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance + jiggleDistance)),
-            // Commands.runOnce(()-> moveRollerPosition(jiggleStartDistance - jiggleDistance), this).until(() -> getRollerIsNearPosition(jiggleStartDistance - jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(startDistance), this).until(() -> getRollerIsNearPosition(startDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() +1 ), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() +1 )),
             Commands.runOnce(() -> System.out.println("ending jiggle"))
         );
     }

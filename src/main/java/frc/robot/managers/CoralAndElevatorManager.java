@@ -81,7 +81,7 @@ public class CoralAndElevatorManager {
           return Commands.sequence(
               setCoralIntakeToLevelCommand.until(() -> coralIntake.getIsNearSetPoint() && !coralIntake.getIsNearZero()),
               new WaitCommand(.3),
-              outTakeCoralCommand.until(conditionForStoppingTheIntake),
+              outTakeCoralCommand.until(conditionForStoppingTheIntake).withTimeout(1.5), //Timeout is for the autoroutine
               elevatorToZeroCommand.until(() -> elevator.getIsNearZero()),
               Commands.runOnce(this :: stowIntake, elevator, coralIntake)
           );
