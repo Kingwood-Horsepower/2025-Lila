@@ -19,8 +19,10 @@ public abstract class PlayerState {
 
     public void onY(){}
     public void onA(){}
-    public void onTrigger(Boolean isPressed){}
-    public void onBumper(Boolean isPressed){}
+    public void onTriggerPressed(){}
+    public void onBumperPressed(){}
+    public void onTriggerUnpressed(){}
+    public void onBumperUnpressed(){}
 
     public void onBack()
     {

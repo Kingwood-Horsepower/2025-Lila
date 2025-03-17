@@ -16,7 +16,7 @@ public class AlignmentState extends PlayerState{
         super.Exit();
     }
 
-    @Override public void onBumper(Boolean isPressed){
+    @Override public void onBumperUnpressed(){
         player.stateMachine.ChangeState(player.scoringState);
     }
 

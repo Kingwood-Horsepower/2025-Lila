@@ -16,7 +16,7 @@ public class DriveState extends PlayerState{
         super.Exit();
     }
 
-    @Override public void onTrigger(Boolean isPressed){
+    @Override public void onTriggerPressed(){
         player.stateMachine.ChangeState(player.intakeState);
     }
     @Override public void onY(){
