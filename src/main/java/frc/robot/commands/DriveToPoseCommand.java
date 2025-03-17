@@ -51,8 +51,8 @@ public class DriveToPoseCommand extends Command {
     private final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
 
 
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-       .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
+    // private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    //    .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
     
     
 
@@ -84,8 +84,6 @@ public class DriveToPoseCommand extends Command {
         xController.reset(swerveDriveManager.getRobotPose().getX());
         yController.reset(swerveDriveManager.getRobotPose().getY());
         thetaController.reset(swerveDriveManager.getRobotPose().getRotation().getRadians());
-        // tagToChase = visionManager.getBestDownTargetOptional().get().getFiducialId();
-        // goal = new Pose3d(cameraSubsystem.getCoralScoreTransform(tagToChase, isRight.getAsBoolean()));
 
         //In the auto routine, this value is null 
         if(isRight == null)
@@ -101,8 +99,6 @@ public class DriveToPoseCommand extends Command {
     }
 
     public void execute() {
-        // System.out.print(" xerror " + xController.getPositionError());
-        // System.out.print(" yerror " + yController.getPositionError());
         ChassisSpeeds speeds = new ChassisSpeeds(
             -xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
             -yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
@@ -116,8 +112,6 @@ public class DriveToPoseCommand extends Command {
         double tolerance = 0.03;
         return Math.abs(current-target) < tolerance;
     }
-
-
   
     @Override
     public boolean isFinished() {

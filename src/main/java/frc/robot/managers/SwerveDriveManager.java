@@ -158,6 +158,10 @@ public class SwerveDriveManager {
     public void resetPose(Pose2d newPose2d) {
         drivetrain.resetPose(newPose2d);
     }
+    public ChassisSpeeds getRobotSpeeds()
+    {
+        return drivetrain.getState().Speeds;
+    }
 
     //Vision
     public void setVisionTrust(Matrix<N3, N1> matrix){
@@ -181,6 +185,8 @@ public class SwerveDriveManager {
     public void invertControls(){
         inputMult = inputMult * -1;
     }
+
+    
 
 
     //Data Logging
