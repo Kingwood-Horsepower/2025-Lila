@@ -19,6 +19,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -84,6 +85,11 @@ public class SwerveDriveManager {
         setStartPose();
         drivetrain.setDefaultCommand(setSwerveToNormalDriveCommand());
         inputMult =1;
+
+        xController.setTolerance(0.2);
+        yController.setTolerance(0.2);
+        thetaController.setTolerance(Units.degreesToRadians(3));
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);   
     }
 
     //Robot Movement functions
