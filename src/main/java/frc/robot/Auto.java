@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.AutoConstants.TargetCoralStation;
 import frc.robot.managers.CoralAndElevatorManager;
+import frc.robot.managers.SwerveDriveManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -22,20 +23,20 @@ public class Auto {
     private final RobotContainer robotContainer;
 
     private final AutoRoutine autoRoutine;
-    private final CommandSwerveDrivetrain drivetrain;
+    private final SwerveDriveManager swerveDriveManager;
 
-    public Auto(CommandSwerveDrivetrain driveSubsystem, CoralAndElevatorManager _CoralAndElevatorManager, RobotContainer _robotContainer)
+    public Auto(SwerveDriveManager swerveDriveManager, CoralAndElevatorManager _CoralAndElevatorManager, RobotContainer _robotContainer)
     {   
         autoFactory = new AutoFactory(
-            driveSubsystem::getRobotPose, // A function that returns the current robot pose
-            driveSubsystem::resetPose, // A function that resets the current robot pose to the provided Pose2d
-            driveSubsystem::followTrajectory, // The drive subsystem trajectory follower 
+            swerveDriveManager::getRobotPose, // A function that returns the current robot pose
+            swerveDriveManager::resetPose, // A function that resets the current robot pose to the provided Pose2d
+            swerveDriveManager::followTrajectory, // The drive subsystem trajectory follower 
         true, // If alliance flipping should be enabled 
-            driveSubsystem // The drive subsystem
+            swerveDriveManager.getDrivetrain() // The drive subsystem
         );
 
         coralAndElevatorManager = _CoralAndElevatorManager;
-        drivetrain = driveSubsystem;
+        this.swerveDriveManager = swerveDriveManager;
         robotContainer = _robotContainer;
         //autoRoutine = getAutoRoutine();
         autoRoutine = getTestRoutine();
@@ -103,7 +104,7 @@ public class Auto {
             testTraj.cmd()
         )
         );
-        testTraj.done().onTrue(Commands.runOnce(drivetrain::stopRobot));
+        testTraj.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
         //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
         return routine;
     }
@@ -112,16 +113,16 @@ public class Auto {
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
         return Commands.sequence(
-            robotContainer.getAlignWithAprilTagCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(4)),
+            //robotContainer.getAlignWithAprilTagCommand().withDeadline(coralAndElevatorManager.getSetElevatorCommand(4)),
             //coralAndElevatorManager.getScoreCoralComand(),
-            nexTrajectory.resetOdometry(),
+            Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
             nexTrajectory.cmd()
         );
     }
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
-                coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() || robotContainer.driverController.b().getAsBoolean()),
-                nexTrajectory.resetOdometry(),
+             //   coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() || robotContainer.driverController.b().getAsBoolean()),
+                Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
                 nexTrajectory.cmd()
             );
     }

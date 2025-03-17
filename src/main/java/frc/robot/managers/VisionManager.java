@@ -28,12 +28,19 @@ public class VisionManager {
     
     private static CameraSubsystem camera = new CameraSubsystem(); 
 
-    private static CommandSwerveDrivetrain drivetrain;
+    private static SwerveDriveManager swerveDriveManager;
 
-    public VisionManager(CommandSwerveDrivetrain _drivetrain){
-        drivetrain = _drivetrain;
+    public VisionManager(SwerveDriveManager swerveDriveManager){
+        this.swerveDriveManager = swerveDriveManager;
         Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1.0, 1.0, 99.0);
-        drivetrain.setVisionMeasurementStdDevs(matrix);
+        swerveDriveManager.setVisionTrust(matrix);
+
+        SmartDashboard.putString("CameraLeftOdometry", "0");
+        SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(0));
+        SmartDashboard.putString("CameraRightOdometry", "0");
+        SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(0));
+        SmartDashboard.putString("Robot Translation", "0");
+        SmartDashboard.putNumber("Robot rotation", Math.toDegrees(0));
     }
 
     /**
@@ -77,7 +84,7 @@ public class VisionManager {
                         
                        
                         
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                     });
             //Left camera
 
@@ -88,12 +95,12 @@ public class VisionManager {
                         SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
         
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                     });
         }
 
-        SmartDashboard.putString("Robot Translation", drivetrain.getRobotPose().getTranslation().toString());
-        SmartDashboard.putNumber("Robot rotation", Math.toDegrees(drivetrain.getRobotPose().getRotation().getDegrees()));
+        SmartDashboard.putString("Robot Translation", swerveDriveManager.getRobotPose().getTranslation().toString());
+        SmartDashboard.putNumber("Robot rotation", Math.toDegrees(swerveDriveManager.getRobotPose().getRotation().getDegrees()));
     }
 
     public Pose2d getRobotScoringPosition(boolean isRightCoral){
@@ -115,7 +122,7 @@ public class VisionManager {
         for (int id : kReefIDs) {
             reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral));
         }
-        return drivetrain.getRobotPose().nearest(reefPoses);
+        return swerveDriveManager.getRobotPose().nearest(reefPoses);
 
     }
 
@@ -128,7 +135,7 @@ public class VisionManager {
         Pose2d rightPose = getRobotScoringPosition(true);
         Pose2d leftPose = getRobotScoringPosition(false);
 
-        return drivetrain.getRobotPose().nearest(List.of(rightPose, leftPose));
+        return swerveDriveManager.getRobotPose().nearest(List.of(rightPose, leftPose));
 
     }
 

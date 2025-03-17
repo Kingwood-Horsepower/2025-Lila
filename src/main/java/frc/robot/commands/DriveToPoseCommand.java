@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 
+import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -19,6 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -39,9 +41,8 @@ public class DriveToPoseCommand extends Command {
             new Rotation3d(0.0, 0.0, Math.PI)
         );
 
-    private final CommandSwerveDrivetrain drivetrain;
+    private final SwerveDriveManager swerveDriveManager;
     private final VisionManager visionManager;
-    private final CameraSubsystem cameraSubsystem;
 
     private BooleanSupplier isRight;
 
@@ -61,28 +62,28 @@ public class DriveToPoseCommand extends Command {
     *
     * @param drivetrain The subsystem used by this command.
     */
-    public DriveToPoseCommand(CommandSwerveDrivetrain drivetrain, VisionManager visionManager,BooleanSupplier isRight) {
+    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager,BooleanSupplier isRight) {
         
-        this.drivetrain = drivetrain;
+        this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;
         this.isRight = isRight;
-        this.cameraSubsystem = visionManager.getCameraSubsystem();
         
         xController.setTolerance(0.2);
         yController.setTolerance(0.2);
         thetaController.setTolerance(Units.degreesToRadians(3));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);   
         
-        addRequirements(drivetrain);
+        addRequirements(swerveDriveManager.getDrivetrain());
     }
 
     @Override
     public void initialize() {
-        // reset controllers to current robot position and speeds
+        // reset controllers
 
-        xController.reset(drivetrain.getRobotPose().getX(), drivetrain.getRobotSpeeds().vxMetersPerSecond);
-        yController.reset(drivetrain.getRobotPose().getY(), drivetrain.getRobotSpeeds().vyMetersPerSecond);
-        thetaController.reset(drivetrain.getRobotPose().getRotation().getRadians(),  drivetrain.getRobotSpeeds().omegaRadiansPerSecond);
+        // reset(double measuredPosition, double measuredVelocity)
+        xController.reset(swerveDriveManager.getRobotPose().getX());
+        yController.reset(swerveDriveManager.getRobotPose().getY());
+        thetaController.reset(swerveDriveManager.getRobotPose().getRotation().getRadians());
         // tagToChase = visionManager.getBestDownTargetOptional().get().getFiducialId();
         // goal = new Pose3d(cameraSubsystem.getCoralScoreTransform(tagToChase, isRight.getAsBoolean()));
         goal = new Pose3d(visionManager.getRobotScoringPosition(isRight.getAsBoolean()));
@@ -90,18 +91,15 @@ public class DriveToPoseCommand extends Command {
     }
 
     public void execute() {
-        double xSpeed = xController.calculate(drivetrain.getRobotPose().getX(), goal.toPose2d().getX());
-        double ySpeed = yController.calculate(drivetrain.getRobotPose().getY(), goal.toPose2d().getY());
-        double thetaSpeed = thetaController.calculate(drivetrain.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
-
         // System.out.print(" xerror " + xController.getPositionError());
         // System.out.print(" yerror " + yController.getPositionError());
-
-        drivetrain.setControl(
-            drive.withVelocityX(-xSpeed)
-                 .withVelocityY(-ySpeed)
-                 .withRotationalRate(thetaSpeed)
+        ChassisSpeeds speeds = new ChassisSpeeds(
+            -xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
+            -yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
+            thetaController.calculate(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians())
         );
+
+        swerveDriveManager.setSwerveDriveChassisSpeeds(speeds);
     }
 
     public boolean getIsNear(double current, double target) {
@@ -113,9 +111,9 @@ public class DriveToPoseCommand extends Command {
   
     @Override
     public boolean isFinished() {
-        return getIsNear(drivetrain.getRobotPose().getX(), goal.toPose2d().getX())
-        && getIsNear(drivetrain.getRobotPose().getY(), goal.toPose2d().getY())
-        && getIsNear(drivetrain.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
+        return getIsNear(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX())
+        && getIsNear(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY())
+        && getIsNear(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
         //return (xController.atGoal() && yController.atGoal() && thetaController.atGoal());
     }
   }

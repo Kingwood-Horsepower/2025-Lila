@@ -47,35 +47,14 @@ import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.managers.VisionManager;
 import frc.robot.managers.CoralAndElevatorManager;
+import frc.robot.managers.SwerveDriveManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Winch;
 
 public class RobotContainer {
-    //Data
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-    private final double translationVelocityMult = .7; // .65
-    private final double rotVelocityMult = .75;                                                                                      // max angular velocity
-
-    //SwerveRequestes
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.01)
-            .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)// (not) Use open-loop control for drive motors
-            .withSteerRequestType(SteerRequestType.MotionMagicExpo);
-    private final SwerveRequest.RobotCentric driveRoboCentric = new SwerveRequest.RobotCentric()
-           .withDeadband(MaxSpeed * 0.01)
-           .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
-           .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// (not) Use open-loop control for drive motors
-          //.withSteerRequestType(SteerRequestType.);
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     
     // Subsystems
-    private final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    private final VisionManager visionManager =  new VisionManager(drivetrain);
-
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Winch winch = new Winch();
     private final Auto auto;
@@ -83,36 +62,25 @@ public class RobotContainer {
     
     
     // Other references
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-    public final CommandXboxController driverController = new CommandXboxController(0);
+
+    private final CommandXboxController driverController = new CommandXboxController(0);
     private final PlayerStateMachine stateMachine = new PlayerStateMachine(driverController);
+    public final SwerveDriveManager swerveDriveManager = new SwerveDriveManager(driverController);
+    private final VisionManager visionManager =  new VisionManager(swerveDriveManager);
         
-    // SlewRaeLimiters
-    private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
-    private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
-    private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
-    private final SlewRateLimiter driveLimiterSlowRot = new SlewRateLimiter(1.1);
 
     // public static final String tagKey = "tag to align to";
     // private static int tag = 21;
 
-    // Coral Commands (Some command are public because used by the Auto class)
-  //private Command alignRobotWithAprilTag;
-    private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, visionManager, ()->driverController.povRight().getAsBoolean());
-    //private Command jiggleRollers = coralAndElevatorManager.getCoralIntake().jiggleIntakeLol(()->coralAndElevatorManager.getCoralIntake().getRollerEncoderPosition());
-    private int inputMult =1;
-    private boolean isInRobotCentric = false;
-
+    // Commands and Triggers
+    private Command driveToPoseCommand = new DriveToPoseCommand(swerveDriveManager, visionManager, ()->driverController.povRight().getAsBoolean());
     private Trigger elevatorLimitSwitch = new Trigger(()-> coralAndElevatorManager.getElevator().getIsLimitSwitchZerod());
 
 
     public RobotContainer() {     
         configureCommands();
-        configureBindings();
-        drivetrain.registerTelemetry(logger::telemeterize);
-        resetPose();
-        auto = new Auto(drivetrain, coralAndElevatorManager, this);
-
+        configureBindings();  
+        auto = new Auto(swerveDriveManager, coralAndElevatorManager, this);
 
     }
 
@@ -127,17 +95,6 @@ public class RobotContainer {
 
     /* #region configureBindings */
     private void configureBindings() {
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> {if (isInRobotCentric){return slowDriveTrainRequest();}
-                        else{return drive
-                        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
-                                * MaxSpeed)
-                        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
-                                * MaxSpeed)
-                        .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
-                                * rotVelocityMult * MaxAngularRate);}}));
-
         // driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
         //driverController.a().onTrue((Commands.runOnce(SignalLogger::start)));
         //driverController.b().onTrue((Commands.runOnce(SignalLogger::stop)));
@@ -171,9 +128,8 @@ public class RobotContainer {
 
         // coral intake command
         // uses stow
-        driverController.start().onTrue(Commands.runOnce(() -> inputMult *= -1));
-        
-        driverController.b().onTrue(Commands.runOnce(() -> isInRobotCentric = !isInRobotCentric));
+        driverController.start().onTrue(Commands.runOnce(swerveDriveManager::invertControls));  
+        driverController.b().toggleOnFalse(swerveDriveManager.setSwerveToSlowDriveCommand());
 
         //driverController.b().whileTrue(getAlignWithAprilTagCommand());
         //driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(visionManager.getBestDownTargetOptional().isPresent() ? visionManager.getBestDownTargetOptional().get().getSkew() : -100)));
@@ -187,8 +143,6 @@ public class RobotContainer {
         
         driverController.povRight().onTrue(driveToPoseCommand);
         driverController.povLeft().onTrue(driveToPoseCommand);
-        //---STATE MACHINE ---
-        //Only prints stuff right now
 
         // driverController.povUp().onTrue(Commands.startEnd(
         //     ()-> {
@@ -214,11 +168,21 @@ public class RobotContainer {
         //             ()->winch.runWinch(0), 
         //             winch, algaeIntake));
 
+
+        // ---STATE MACHINE ---
+        //Only prints stuff right now
         driverController.rightBumper().onTrue(Commands.runOnce(
-            () -> {stateMachine.getPlayerState().onBumper();}));
+            () -> {stateMachine.getPlayerState().onBumperPressed();}));
+
+        driverController.rightBumper().onFalse(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onBumperUnpressed();}));
 
         driverController.rightTrigger().onTrue(Commands.runOnce(
-            () -> {stateMachine.getPlayerState().onTrigger();}));
+            () -> {stateMachine.getPlayerState().onTriggerPressed();}));
+
+        driverController.rightTrigger().onFalse(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onTriggerUnpressed();}));
+
 
         driverController.y().onTrue(Commands.runOnce(
             () -> {stateMachine.getPlayerState().onY();}));
@@ -234,13 +198,6 @@ public class RobotContainer {
     /* #endregion */
 
     /* #region Other Methods*/
-
-    public void resetPose() {
-        // The first pose in an autonomous path is often a good choice.
-        //var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d(Math.PI));
-        var startPose = new Pose2d(AutoConstants.getStartingPosition(), new Rotation2d(Math.PI));
-        drivetrain.resetPose(startPose);
-    }
     public void UpdateRobotPosition(){
         visionManager.UpdateRobotPosition();
         SmartDashboard.putBoolean("Has Target", visionManager.getBestDownTargetOptional().isPresent());
@@ -255,9 +212,7 @@ public class RobotContainer {
     }
     public void disabledAuto(){
         auto.KillAutoRoutine();
-        drivetrain.stopRobot();
-        isInRobotCentric = false;
-        inputMult =1;
+        swerveDriveManager.stopRobot();
     }
 
     // public void teleopInit() {
@@ -265,64 +220,8 @@ public class RobotContainer {
     // }
 
     /* #endregion */
-    int getInputMult(){
-        boolean isBlue = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() == Alliance.Blue : false;
-        if(isBlue){
-            return -1 * inputMult;
-        }else{
-            return 1 * inputMult;
-        }
-    }
 
 
-    public Command getAlignWithAprilTagCommand()
-    {
-        //return new ConditionalCommand(alignDriveTrain(), Commands.runOnce(()->{}), camera::hasTarget);
-        //return alignDriveTrain();   
-        return null;      
-    }
-    // private Command alignDriveTrain(){
-    //     return  drivetrain.applyRequest(() ->  drive
-    // //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
-    //     .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()* getInputMult()) * translationVelocityMult
-    //         * MaxSpeed  * 0.2 )
-    //     .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()* getInputMult()) * translationVelocityMult
-    //         * MaxSpeed * 0.2 )
-    //      .withRotationalRate(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew())* 2* MaxAngularRate : 0)).andThen(
-    //         Commands.runOnce(() ->System.out.println(camera.hasDownTarget() ? -1.0 * (camera.getDownTargetSkew()/3)* MaxAngularRate : 0))
-    //      );
-    // }
-    private SwerveRequest slowDriveTrainRequest(){
-        return  driveRoboCentric
-    //.withVelocityX((camera.getTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
-        .withVelocityX(-driverController.getLeftY()* translationVelocityMult
-            * MaxSpeed  * 0.2 )
-        .withVelocityY(-driverController.getLeftX() * translationVelocityMult
-            * MaxSpeed * 0.2 )
-        .withRotationalRate(driverController.getRightX()* -1
-            * rotVelocityMult * MaxAngularRate * 0.4);
-    }
 
-    public void sendSwerveData() {
-        SmartDashboard.putData("Swerve Drive", new Sendable() {
-            @Override
-            public void initSendable(SendableBuilder builder) {
-            builder.setSmartDashboardType("SwerveDrive");
-            
-            builder.addDoubleProperty("Front Left Angle", () -> drivetrain.getState().ModuleStates[1].angle.getRadians(), null);
-            builder.addDoubleProperty("Front Left Velocity", () -> drivetrain.getState().ModuleStates[1].speedMetersPerSecond, null);
-            
-            builder.addDoubleProperty("Front Right Angle", () -> drivetrain.getState().ModuleStates[0].angle.getRadians(), null);
-            builder.addDoubleProperty("Front Right Velocity", () -> drivetrain.getState().ModuleStates[0].speedMetersPerSecond, null);
-            
-            builder.addDoubleProperty("Back Left Angle", () -> drivetrain.getState().ModuleStates[2].angle.getRadians(), null);
-            builder.addDoubleProperty("Back Left Velocity", () -> drivetrain.getState().ModuleStates[2].speedMetersPerSecond, null);
-            
-            builder.addDoubleProperty("Back Right Angle", () -> drivetrain.getState().ModuleStates[3].angle.getRadians(), null);
-            builder.addDoubleProperty("Back Right Velocity", () -> drivetrain.getState().ModuleStates[3].speedMetersPerSecond, null);
 
-            builder.addDoubleProperty("Robot Angle", () -> drivetrain.getState().RawHeading.getRadians(), null);
-            }
-            });
-    }
 }

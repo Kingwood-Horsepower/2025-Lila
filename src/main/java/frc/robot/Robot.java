@@ -18,6 +18,8 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
+  private boolean isAutoStarted = false;
+
   public Robot() {
     m_robotContainer = new RobotContainer();
   }
@@ -42,7 +44,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_robotContainer.resetPose();
+    isAutoStarted = true;
+    m_robotContainer.swerveDriveManager.setStartPose();;
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -62,7 +65,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    m_robotContainer.resetPose();
+    if(!isAutoStarted){
+      m_robotContainer.swerveDriveManager.setStartPose();
+    }
+    isAutoStarted = false;
     //m_robotContainer.loadPreferences();
   
   }
