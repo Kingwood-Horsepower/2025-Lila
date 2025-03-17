@@ -35,11 +35,7 @@ public class DriveToPoseCommand extends Command {
     private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 10);
 
     private int tagToChase = 17;
-    private Pose3d goal = 
-        new Pose3d(
-            new Translation3d(3.05, 3.87, 0.0),
-            new Rotation3d(0.0, 0.0, Math.PI)
-        );
+    private Pose3d goal = null;
 
     private final SwerveDriveManager swerveDriveManager;
     private final VisionManager visionManager;
@@ -62,11 +58,26 @@ public class DriveToPoseCommand extends Command {
     *
     * @param drivetrain The subsystem used by this command.
     */
-    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager,BooleanSupplier isRight) {
+    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager, BooleanSupplier isRight) {
         
         this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;
         this.isRight = isRight;
+        
+        xController.setTolerance(0.2);
+        yController.setTolerance(0.2);
+        thetaController.setTolerance(Units.degreesToRadians(3));
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);   
+        
+        addRequirements(swerveDriveManager.getDrivetrain());
+    }
+
+    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager, Supplier<Pose3d> goal) {
+        
+        this.swerveDriveManager = swerveDriveManager;
+        this.visionManager = visionManager;
+        this.isRight = null;
+        this.goal=goal.get();
         
         xController.setTolerance(0.2);
         yController.setTolerance(0.2);
@@ -85,14 +96,18 @@ public class DriveToPoseCommand extends Command {
         yController.reset(swerveDriveManager.getRobotPose().getY());
         thetaController.reset(swerveDriveManager.getRobotPose().getRotation().getRadians());
 
-        //In the auto routine, this value is null 
-        if(isRight == null)
-        {
-            goal = new Pose3d(visionManager.getClosestRobotScoringPosition());
-        }
-        else
-        {
-            goal = new Pose3d(visionManager.getRobotScoringPosition(isRight.getAsBoolean()));
+        //In the auto routine, isRight is null 
+        // if goal is still null, then we are using it to align to the reef
+        // otherwise, supply it a goal as a parameter
+        if(goal == null) {
+            if(isRight == null)
+            {
+                goal = new Pose3d(visionManager.getClosestRobotScoringPosition());
+            }
+            else
+            {
+                goal = new Pose3d(visionManager.getRobotScoringPosition(isRight.getAsBoolean()));
+            }
         }
 
         System.out.print(" tag id" + tagToChase);
