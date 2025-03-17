@@ -93,13 +93,13 @@ public class RobotContainer {
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
     private final SlewRateLimiter driveLimiterSlowRot = new SlewRateLimiter(1.1);
 
-    public static final String tagKey = "tag to align to";
-    private static int tag = 21;
+    // public static final String tagKey = "tag to align to";
+    // private static int tag = 21;
 
     // Coral Commands (Some command are public because used by the Auto class)
   //private Command alignRobotWithAprilTag;
     private Command driveToPoseCommand = new DriveToPoseCommand(drivetrain, visionManager, ()->driverController.povRight().getAsBoolean());
-    private Command jiggleRollers = coralAndElevatorManager.getCoralIntake().jiggleIntakeLol(()->coralAndElevatorManager.getCoralIntake().getRollerEncoderPosition());
+    //private Command jiggleRollers = coralAndElevatorManager.getCoralIntake().jiggleIntakeLol(()->coralAndElevatorManager.getCoralIntake().getRollerEncoderPosition());
     private int inputMult =1;
     private boolean isInRobotCentric = false;
 
@@ -113,9 +113,7 @@ public class RobotContainer {
         resetPose();
         auto = new Auto(drivetrain, coralAndElevatorManager, this);
 
-        if (!Preferences.containsKey(tagKey)) {
-            Preferences.setDouble(tagKey, tag);
-        }
+
     }
 
     /* #region configureCommands */
@@ -126,9 +124,6 @@ public class RobotContainer {
     
     /* #endregion */
 
-    public void loadPreferences() {
-        tag = Preferences.getInt(tagKey, tag);
-    }
 
     /* #region configureBindings */
     private void configureBindings() {
@@ -185,7 +180,7 @@ public class RobotContainer {
    
         elevatorLimitSwitch.onTrue(Commands.runOnce(()->coralAndElevatorManager.getElevator().resetEncoders()));
 
-        driverController.x().onTrue(jiggleRollers);
+        driverController.x().onTrue(coralAndElevatorManager.getCoralIntake().jiggleIntakeLol(()->coralAndElevatorManager.getCoralIntake().getRollerEncoderPosition()));
 
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));

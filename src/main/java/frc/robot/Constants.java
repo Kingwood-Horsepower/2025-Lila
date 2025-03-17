@@ -49,8 +49,8 @@ public class Constants {
         public static final double ELEVATOR_L1_INCHES = 2;      //1
         public static final double ELEVATOR_L2_INCHES = 8.25;      //2
         public static final double ELEVATOR_L3_INCHES = 14.25;   //3
-        public static final double ELEVATOR_L4_INCHES = 27.8;      //4
-        public static final double ELEVATOR_MAX_INCHES = 27.8;    //Max
+        public static final double ELEVATOR_L4_INCHES = 27.5;      //4
+        public static final double ELEVATOR_MAX_INCHES = 28.7;    //Max
 
 
         public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0, 0);

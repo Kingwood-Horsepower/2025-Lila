@@ -58,8 +58,8 @@ public class Elevator extends SubsystemBase{
     //private double ElevatorMaxExtensionInches = ELEVATOR_MAX_INCHES;
     //private String maxExtensionPreferenceKey = "Elevator Max Extension Inches";
 
-    private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(2000, 9000);
-    private final ProfiledPIDController elevatorController = new ProfiledPIDController(.1, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
+    private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(2000, 1000);
+    private final ProfiledPIDController elevatorController = new ProfiledPIDController(.5, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
 
     public Elevator() {
         leadMotorConfig
@@ -189,6 +189,7 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putBoolean("is zeroed limitwsitch", isZerod);
         SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
         SmartDashboard.putBoolean("elevator is near setpoint", getIsNearSetPoint());
+        SmartDashboard.putNumber("elevator motor current", leadMotor.getOutputCurrent());
 
     }
 

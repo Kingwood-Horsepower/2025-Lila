@@ -63,7 +63,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_robotContainer.resetPose();
-    m_robotContainer.loadPreferences();
+    //m_robotContainer.loadPreferences();
   
   }
 
