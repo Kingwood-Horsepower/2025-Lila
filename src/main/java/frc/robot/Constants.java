@@ -34,9 +34,11 @@ public class Constants {
         public static final Translation2d kRedReefCenter = new Translation2d(inchesToMeters(514.13), inchesToMeters(158.5));
 
         public static final int[] kReefIDs = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
+        public static final int[] kStationIDs = {12, 13, 1, 2};
 
         public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(20);
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5);
+
         public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
         public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(0.5); // center of the intake is 5 inches to the left of the center of the rboto
 

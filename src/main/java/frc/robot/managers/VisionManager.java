@@ -1,7 +1,7 @@
 package frc.robot.managers;
 
 import static frc.robot.Constants.AutoConstants.getStartingPosition;
-import static frc.robot.Constants.CameraConstants.kReefIDs;
+import static frc.robot.Constants.CameraConstants.*;
 
 import com.ctre.phoenix6.Utils;
 
@@ -148,8 +148,25 @@ public class VisionManager {
     }
 
     //Does not work currently
-    public Pose2d getRobotIntakePosition(int id){
-        return camera.getStationPose2d(id);
+    public Pose2d getRobotIntakePosition(){
+        var target = getBestDownTargetOptional();
+        if(target.isPresent()){
+            int targetId = target.get().fiducialId;
+            for (int reefId : kStationIDs) {
+                if (targetId == reefId) {
+                    return camera.getStationPose2d(targetId);
+                }           
+            }
+        }
+        // if we don't have a target, estimate the closest april tag based on the robot's current position
+
+        System.out.println("No target found, using estimate using robot position");
+
+        List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
+        for (int id : kStationIDs) {
+            reefPoses.add(camera.getStationPose2d(id));
+        }
+        return swerveDriveManager.getRobotPose().nearest(reefPoses);
 
     }
 

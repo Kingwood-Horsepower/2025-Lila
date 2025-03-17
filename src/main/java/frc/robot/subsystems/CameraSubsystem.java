@@ -279,7 +279,22 @@ public Pose2d getStationPose2d(int AprilTagId){
   Translation2d aprilTagTranslation2d =  aprilTagFieldLayout.getTagPose(AprilTagId).get().getTranslation().toTranslation2d();
   double rotation = AprilTagId == 12 ?  Math.toRadians(234) : Math.toRadians(126);
   
-
+  switch (AprilTagId) {
+    case 12:
+      rotation = Math.toRadians(234);
+      break;
+    case 13:
+      rotation = Math.toRadians(126);
+      break;
+    case 1:
+      rotation = Math.toRadians(126 + 180);
+      break;
+    case 2:
+      rotation = Math.toRadians(234 + 180);
+      break;
+    default:
+      break;
+  }
   Translation2d fromAprilTagToRobot = new Translation2d(Math.cos(rotation), Math.sin(rotation));
 
   return new Pose2d(aprilTagTranslation2d.plus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
