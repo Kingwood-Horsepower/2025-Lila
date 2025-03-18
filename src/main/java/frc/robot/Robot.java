@@ -45,7 +45,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     isAutoStarted = true;
-    m_robotContainer.swerveDriveManager.setStartPose();;
+    //m_robotContainer.swerveDriveManager.setStartPose();;
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
