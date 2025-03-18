@@ -147,7 +147,10 @@ public class SwerveDriveManager {
 
     //Utility Functions
     public void stopRobot(){
-        drivetrain.setControl(brake);
+        ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 0);
+        // Apply the generated speeds
+        drivetrain.setControl(trajectoryRequest.withSpeeds(speeds));
+        //drivetrain.setControl(brake);
 
     }
     public Pose2d getRobotPose()
