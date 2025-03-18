@@ -53,13 +53,13 @@ public class SwerveDriveManager {
     private final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
            .withDeadband(MaxSpeed * 0.01)
            .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
-           .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// (not) Use open-loop control for drive motors
+           .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
           //.withSteerRequestType(SteerRequestType.);
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();   
 
     private final SwerveRequest.ApplyFieldSpeeds trajectoryRequest = new SwerveRequest.ApplyFieldSpeeds()       
-        .withDriveRequestType(DriveRequestType.Velocity);      //SwerveRequest used by the follow trajectory method;
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);      //SwerveRequest used by the follow trajectory method;
 
 
     // SlewRaeLimiters
@@ -140,6 +140,11 @@ public class SwerveDriveManager {
             sample.vy + yController.calculate(pose.getY(), sample.y),
             sample.omega + thetaController.calculate(pose.getRotation().getRadians(), sample.heading)
         );
+        // ChassisSpeeds speeds = new ChassisSpeeds(
+        //     sample.vx,
+        //     sample.vy,
+        //     sample.omega 
+        // );
         // Apply the generated speeds
         drivetrain.setControl(trajectoryRequest.withSpeeds(speeds));
     }
@@ -147,7 +152,10 @@ public class SwerveDriveManager {
 
     //Utility Functions
     public void stopRobot(){
-        drivetrain.setControl(brake);
+        ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 0);
+        // Apply the generated speeds
+        drivetrain.setControl(trajectoryRequest.withSpeeds(speeds));
+        //drivetrain.setControl(brake);
 
     }
     public Pose2d getRobotPose()
