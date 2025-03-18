@@ -7,7 +7,10 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.google.gson.internal.TroubleshootingGuide;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.sim.SparkMaxSim;
+import com.revrobotics.sim.SparkRelativeEncoderSim;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import static frc.robot.Constants.ElevatorConstants.*;
@@ -16,7 +19,11 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.simulation.PWMSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -24,19 +31,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 
 public class Elevator extends SubsystemBase{
-
-    //sim
-    Mechanism2d mech = new Mechanism2d(3, 6);
-    MechanismRoot2d rootMech = mech.getRoot("root?", 0, 6);
-    DCMotor maxGearbox = DCMotor.getNEO(1);
-
-    // private final ElevatorSim elevatorSim = new ElevatorSim(
-    //     , ELEVATOR_HOME_INCHES, ELEVATOR_HOME_INCHES, ELEVATOR_HOME_INCHES, ELEVATOR_L2_INCHES, ELEVATOR_L1_INCHES, getIsLimitSwitchZerod(), ELEVATOR_HOME_INCHES, null)
-    // private final MechanismLigament2d elevatorMech2d =
-    //   rootMech.append(
-    //       new MechanismLigament2d("elevator", 1, 1));
 
     
     DigitalInput limitSwitch = new DigitalInput(8);
@@ -77,6 +74,22 @@ public class Elevator extends SubsystemBase{
 
     private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(2000, 1000);
     private final ProfiledPIDController elevatorController = new ProfiledPIDController(.5, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
+
+    //sim
+    Mechanism2d mech = new Mechanism2d(20, 50);
+    MechanismRoot2d rootMech = mech.getRoot("Elevator Root", 10, 0);
+
+    DCMotor elevatorDCMotor = DCMotor.getNEO(2);
+    private final SparkMaxSim leadMotorSim = new SparkMaxSim(leadMotor, elevatorDCMotor);
+
+    private final ElevatorSim elevatorSim = new ElevatorSim(
+        elevatorDCMotor, 12, 9, 0.0152, 0, 1.25, true, 0, 0.01, 0);
+    private final MechanismLigament2d elevatorMech2d =
+      rootMech.append(
+          new MechanismLigament2d("elevator", elevatorSim.getPositionMeters(), 90)
+          );
+    private final SparkRelativeEncoderSim leadEncoderSim = leadMotorSim.getRelativeEncoderSim();
+    
 
     public Elevator() {
         leadMotorConfig
@@ -144,9 +157,17 @@ public class Elevator extends SubsystemBase{
         setElevatorLevel();
     }
 
+    public double getLeadEncoderPosition() {
+        double pos = -1;
+        if(Robot.isSimulation()) pos = leadEncoderSim.getPosition();
+        pos = leadEncoder.getPosition();
+        //System.out.println(pos);
+        return pos;
+    }
+
     public boolean getIsNearSetPoint() {
         double tolerance = 2;  // in encoder rotations
-        double currPosition = leadEncoder.getPosition(); 
+        double currPosition = getLeadEncoderPosition(); 
         double targetPosition = setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS;
         if ((currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance)) return true;
         return false;
@@ -157,7 +178,7 @@ public class Elevator extends SubsystemBase{
      */    
     public boolean getIsNearZero() {
         double tolerance = 5; // in encoder rotations
-        double currPosition = leadEncoder.getPosition();
+        double currPosition = getLeadEncoderPosition();
         if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
         return false;
     }
@@ -192,7 +213,7 @@ public class Elevator extends SubsystemBase{
     public void periodic() {
 
         //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
-        leadMotor.setVoltage(elevatorController.calculate(leadEncoder.getPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
+        leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
         isZerod = !limitSwitch.get();
         // if(isZerod && !getIsSuperNearZero()) {
         //     System.out.println("RESETTING ELEVATOR ENCODERS");
@@ -210,4 +231,25 @@ public class Elevator extends SubsystemBase{
 
     }
 
+    @Override 
+    public void simulationPeriodic() {
+        
+        elevatorSim.update(0.02);
+
+        // setting the motor sim to the mechanism's current calculated velocity
+        leadMotorSim.iterate(elevatorSim.getVelocityMetersPerSecond(), RoboRioSim.getVInVoltage(), 0.02);
+        // simulating the power draw from the battery by this mechanism
+        RoboRioSim.setVInVoltage(
+        BatterySim.calculateDefaultBatteryLoadedVoltage(elevatorSim.getCurrentDrawAmps()));
+        // calculate the mechanism's new velocity with the motor sim
+        elevatorSim.setInput(leadMotorSim.getVelocity() * RobotController.getBatteryVoltage());
+        // set the encododer sim 
+        leadEncoderSim.setPosition(leadMotorSim.getPosition());
+        // modify the mechanism
+        elevatorMech2d.setLength(1+elevatorSim.getPositionMeters());
+        //System.out.println(leadMotorSim.getPosition());
+
+        SmartDashboard.putData("elevator please", mech);
+        
+    }
 }
