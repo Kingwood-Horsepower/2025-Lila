@@ -297,7 +297,7 @@ public Pose2d getStationPose2d(int AprilTagId){
   }
   Translation2d fromAprilTagToRobot = new Translation2d(Math.cos(rotation), Math.sin(rotation));
 
-  return new Pose2d(aprilTagTranslation2d.plus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
+  return new Pose2d(aprilTagTranslation2d.minus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
 }
 }
 

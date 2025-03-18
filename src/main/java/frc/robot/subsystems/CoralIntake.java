@@ -114,8 +114,8 @@ public class CoralIntake extends SubsystemBase {
 
     public Command jiggleIntakeLol(DoubleSupplier currentRollerEncoderPosition) {
         double startDistance = currentRollerEncoderPosition.getAsDouble();
-        double jiggleStartDistance = -1 + startDistance;
-        double jiggleDistance = 0.3;
+        double jiggleStartDistance = -2 + startDistance;
+        double jiggleDistance = 1;
         return Commands.sequence(
             //Commands.runOnce(() -> System.out.print(startDistance)),
             Commands.runOnce(() -> System.out.println("running jiggle")),
