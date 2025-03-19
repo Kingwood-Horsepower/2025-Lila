@@ -65,9 +65,9 @@ public class RobotContainer {
     // Other references
 
     private final CommandXboxController driverController = new CommandXboxController(0);
-    private final PlayerStateMachine stateMachine = new PlayerStateMachine(driverController);
     public final SwerveDriveManager swerveDriveManager = new SwerveDriveManager(driverController);
     public final VisionManager visionManager =  new VisionManager(swerveDriveManager);
+    private final PlayerStateMachine stateMachine = new PlayerStateMachine(swerveDriveManager, visionManager);
         
 
     // public static final String tagKey = "tag to align to";
@@ -192,6 +192,12 @@ public class RobotContainer {
 
         driverController.a().onTrue(Commands.runOnce(
             () -> {stateMachine.getPlayerState().onA();}));
+
+        driverController.b().onTrue(Commands.runOnce(
+                () -> {stateMachine.getPlayerState().onB();}));
+    
+        driverController.x().onTrue(Commands.runOnce(
+                () -> {stateMachine.getPlayerState().onX();}));    
 
         driverController.back().onTrue(Commands.runOnce(
             () -> {stateMachine.getPlayerState().onBack();}));
