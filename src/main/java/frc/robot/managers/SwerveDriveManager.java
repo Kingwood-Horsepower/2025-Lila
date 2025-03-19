@@ -83,7 +83,7 @@ public class SwerveDriveManager {
         this.driverController = driverController;
         drivetrain.registerTelemetry(logger::telemeterize);
         setStartPose();
-        drivetrain.setDefaultCommand(setSwerveToNormalDriveCommand());
+        //drivetrain.setDefaultCommand(setSwerveToNormalDriveCommand());
         inputMult =1;
 
         xController.setTolerance(0.2);

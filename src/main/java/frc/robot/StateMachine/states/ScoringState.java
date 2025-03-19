@@ -15,6 +15,10 @@ public class ScoringState extends PlayerState{
     @Override public void Exit(){
         super.Exit();
     }
+    @Override public void onBumperUnpressed(){
+        player.stateMachine.ChangeState(player.driveState);
+    }
+
 
 }
 

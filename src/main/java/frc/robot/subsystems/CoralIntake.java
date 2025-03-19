@@ -105,8 +105,6 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public double getRollerEncoderPosition() {
-        System.out.print("getRollerEncoderPosition() ");
-        System.out.println(rollerEncoder.getPosition());
         return rollerEncoder.getPosition();
     }
 
@@ -117,11 +115,8 @@ public class CoralIntake extends SubsystemBase {
         double jiggleStartDistance = -2 + startDistance;
         double jiggleDistance = 1;
         return Commands.sequence(
-            //Commands.runOnce(() -> System.out.print(startDistance)),
             Commands.runOnce(() -> System.out.println("running jiggle")),
             Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-1), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition()-1)),
-            
-            //,
             Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
             Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
             Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
