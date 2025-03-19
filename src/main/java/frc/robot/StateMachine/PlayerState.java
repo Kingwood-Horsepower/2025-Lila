@@ -24,6 +24,9 @@ public abstract class PlayerState {
     public void onTriggerUnpressed(){}
     public void onBumperUnpressed(){}
 
+    public void onX(){}
+    public void onB(){}
+
     public void onBack()
     {
         //onBack Always goes back to drive
