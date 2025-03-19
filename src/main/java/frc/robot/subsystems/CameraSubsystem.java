@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Constants.CameraConstants;
 
+import static edu.wpi.first.math.util.Units.inchesToMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.CameraConstants.*;
 
@@ -85,12 +86,11 @@ public class CameraSubsystem extends SubsystemBase {
     processLeftResults();
     processUpResults();
   }
-  public boolean processRightResults()
+  private boolean processRightResults()
   {
     //Check if we have a frame
     if (rightResults.isEmpty())
     {
-      hasTargetRight = false;
       return false;
     }
     //Check if we have a target
@@ -110,12 +110,11 @@ public class CameraSubsystem extends SubsystemBase {
     }
     return false;
   }
-  public boolean processLeftResults()
+  private boolean processLeftResults()
   {
     //Check if we have a frame
     if (leftResults.isEmpty())
     {
-      hasTargetLeft = false;
       return false;
     }
     //Check if we have a target
@@ -135,12 +134,11 @@ public class CameraSubsystem extends SubsystemBase {
     }
     return false;
   }
-  public boolean processUpResults()
+  private boolean processUpResults()
   {
     //Check if we have a frame
     if (upResults.isEmpty())
     {
-      hasTargetUp = false;
       return false;
     }
     //Check if we have a target
@@ -237,9 +235,7 @@ public boolean hasUpTarget(){
 public boolean hasDownTarget(){
   return hasTargetLeft || hasTargetRight;
 }
-public double getDownTargetYaw(){
-    return getBestDownTarget().getYaw();
-}
+
 public double getDownTargetRange(){
   //Chose one with lowest ambiguity
   if(hasTargetLeft && hasTargetRight)
@@ -255,10 +251,11 @@ public double getDownTargetRange(){
 }
 
 public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
-  int id =  getScoreCoralAprilTagId(AprilTagId);
-
+  boolean isBlue = AprilTagId > 15;
+  Translation2d reefCenter = isBlue ? kBlueReefCenter : kRedReefCenter;
+  
   //Vector from the center to the april tag
-  Translation2d v = aprilTagFieldLayout.getTagPose(id).get().getTranslation().toTranslation2d().minus(kReefCenter);
+  Translation2d v = aprilTagFieldLayout.getTagPose(AprilTagId).get().getTranslation().toTranslation2d().minus(reefCenter);
   double vMangnitude = v.getNorm();
   Translation2d vNormalized = new Translation2d(v.getX()/vMangnitude, v.getY()/vMangnitude);
   v = vNormalized.times(vMangnitude + kDistanceFromApriltagWhenScoring);
@@ -267,55 +264,42 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
   Translation2d vPerpendicular = new Translation2d(-vNormalized.getY(), vNormalized.getX());
 
   if(getRightCoral)
-   return new Pose2d(kReefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag))), new Rotation2d(aprilTagFieldLayout.getTagPose(id).get().getRotation().getZ() + Math.PI));
+    return new Pose2d(reefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag+kRobotToCoralIntakeLeftOffset))), 
+    new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
   else 
-  return new Pose2d(kReefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag))), new Rotation2d(aprilTagFieldLayout.getTagPose(id).get().getRotation().getZ() + Math.PI));
+    return new Pose2d(reefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+inchesToMeters(0.5)))), 
+    new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
 
-}
-private int getScoreCoralAprilTagId(int id){
-  //if the id is in the blue allience, return its id
-  if(id> 15)
-    return id;
-  //if the id is in the red alliance, convert it to its blue allience equivalent
-  else 
-  {
-    switch (id){
-      case 7: return 18;
-      case 8: return 17;
-      case 9: return 22;
-      case 10: return 21;
-      case 11: return 20;
-      case 12: return 19;
-      default:
-      System.err.println("Wrong April Tag");
-       return -1; 
-    }
-
-      
   }
-}
+
+//DOES NOT WORK because top camera does not align with the reef
 public Pose2d getStationPose2d(int AprilTagId){
-  int id =  getStationAprilTagId(AprilTagId);
+  //int id =  getStationAprilTagId(AprilTagId);
 
-  Translation2d aprilTagTranslation2d =  aprilTagFieldLayout.getTagPose(id).get().getTranslation().toTranslation2d();
-  double rotation = id == 12 ?  Math.toRadians(234) : Math.toRadians(126);
+  Translation2d aprilTagTranslation2d =  aprilTagFieldLayout.getTagPose(AprilTagId).get().getTranslation().toTranslation2d();
+  double rotation = 0;
   
-
+  switch (AprilTagId) {
+    case 12:
+      rotation = Math.toRadians(234);
+      break;
+    case 13:
+      rotation = Math.toRadians(126);
+      break;
+    case 1:
+      rotation = Math.toRadians(126 + 180);
+      break;
+    case 2:
+      rotation = Math.toRadians(234 - 180);
+      break;
+    default:
+      System.out.println("Invalid AprilTagId");
+      break;
+  }
+  
   Translation2d fromAprilTagToRobot = new Translation2d(Math.cos(rotation), Math.sin(rotation));
 
   return new Pose2d(aprilTagTranslation2d.minus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
 }
-
-private int getStationAprilTagId(int id){
-  //if the id is in the red alliance, convert it to its blue allience equivalent
-  switch (id) {
-    case 1:
-      return 13;
-    case 2:
-      return 12;
-    default:
-      return id;
-  }
 }
 
-}

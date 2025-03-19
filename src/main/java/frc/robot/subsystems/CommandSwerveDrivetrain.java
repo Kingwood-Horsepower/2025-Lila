@@ -22,8 +22,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -243,6 +246,35 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
         
+        // i hope this sends swerve data
+        // edit: it just stops the swerve train from working entirely
+        // SmartDashboard.putData("Swerve Drive", new Sendable() {
+        //     @Override
+        //     public void initSendable(SendableBuilder builder) {
+        //     builder.setSmartDashboardType("SwerveDrive");
+            
+        //     builder.addDoubleProperty("Front Left Angle", () -> getState().ModuleStates[1].angle.getRadians(), null);
+        //     builder.addDoubleProperty("Front Left Velocity", () -> getState().ModuleStates[1].speedMetersPerSecond, null);
+            
+        //     builder.addDoubleProperty("Front Right Angle", () -> getState().ModuleStates[0].angle.getRadians(), null);
+        //     builder.addDoubleProperty("Front Right Velocity", () -> getState().ModuleStates[0].speedMetersPerSecond, null);
+            
+        //     builder.addDoubleProperty("Back Left Angle", () -> getState().ModuleStates[2].angle.getRadians(), null);
+        //     builder.addDoubleProperty("Back Left Velocity", () -> getState().ModuleStates[2].speedMetersPerSecond, null);
+            
+        //     builder.addDoubleProperty("Back Right Angle", () -> getState().ModuleStates[3].angle.getRadians(), null);
+        //     builder.addDoubleProperty("Back Right Velocity", () -> getState().ModuleStates[3].speedMetersPerSecond, null);
+
+        //     builder.addDoubleProperty("Robot Angle", () -> getState().RawHeading.getRadians(), null);
+        //     }
+        //     });
+
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        /* Assume 20ms update rate, get battery voltage from WPILib */
+        updateSimState(0.020, RobotController.getBatteryVoltage());
     }
 
     private void startSimThread() {
@@ -266,24 +298,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         .withDriveRequestType(DriveRequestType.Velocity);
 
     //Unused as of now
-    private final PIDController xController = new PIDController(5.8, 0, 0.5);
-    private final PIDController yController = new PIDController(5.8, 0, 0.5);
-    private final PIDController headingController = new PIDController(3.2, 0, 0.3);
+    private final PIDController xController = new PIDController(5.6, 0, 0.4);
+    private final PIDController yController = new PIDController(5.6, 0, 0.4);
+    private final PIDController headingController = new PIDController(2.8, 0, 0.3);
 
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
         Pose2d pose = getRobotPose();
- 
-        double rotation = Math.toRadians(pose.getRotation().getDegrees());
-        if(rotation > (Math.PI/2) && sample.heading < 0 ){
-            rotation -= (Math.PI * 2);
-        }
         //System.out.println("est: " +pose.getTranslation());
         //System.out.println("right: " + Double.toString(sample.x) + "   y: " + Double.toString(sample.y));
-        System.out.println("Degreediff: " + (rotation - sample.heading));
-        System.out.println("Pose: " + rotation);
-        //System.out.println("Degreediff: " + (sample.heading));
-        //System.out.println("Robpot: " + (pose.getRotation().getDegrees()));
+        System.out.println("Xdiff: " + (pose.getTranslation().getX()-sample.x));
 
         //WE NEED TO APPLY PID AND FEED FORWARD
         //use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
@@ -295,25 +319,26 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         ChassisSpeeds speeds = new ChassisSpeeds(
             sample.vx + xController.calculate(pose.getX(), sample.x),
             sample.vy,
-            sample.omega + headingController.calculate(rotation, sample.heading)
+            sample.omega
         );
 
         // Apply the generated speeds
         this.setControl(trajectoryRequest.withSpeeds(speeds));
     }
-    public void StopDriveTrain(){
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    public void stopRobot(){
         ChassisSpeeds speeds = new ChassisSpeeds(
-            0,
-            0,
-            0
+            0, 0, 0
         );
 
         // Apply the generated speeds
-        this.setControl(trajectoryRequest.withSpeeds(speeds));
+        this.setControl(brake);
+
     }
     public Pose2d getRobotPose()
     {
         return this.getState().Pose;
     }
+   
 
 }
