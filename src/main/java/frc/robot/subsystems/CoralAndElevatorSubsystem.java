@@ -1,7 +1,5 @@
-package frc.robot.managers;
+package frc.robot.subsystems;
 
-import frc.robot.subsystems.CoralIntake;
-import frc.robot.subsystems.Elevator;
 import static frc.robot.Constants.ElevatorConstants.*;
 
 import java.util.function.BooleanSupplier;
@@ -11,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.CoralAndElevatorState;
 
-public class CoralAndElevatorStateManager {
+public class CoralAndElevatorSubsystem {
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake();
 
@@ -46,8 +44,9 @@ public class CoralAndElevatorStateManager {
 
     private Command rizzTheLevel4GyattCommand(BooleanSupplier endCondition) {
         return Commands.sequence(
-            Commands.run(() -> coralIntake.setRollerVelocity(-1), coralIntake).until(endCondition),
-            moveToNormalState(L4END)
+            Commands.run(() -> coralIntake.setRollerVelocity(-1), coralIntake).until(endCondition)
+            //moveToNormalState(L4END)
+            //i will add something here
         );
     }
 
@@ -61,58 +60,65 @@ public class CoralAndElevatorStateManager {
             () -> lastState == L4);
     }
 
-    public Command moveToState(CoralAndElevatorState newState) {
+    // the public commands
+
+    private Command moveToState(CoralAndElevatorState newState) {
         return new ConditionalCommand(
             // if i cant go to this new state
-            Commands.none(), 
+            Commands.runOnce(() -> {
+                System.out.print("Error, can't go to this state, (alberts state machine): ");
+                System.out.print(newState.toString());
+                System.out.print(" old state: ");
+                System.out.println(lastState.toString())
+;            }), 
             // else
             moveToNormalState(newState),
             () -> newState.canComeFrom != null && newState.canComeFrom != lastState.canGoTo
         );
     }
 
-    public Command score(BooleanSupplier endCondition) {
-        return Commands.sequence(
-            scoringCommand(endCondition),
+    public void scheduleNewState(CoralAndElevatorState newState) {
+        moveToState(newState).schedule();
+    }
+
+    public void score() {
+        scoringCommand(() -> coralIntake.runningLowAmps()).schedule();
+    }
+
+    public void moveDown() {
+        Commands.sequence(
             moveToState(STOW_DOWN), 
             moveToState(STOW_UP)
-        );
+        ).schedule();
     }
 
-    public Command intake(BooleanSupplier endCondition) {
-        return Commands.sequence(
-            moveToState(INTAKE),
-            scoringCommand(endCondition),
-            moveToState(STOW_UP)
-        );
+    public void startIntake() {
+        moveToState(INTAKE).schedule();
     }
 
-    public Command jiggle() {
-        return Commands.sequence(
-            moveToState(STOW_UP),
-            
-            moveToState(STOW_UP)
-        );
+    public void endIntake() {
+        moveToState(STOW_UP).schedule();
     }
+
 
     public void incrementELevatorScoringLevel() {
-        scoringLevel = (scoringLevel + 1) % 5;
-        moveToState(scoringStates[scoringLevel]);
+        scoringLevel = Math.min(scoringLevel + 1, 4);
+        moveToState(scoringStates[scoringLevel]).schedule();
     }
 
     public void decrementELevatorScoringLevel() {
-        scoringLevel = (scoringLevel - 1) % 5;
-        moveToState(scoringStates[scoringLevel]);
+        scoringLevel = Math.max(scoringLevel - 1, 0);
+        moveToState(scoringStates[scoringLevel]).schedule();
     }
 
     public void incrementDeAlgaeifyScoringLevel() {
-        deAlgaeifyLevel = (deAlgaeifyLevel + 1) % 3;
-        moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+        deAlgaeifyLevel = Math.min(deAlgaeifyLevel + 1, 2);
+        moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
     }
 
     public void decrementDeAlgaeifyScoringLevel() {
-        deAlgaeifyLevel = (deAlgaeifyLevel - 1) % 3;
-        moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+        deAlgaeifyLevel = Math.max(deAlgaeifyLevel - 1, 0);
+        moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
     }
 
 
