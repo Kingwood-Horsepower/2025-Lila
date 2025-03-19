@@ -154,7 +154,7 @@ public class CoralAndElevatorManager {
         
 
         // if i am not near zero, or not set to 0, or i have coral set to down position
-        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0 || coralIntake.hasCoral) {
+        if (!elevator.getIsNearZero() || elevator.getElevatorLevel() > 0) {  // || coralIntake.hasCoral
             coralIntake.setSetPoint(.26);
             System.out.println("stow down");
         }
