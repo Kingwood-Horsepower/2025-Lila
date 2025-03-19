@@ -13,7 +13,8 @@ import org.opencv.core.Mat;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -23,9 +24,15 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -33,99 +40,64 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.AlgaeConstants;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.StateMachine.PlayerStateMachine;
+import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.AlignToStationCommand;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.managers.VisionManager;
+import frc.robot.managers.CoralAndElevatorManager;
+import frc.robot.managers.SwerveDriveManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.Winch;
-import frc.robot.CoralAndElevatorManager;
 
 public class RobotContainer {
-    //Data
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-    private final double translationVelocityMult = 0.65; // Cannot be more than 1
-    private final double rotVelocityMult = .75; 
-    private boolean isPointingRight;                                                                                     // max angular velocity
-
-    //SwerveRequestes
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.01)
-            .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 1% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);// (not) Use open-loop control for drive motors
-           //.withSteerRequestType(SteerRequestType.);
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     
     // Subsystems
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public static CameraSubsystem camera = new CameraSubsystem(); // this was public static final
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
-    private final Auto auto;
-    private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager(this);
     private final Winch winch = new Winch();
-
+    private final Auto auto;
+    private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager();
+    
+    
     // Other references
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-    public final CommandXboxController driverController = new CommandXboxController(0);
-    public final Trigger targetAquired = new Trigger(() -> camera.hasDownTarget());
-        
-    // SlewRaeLimiters
-    private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
-    private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
-    private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(1.3);
 
-    // Coral Commands (Some command are public because used by the Auto class)
-  private Command alignRobotWithAprilTag;
-    private Command moveCageUpCommand;
-    private Command moveCageDownCommand;
+    private final CommandXboxController driverController = new CommandXboxController(0);
+    public final SwerveDriveManager swerveDriveManager = new SwerveDriveManager(driverController);
+    public final VisionManager visionManager =  new VisionManager(swerveDriveManager);
+    private final PlayerStateMachine stateMachine = new PlayerStateMachine(swerveDriveManager, visionManager);
+        
+
+    // public static final String tagKey = "tag to align to";
+    // private static int tag = 21;
+
+    // Commands and Triggers
+    private Command alignToReefCommand = new AlignToReefCommand(swerveDriveManager, visionManager, ()->driverController.povRight().getAsBoolean());
+    private Command alignToStationCommand = new AlignToStationCommand(swerveDriveManager, visionManager);
+    private Trigger elevatorLimitSwitch = new Trigger(()-> coralAndElevatorManager.getElevator().getIsLimitSwitchZerod());
+
 
     public RobotContainer() {     
         configureCommands();
-        configureBindings();
-        drivetrain.registerTelemetry(logger::telemeterize);
-        resetPose();
-        auto = new Auto(drivetrain, coralAndElevatorManager, this);
+        configureBindings();  
+        auto = new Auto(swerveDriveManager, coralAndElevatorManager, this);
+
     }
 
     /* #region configureCommands */
     private void configureCommands() {    
         //align robot with april tag
-        alignRobotWithAprilTag = getAlignWithAprilTagCommand();       
-        moveCageUpCommand = Commands.sequence(
-            coralAndElevatorManager.getSetElevatorCommand(0),
-            Commands.runOnce(() -> algaeIntake.setSetPoint(Constants.AlgaeConstants.ALGAE_DOWN_POINT)),
-            winch.winchForwardCommand().until(driverController.rightBumper())
-        );
-        moveCageUpCommand = Commands.sequence(
-            Commands.runOnce(() -> algaeIntake.setSetPoint(Constants.AlgaeConstants.ALGAE_DOWN_POINT)),
-            coralAndElevatorManager.getSetElevatorCommand(0),
-            winch.winchForwardCommand().onlyWhile(driverController.povUp())
-        );
-        moveCageDownCommand = Commands.sequence(
-            Commands.runOnce(() -> algaeIntake.setSetPoint(Constants.AlgaeConstants.ALGAE_DOWN_POINT)),
-            coralAndElevatorManager.getSetElevatorCommand(0),
-            winch.winchReverseCommand().onlyWhile(driverController.povDown())
-        );
+        //alignRobotWithAprilTag = getAlignWithAprilTagCommand();       
     }
     
     /* #endregion */
 
+
     /* #region configureBindings */
     private void configureBindings() {
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive
-                        .withVelocityX(driveLimiterX.calculate(driverController.getLeftY()) * translationVelocityMult
-                                * MaxSpeed)
-                        .withVelocityY(driveLimiterY.calculate(driverController.getLeftX()) * translationVelocityMult
-                                * MaxSpeed)
-                        .withRotationalRate(driveLimiterRot.calculate(driverController.getRightX()) * -1
-                                * rotVelocityMult * MaxAngularRate)));
-
         // driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
         //driverController.a().onTrue((Commands.runOnce(SignalLogger::start)));
         //driverController.b().onTrue((Commands.runOnce(SignalLogger::stop)));
@@ -136,8 +108,6 @@ public class RobotContainer {
 
         //driverController.b().whileTrue(alignRobotWithAprilTag);
 
-        // ======= ALGAE BINDINGS =======
-        
         // algae intake command
         driverController.leftTrigger(0.1).whileTrue(
             algaeIntake.intake()
@@ -148,124 +118,120 @@ public class RobotContainer {
             algaeIntake.score()
         );
 
-        // ======= ELEVATOR BINDINGS =======
-
         // coral elevator increment level
         driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
-        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf)); 
+        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));                
         
-        //Change face direction
-        driverController.b().onTrue(Commands.runOnce(() -> isPointingRight = true));
-        driverController.x().onTrue(Commands.runOnce(() -> isPointingRight = false));
+        //driverController.b().whileTrue(coralAndElevatorManager.getMoveRollersCommand());
 
-        // ======= CORAL BINDINGS =======
-
-        // coral score commands
+        // coral score command
+        // uses stow
         driverController.rightBumper().onTrue(Commands.run(() -> {}));
-        driverController.rightBumper().onFalse(coralAndElevatorManager.getScoreCoralComand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-        
-        
+        driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand(() -> !driverController.rightBumper().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
         // coral intake command
-        driverController.rightTrigger(0.01).onTrue(              
-           coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean(), 5).onlyWhile(driverController.rightTrigger():: getAsBoolean).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-        
-        // ======= CORAL AUTOMATION COMMANDS =======
-        driverController.back().onTrue(
-            getAlignWithReefCommand().onlyWhile(driverController.back()));
-        driverController.start().onTrue(Commands.runOnce(this::resetPose));
-        
-         // ======= CLIMBS COMMANDS =======
-        driverController.povUp().onTrue(moveCageUpCommand);
-        driverController.povDown().onTrue(moveCageDownCommand);
-        
+        // uses stow
+        driverController.start().onTrue(Commands.runOnce(swerveDriveManager::invertControls));  
+        driverController.b().toggleOnFalse(swerveDriveManager.setSwerveToSlowDriveCommand());
 
-        // left
-        // driverController.rightBumper()
-        //     .and(driverController.x()).onTrue(
-                
-        //     );
+        //driverController.b().whileTrue(getAlignWithAprilTagCommand());
+        //driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(visionManager.getBestDownTargetOptional().isPresent() ? visionManager.getBestDownTargetOptional().get().getSkew() : -100)));
+   
+        elevatorLimitSwitch.onTrue(Commands.runOnce(()->coralAndElevatorManager.getElevator().resetEncoders()));
+
+        driverController.x().onTrue(coralAndElevatorManager.getCoralIntake().jiggleIntakeLol(()->coralAndElevatorManager.getCoralIntake().getRollerEncoderPosition()));
+
+        driverController.rightTrigger(0.01).onTrue(              
+           coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        
+        driverController.povRight().onTrue(alignToReefCommand);
+        driverController.povLeft().onTrue(alignToReefCommand);
+        driverController.rightTrigger().and(driverController.povUp()).onTrue(alignToStationCommand);
+
+        // driverController.povUp().onTrue(Commands.startEnd(
+        //     ()-> {
+        //         algaeIntake.setSetPoint(AlgaeConstants.ALGAE_DOWN_POINT);
+        //         winch.runWinch(-1);
+        //     },
+        //     ()->winch.runWinch(0), 
+        //     winch, algaeIntake));
+
+        //             driverController.povDown().onTrue(Commands.startEnd(
+        //             ()-> {
+        //                 algaeIntake.setSetPoint(AlgaeConstants.ALGAE_DOWN_POINT);
+        //                 winch.runWinch(1);
+        //             },
+        //             ()->winch.runWinch(0), 
+        //             winch, algaeIntake));
+
+        //             driverController.povCenter().onTrue(Commands.startEnd(
+        //             ()-> {
+        //                 algaeIntake.setSetPoint(AlgaeConstants.ALGAE_DOWN_POINT);
+        //                 winch.runWinch(0);
+        //             },
+        //             ()->winch.runWinch(0), 
+        //             winch, algaeIntake));
+
+
+        // ---STATE MACHINE ---
+        //Only prints stuff right now
+        driverController.rightBumper().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onBumperPressed();}));
+
+        driverController.rightBumper().onFalse(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onBumperUnpressed();}));
+
+        driverController.rightTrigger().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onTriggerPressed();}));
+
+        driverController.rightTrigger().onFalse(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onTriggerUnpressed();}));
+
+
+        driverController.y().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onY();}));
+
+        driverController.a().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onA();}));
+
+        driverController.b().onTrue(Commands.runOnce(
+                () -> {stateMachine.getPlayerState().onB();}));
+    
+        driverController.x().onTrue(Commands.runOnce(
+                () -> {stateMachine.getPlayerState().onX();}));    
+
+        driverController.back().onTrue(Commands.runOnce(
+            () -> {stateMachine.getPlayerState().onBack();}));
+
 
     }
     /* #endregion */
 
     /* #region Other Methods*/
-    public void UpdateRobotPosition() {
-        //System.out.println("swerveRot: " + drivetrain.getRobotPose().getRotation().getRadians());
-        //System.out.println("swervePos: " + drivetrain.getRobotPose().getTranslation());
-
-        if (camera != null) {
-            //Right camera
-            var visionEst = camera.getEstimatedGlobalRightPose();
-            visionEst.ifPresent(
-                    est -> {
-                        //System.out.println("right: " +est.estimatedPose.getTranslation());
-                        SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
-
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
-                    });
-            //Left camera
-
-            visionEst = camera.getEstimatedGlobalLeftPose();
-            visionEst.ifPresent(
-                    est -> {
-                        //System.out.println("left: " + est.estimatedPose.getTranslation());
-                        SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+    public void UpdateRobotPosition(){
+        visionManager.UpdateRobotPosition();
+        SmartDashboard.putBoolean("Has Target", visionManager.getBestDownTargetOptional().isPresent());
         
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
-                    });
-
-            //Up camera
-
-            visionEst = camera.getEstimatedGlobalUpPose();
-            visionEst.ifPresent(
-                    est -> {
-                        //System.out.println("up: " + est.estimatedPose.getTranslation());
-                        SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraUpOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
-        
-                        drivetrain.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds);
-                    });
-        }
-
-    }
-
-    public void resetPose() {
-        // The first pose in an autonomous path is often a good choice.
-        //var startPose = new Pose2d(new Translation2d(Inches.of(19), Inches.of(44.5)), new Rotation2d(Math.PI));
-        var startPose = new Pose2d(AutoConstants.getStartingPosition(), new Rotation2d(Math.PI));
-        drivetrain.resetPose(startPose);
     }
 
     public void autonomousPeriodic(){
-        auto.PollAutoRoutine();
+        if(!driverController.b().getAsBoolean()){
+            auto.PollAutoRoutine();
+
+        }
     }
-    public void disableAuto(){
+    public void disabledAuto(){
         auto.KillAutoRoutine();
+        swerveDriveManager.stopRobot();
     }
+
+    // public void teleopInit() {
+    //     coralAndElevatorManager.getElevator().resetEncoders();
+    // }
+
     /* #endregion */
 
 
-    public Command getAlignWithAprilTagCommand()
-    {
-        return  drivetrain.applyRequest(() ->
-        drive.withVelocityX((camera.getDownTargetRange() - (Constants.CameraConstants.kDistanceFromApriltagWhenScoring-Constants.CameraConstants.kRobotToRightCam.getX())) * MaxSpeed*0.12559)
-        .withVelocityY(driverController.getLeftX() * MaxSpeed)
-        .withRotationalRate(-1.0 * (camera.getDownTargetYaw()/50)* MaxAngularRate)).onlyWhile(targetAquired);
 
-    }
-    public Command getAlignWithReefCommand(){
-       Command driveComm = new DriveToPoseCommand(drivetrain, camera, () -> isPointingRight);
-       return driveComm.onlyIf(() -> camera.hasDownTarget());
-    }
-    public Command getAlignWithStationCommand(){
-        Command driveComm = new AlignToStationCommand(drivetrain, camera);
-        return driveComm.onlyIf(() -> camera.hasUpTarget());
-     }
-    public void getGoalCoralPose(){
-        //iuhiuhi
-        //help
-    }
+
 }

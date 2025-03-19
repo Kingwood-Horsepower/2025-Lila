@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -16,25 +18,19 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
+  private boolean isAutoStarted = false;
+
   public Robot() {
     m_robotContainer = new RobotContainer();
-    CommandScheduler.getInstance()
-    .onCommandInitialize(
-        command ->
-            // Shuffleboard.addEventMarker(
-            //     "Command initialized", command.getName(), EventImportance.kNormal));
-            SmartDashboard.putString("commands", "initialize " + command.getName()));
-  CommandScheduler.getInstance()
-    .onCommandFinish(
-        command ->
-            // Shuffleboard.addEventMarker(
-            //     "Command finished", command.getName(), EventImportance.kNormal));
-            SmartDashboard.putString("commands", "end command " + command.getName()));
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
+    if(m_robotContainer != null){
+      m_robotContainer.UpdateRobotPosition();
+    }
+    //m_
   }
 
   @Override
@@ -48,7 +44,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_robotContainer.resetPose();
+    isAutoStarted = true;
+    //m_robotContainer.swerveDriveManager.setStartPose();;
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -63,24 +60,36 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousExit() {
-    m_robotContainer.disableAuto();
+    m_robotContainer.disabledAuto();
   }
 
   @Override
   public void teleopInit() {
-    System.out.println(RobotContainer.camera.getCoralScoreTransform(8, false));
-    System.out.println(RobotContainer.camera.getCoralScoreTransform(8, true));
-    System.out.println(RobotContainer.camera.getStationPose2d(12));
-    //m_robotContainer.resetPose();
+    if(!isAutoStarted){
+      m_robotContainer.swerveDriveManager.setStartPose();
+    }
+    isAutoStarted = false;
     
+    //m_robotContainer.loadPreferences();
+  
   }
 
   @Override
   public void teleopPeriodic() 
   {
-    if(m_robotContainer != null){
-      m_robotContainer.UpdateRobotPosition();
-    }
+    //robotContainer.sendSwerveData();
+    // CommandScheduler.getInstance()
+    //   .onCommandInitialize(
+    //       command ->
+    //           // Shuffleboard.addEventMarker(
+    //           //     "Command initialized", command.getName(), EventImportance.kNormal));
+    //           SmartDashboard.putString("commands", "initialize " + command.getName()));
+    // CommandScheduler.getInstance()
+    //   .onCommandFinish(
+    //       command ->
+    //           // Shuffleboard.addEventMarker(
+    //           //     "Command finished", command.getName(), EventImportance.kNormal));
+    //           SmartDashboard.putString("commands", "end command " + command.getName()));
   }
 
   @Override
@@ -90,6 +99,7 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+    
   }
 
   @Override
@@ -100,6 +110,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void simulationPeriodic() {
-    
+    //m_robotContainer.visionManager.printScoringPosition();
   }
 }
