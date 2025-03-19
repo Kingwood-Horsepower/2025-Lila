@@ -52,6 +52,7 @@ import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralAndElevatorSubsystem;
 import frc.robot.subsystems.Winch;
 
 public class RobotContainer {
@@ -68,7 +69,8 @@ public class RobotContainer {
     private final CommandXboxController driverController = new CommandXboxController(0);
     public final SwerveDriveManager swerveDriveManager = new SwerveDriveManager(driverController);
     public final VisionManager visionManager =  new VisionManager(swerveDriveManager);
-    private final PlayerStateMachine stateMachine = new PlayerStateMachine(swerveDriveManager, visionManager);
+    public final CoralAndElevatorSubsystem coralAndElevatorSubsystem = new CoralAndElevatorSubsystem();
+    private final PlayerStateMachine stateMachine = new PlayerStateMachine(swerveDriveManager, visionManager, coralAndElevatorSubsystem);
         
 
     // public static final String tagKey = "tag to align to";
@@ -131,22 +133,22 @@ public class RobotContainer {
 
         // coral intake command
         // uses stow
-        driverController.start().onTrue(Commands.runOnce(swerveDriveManager::invertControls));  
-        driverController.b().toggleOnFalse(swerveDriveManager.setSwerveToSlowDriveCommand());
+        // driverController.start().onTrue(Commands.runOnce(swerveDriveManager::invertControls));  
+        // driverController.b().toggleOnFalse(swerveDriveManager.setSwerveToSlowDriveCommand());
 
-        //driverController.b().whileTrue(getAlignWithAprilTagCommand());
-        //driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(visionManager.getBestDownTargetOptional().isPresent() ? visionManager.getBestDownTargetOptional().get().getSkew() : -100)));
+        // //driverController.b().whileTrue(getAlignWithAprilTagCommand());
+        // //driverController.x().onTrue(Commands.runOnce(() ->  System.out.println(visionManager.getBestDownTargetOptional().isPresent() ? visionManager.getBestDownTargetOptional().get().getSkew() : -100)));
    
-        elevatorLimitSwitch.onTrue(Commands.runOnce(()->coralAndElevatorManager.getElevator().resetEncoders()));
+        // elevatorLimitSwitch.onTrue(Commands.runOnce(()->coralAndElevatorManager.getElevator().resetEncoders()));
 
-        driverController.x().onTrue(coralAndElevatorManager.getCoralIntake().jiggleIntakeLol(()->coralAndElevatorManager.getCoralIntake().getRollerEncoderPosition()));
+        // driverController.x().onTrue(coralAndElevatorManager.getCoralIntake().jiggleIntakeLol(()->coralAndElevatorManager.getCoralIntake().getRollerEncoderPosition()));
 
-        driverController.rightTrigger(0.01).onTrue(              
-           coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        // driverController.rightTrigger(0.01).onTrue(              
+        //    coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         
-        driverController.povRight().onTrue(alignToReefCommand);
-        driverController.povLeft().onTrue(alignToReefCommand);
-        driverController.rightTrigger().and(driverController.povUp()).onTrue(alignToStationCommand);
+        // driverController.povRight().onTrue(alignToReefCommand);
+        // driverController.povLeft().onTrue(alignToReefCommand);
+        // driverController.rightTrigger().and(driverController.povUp()).onTrue(alignToStationCommand);
 
         // driverController.povUp().onTrue(Commands.startEnd(
         //     ()-> {

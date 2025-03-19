@@ -12,8 +12,6 @@ public class DriveState extends PlayerState{
     {
         super.Enter();
         player.swerveDriveManager.setSwerveToNormalDriveCommand().schedule();
-        //Elevator to 0
-        //Stop Rollers
         System.out.println("Entered Drive State");
     }
     @Override public void Exit(){
@@ -24,7 +22,10 @@ public class DriveState extends PlayerState{
         player.stateMachine.ChangeState(player.intakeState);
     }
     @Override public void onY(){
-        player.stateMachine.ChangeState(player.alignmentState);
+        if(player.coralAndElevatorSubsystem.hasCoral())
+            player.stateMachine.ChangeState(player.alignmentState);
+        else
+            player.stateMachine.ChangeState(player.algeePickupState);
     }
 
 }

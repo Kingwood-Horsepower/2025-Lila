@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
 import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.managers.SwerveDriveManager;
 
 public class AlignmentState extends PlayerState{
     private Command driveToReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->driverController.b().getAsBoolean());
@@ -11,12 +12,14 @@ public class AlignmentState extends PlayerState{
 
     public AlignmentState(){
         super();
+        //When the alignment is not working it gives control back to the player, only x robot centric
+        player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.getSwerveDriveScoringCommand());
     }
     @Override public void Enter()
     {
         super.Enter();
-        //driveToClosestReefCommand.schedule();
-        //Elevator to 1
+        driveToClosestReefCommand.schedule();
+        player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
         System.out.println("Entered Alignment State");
     }
     @Override public void Exit(){
@@ -28,10 +31,17 @@ public class AlignmentState extends PlayerState{
     }
 
     @Override public void onX(){
-        //driveToReefCommand.schedule();
+        driveToReefCommand.schedule();
     }
     @Override public void onB(){
-        //driveToReefCommand.schedule();
+        driveToReefCommand.schedule();
+    }
+
+    @Override public void onY(){
+        player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+    }
+    @Override public void onA(){
+        player.coralAndElevatorSubsystem.decrementElevatorScoringLevel();
     }
 
 

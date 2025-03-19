@@ -81,8 +81,8 @@ public class CoralAndElevatorSubsystem {
         moveToState(newState).schedule();
     }
 
-    public void score() {
-        scoringCommand(() -> coralIntake.runningLowAmps()).schedule();
+    public Command score() {
+        return scoringCommand(() -> coralIntake.runningLowAmps());
     }
 
     public void moveDown() {
@@ -101,12 +101,12 @@ public class CoralAndElevatorSubsystem {
     }
 
 
-    public void incrementELevatorScoringLevel() {
+    public void incrementElevatorScoringLevel() {
         scoringLevel = Math.min(scoringLevel + 1, 4);
         moveToState(scoringStates[scoringLevel]).schedule();
     }
 
-    public void decrementELevatorScoringLevel() {
+    public void decrementElevatorScoringLevel() {
         scoringLevel = Math.max(scoringLevel - 1, 0);
         moveToState(scoringStates[scoringLevel]).schedule();
     }
@@ -116,10 +116,15 @@ public class CoralAndElevatorSubsystem {
         moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
     }
 
-    public void decrementDeAlgaeifyScoringLevel() {
+    public boolean decrementDeAlgaeifyScoringLevel() {
         deAlgaeifyLevel = Math.max(deAlgaeifyLevel - 1, 0);
         moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
+        return deAlgaeifyLevel == 0; //It's useful for the player state Machine
     }
+
+    public boolean hasCoral(){
+        return coralIntake.hasCoral;
+      }
 
 
 

@@ -7,8 +7,10 @@ import frc.robot.StateMachine.states.AlignmentState;
 import frc.robot.StateMachine.states.DriveState;
 import frc.robot.StateMachine.states.IntakeState;
 import frc.robot.StateMachine.states.ScoringState;
+import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
+import frc.robot.subsystems.CoralAndElevatorSubsystem;
 
 public class PlayerStateMachine {
     public StateMachine stateMachine;
@@ -21,14 +23,16 @@ public class PlayerStateMachine {
     public ScoringState scoringState = new ScoringState();
 
     public SwerveDriveManager swerveDriveManager;
-    public VisionManager    visionManager;
+    public VisionManager visionManager;
+    public CoralAndElevatorSubsystem  coralAndElevatorSubsystem;
 
-    public PlayerStateMachine(SwerveDriveManager swerveDriveManager, VisionManager visionManager)
+    public PlayerStateMachine(SwerveDriveManager swerveDriveManager, VisionManager visionManager, CoralAndElevatorSubsystem coralAndElevatorSubsystem)
     {
         PlayerState.player = this;
         
         this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;
+        this.coralAndElevatorSubsystem = coralAndElevatorSubsystem;
         stateMachine = new StateMachine(driveState);
     }
     public PlayerState getPlayerState(){

@@ -105,6 +105,7 @@ public class SwerveDriveManager {
         command.addRequirements(drivetrain);
         return command;
     }
+
     public Command setSwerveToSlowDriveCommand(){
         Command command =  drivetrain.applyRequest(() -> driveRobotCentric
         .withVelocityX(-driverController.getLeftY()* translationVelocityMult
@@ -113,6 +114,17 @@ public class SwerveDriveManager {
             * MaxSpeed * 0.2 )
         .withRotationalRate(driverController.getRightX()* -1
             * rotVelocityMult * MaxAngularRate * 0.4));
+
+        command.addRequirements(drivetrain);
+        return command;
+    }
+
+    public Command getSwerveDriveScoringCommand(){
+        Command command =  drivetrain.applyRequest(() -> driveRobotCentric
+        .withVelocityX(-driverController.getLeftY()* translationVelocityMult
+            * MaxSpeed  * 0.2 )
+        .withVelocityY(0)
+        .withRotationalRate(0));
 
         command.addRequirements(drivetrain);
         return command;
