@@ -43,6 +43,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlgaeConstants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.StateMachine.PlayerStateMachine;
+import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.AlignToStationCommand;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.generated.TunerConstants;
@@ -74,7 +75,7 @@ public class RobotContainer {
     // private static int tag = 21;
 
     // Commands and Triggers
-    private Command driveToPoseCommand = new DriveToPoseCommand(swerveDriveManager, visionManager, ()->driverController.povRight().getAsBoolean());
+    private Command alignToReefCommand = new AlignToReefCommand(swerveDriveManager, visionManager, ()->driverController.povRight().getAsBoolean());
     private Command alignToStationCommand = new AlignToStationCommand(swerveDriveManager, visionManager);
     private Trigger elevatorLimitSwitch = new Trigger(()-> coralAndElevatorManager.getElevator().getIsLimitSwitchZerod());
 
@@ -143,8 +144,8 @@ public class RobotContainer {
         driverController.rightTrigger(0.01).onTrue(              
            coralAndElevatorManager.getIntakeCoralCommand(() -> coralAndElevatorManager.hasCoral() | !driverController.rightTrigger().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
         
-        driverController.povRight().onTrue(driveToPoseCommand);
-        driverController.povLeft().onTrue(driveToPoseCommand);
+        driverController.povRight().onTrue(alignToReefCommand);
+        driverController.povLeft().onTrue(alignToReefCommand);
         driverController.rightTrigger().and(driverController.povUp()).onTrue(alignToStationCommand);
 
         // driverController.povUp().onTrue(Commands.startEnd(

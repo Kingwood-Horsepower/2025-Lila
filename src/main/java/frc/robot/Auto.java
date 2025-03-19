@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.AutoConstants.TargetCoralStation;
+import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.managers.SwerveDriveManager;
@@ -116,7 +117,7 @@ public class Auto {
 
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
-        Command driveToPoseCommand = new DriveToPoseCommand(swerveDriveManager, robotContainer.visionManager, null);
+        Command driveToPoseCommand = new AlignToReefCommand(swerveDriveManager, robotContainer.visionManager, null);
         return Commands.sequence(
             Commands.runOnce(swerveDriveManager::stopRobot),
             driveToPoseCommand.withDeadline(coralAndElevatorManager.getSetElevatorCommand(3)),

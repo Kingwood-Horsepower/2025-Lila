@@ -56,6 +56,11 @@ public class CoralAndElevatorState {
         this.canComeFrom = canComeFrom;
         this.canGoTo = canGoTo;
     }
+
+    @Override
+    public String toString() {
+        return "e: " + String.valueOf(elevatorPosition) + " cStart: " + String.valueOf(coralPrePosition) + " cEnd: " + String.valueOf(coralEndPosition) + " r: " + String.valueOf(runRollers);
+    }
     
     
 

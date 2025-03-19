@@ -2,11 +2,12 @@ package frc.robot.StateMachine.states;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
+import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.DriveToPoseCommand;
 
 public class AlignmentState extends PlayerState{
-    private Command driveToReefCommand = new DriveToPoseCommand(player.swerveDriveManager, player.visionManager, ()->driverController.b().getAsBoolean());
-    private Command driveToClosestReefCommand = new DriveToPoseCommand(player.swerveDriveManager, player.visionManager, null);
+    private Command driveToReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->driverController.b().getAsBoolean());
+    private Command driveToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null);
 
     public AlignmentState(){
         super();

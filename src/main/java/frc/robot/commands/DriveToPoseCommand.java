@@ -34,13 +34,12 @@ public class DriveToPoseCommand extends Command {
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(10,2);
     private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 10);
 
-    private int tagToChase = 17;
+    //private int tagToChase = 17;
     protected Pose3d goal = null;
 
     protected final SwerveDriveManager swerveDriveManager;
     protected final VisionManager visionManager;
 
-    private BooleanSupplier isRight;
 
     protected final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.2, X_CONSTRAINTS);
     protected final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
@@ -50,27 +49,6 @@ public class DriveToPoseCommand extends Command {
     // private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
     //    .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
     
-    
-
-
-    /**
-    * Creates a new drive to target command.
-    *
-    * @param drivetrain The subsystem used by this command.
-    */
-    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager, BooleanSupplier isRight) {
-        
-        this.swerveDriveManager = swerveDriveManager;
-        this.visionManager = visionManager;
-        this.isRight = isRight;
-        
-        xController.setTolerance(0.2);
-        yController.setTolerance(0.2);
-        thetaController.setTolerance(Units.degreesToRadians(3));
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);   
-        
-        addRequirements(swerveDriveManager.getDrivetrain());
-    }
 
     public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager) {
         
@@ -85,45 +63,16 @@ public class DriveToPoseCommand extends Command {
         addRequirements(swerveDriveManager.getDrivetrain());
     }
 
-    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, Supplier<Pose3d> goal, VisionManager visionManager) {
-        
-        this.swerveDriveManager = swerveDriveManager;
-        this.visionManager = visionManager;
-        this.isRight = null;
-        this.goal=goal.get();
-        
-        xController.setTolerance(0.2);
-        yController.setTolerance(0.2);
-        thetaController.setTolerance(Units.degreesToRadians(3));
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);   
-        
-        addRequirements(swerveDriveManager.getDrivetrain());
-    }
-
     @Override
     public void initialize() {
         // reset controllers
 
-        // reset(double measuredPosition, double measuredVelocity)
         xController.reset(swerveDriveManager.getRobotPose().getX());
         yController.reset(swerveDriveManager.getRobotPose().getY());
         thetaController.reset(swerveDriveManager.getRobotPose().getRotation().getRadians());
 
-        //In the auto routine, isRight is null 
-        // if goal is still null, then we are using it to align to the reef
-        // otherwise, supply it a goal as a parameter
-        //if(goal == null) {
-            if(isRight == null)
-            {
-                goal = new Pose3d(visionManager.getClosestRobotScoringPosition());
-            }
-            else
-            {
-                goal = new Pose3d(visionManager.getRobotScoringPosition(isRight.getAsBoolean()));
-            }
-        //}
+        goal = initializeGoal();
 
-        System.out.print(" tag id" + tagToChase);
     }
 
     public void execute() {
@@ -140,6 +89,12 @@ public class DriveToPoseCommand extends Command {
         double tolerance = 0.03;
         return Math.abs(current-target) < tolerance;
     }
+
+    public Pose3d initializeGoal() {
+        System.out.println("no goal given, goal is set to current robot pose");
+        return new Pose3d(swerveDriveManager.getRobotPose());
+    }
+
   
     @Override
     public boolean isFinished() {

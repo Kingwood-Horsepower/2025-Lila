@@ -10,17 +10,10 @@ public class AlignToStationCommand extends DriveToPoseCommand {
     public AlignToStationCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager) {
         super(swerveDriveManager, visionManager);
     }
-    
+
     @Override
-    public void initialize() {
-        // reset controllers
-
-        xController.reset(swerveDriveManager.getRobotPose().getX());
-        yController.reset(swerveDriveManager.getRobotPose().getY());
-        thetaController.reset(swerveDriveManager.getRobotPose().getRotation().getRadians());
-
-        goal = new Pose3d(visionManager.getRobotIntakePosition());
+    public Pose3d initializeGoal() {
+        return new Pose3d(visionManager.getRobotIntakePosition());
     }
-  
-
+    
 }
