@@ -36,7 +36,7 @@ public class Constants {
         public static final int[] kReefIDs = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
         public static final int[] kStationIDs = {12, 13, 1, 2};
 
-        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(20);
+        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(23);
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5);
 
         public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
