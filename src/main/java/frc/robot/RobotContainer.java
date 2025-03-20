@@ -83,7 +83,7 @@ public class RobotContainer {
     public RobotContainer() {     
         configureCommands();
         configureBindings();  
-        auto = new Auto(swerveDriveManager, this);
+        auto = new Auto(swerveDriveManager, visionManager, coralAndElevatorSubsystem);
 
     }
 
@@ -109,15 +109,6 @@ public class RobotContainer {
         //driverController.b().whileTrue(alignRobotWithAprilTag);
 
         // // algae intake command
-        // driverController.leftTrigger(0.1).whileTrue(
-        //     algaeIntake.intake()
-        // );
-
-        // // algae score command
-        // driverController.leftBumper().whileTrue(
-        //     algaeIntake.score()
-        // );
-
         // // coral elevator increment level
         // driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
         // driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));                
@@ -202,6 +193,18 @@ public class RobotContainer {
 
         driverController.back().onTrue(Commands.runOnce(
             () -> {stateMachine.getPlayerState().onBack();}));
+
+
+
+        //ALGEE
+        driverController.leftTrigger(0.1).whileTrue(
+                algaeIntake.intake()
+            );
+
+        driverController.leftBumper().whileTrue(
+                algaeIntake.score()
+            );
+    
 
 
     }

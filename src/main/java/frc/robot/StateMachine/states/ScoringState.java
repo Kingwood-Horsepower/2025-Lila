@@ -12,7 +12,13 @@ public class ScoringState extends PlayerState{
     @Override public void Enter()
     {
         super.Enter();
-        (player.coralAndElevatorSubsystem.score().andThen(Commands.runOnce(() -> player.stateMachine.ChangeState(player.driveState)))).schedule();
+        Commands.sequence(
+            player.coralAndElevatorSubsystem.score(),
+            player.swerveDriveManager.goBackCommand().withTimeout(0.2),
+            Commands.runOnce(() -> player.stateMachine.ChangeState(player.driveState))
+        ).schedule();
+
+        player.estimatedHasCoral = false;
         System.out.println("Entered Score State");
     }
     @Override public void Exit(){

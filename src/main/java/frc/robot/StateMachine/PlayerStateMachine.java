@@ -25,6 +25,8 @@ public class PlayerStateMachine {
     public VisionManager visionManager;
     public CoralAndElevatorSubsystem  coralAndElevatorSubsystem;
 
+    public boolean estimatedHasCoral = false;
+
     public PlayerStateMachine(SwerveDriveManager swerveDriveManager, VisionManager visionManager, CoralAndElevatorSubsystem coralAndElevatorSubsystem)
     {
         PlayerState.player = this;

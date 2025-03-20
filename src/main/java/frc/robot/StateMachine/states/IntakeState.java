@@ -10,7 +10,7 @@ public class IntakeState extends PlayerState{
     @Override public void Enter()
     {
         super.Enter();
-        player.swerveDriveManager.setSwerveToSlowDriveCommand().schedule();
+        //player.swerveDriveManager.setSwerveToSlowDriveCommand().schedule();
         player.coralAndElevatorSubsystem.startIntake();
         System.out.println("Entered Intake State");
     }
@@ -20,6 +20,7 @@ public class IntakeState extends PlayerState{
 
     @Override public void onTriggerUnpressed(){
         player.coralAndElevatorSubsystem.endIntake();
+        player.estimatedHasCoral = true;
         player.stateMachine.ChangeState(player.driveState);
     }
 

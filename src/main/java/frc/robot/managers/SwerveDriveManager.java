@@ -130,6 +130,17 @@ public class SwerveDriveManager {
         return command;
     }
 
+
+    public Command goBackCommand(){
+        Command command =  drivetrain.applyRequest(() -> driveRobotCentric
+        .withVelocityX(-0.6 * MaxSpeed)
+        .withVelocityY(0)
+        .withRotationalRate(0));
+
+        command.addRequirements(drivetrain);
+        return command;
+    }
+
     public void setSwerveDriveChassisSpeeds(ChassisSpeeds speeds){
         drivetrain.setControl(trajectoryRequest.withSpeeds(speeds));
     }

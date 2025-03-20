@@ -132,7 +132,7 @@ public class CoralAndElevatorSubsystem {
     }
 
     public boolean hasCoral(){
-        return !coralIntake.hasCoral;
+        return coralIntake.hasCoral;
       }
 
 

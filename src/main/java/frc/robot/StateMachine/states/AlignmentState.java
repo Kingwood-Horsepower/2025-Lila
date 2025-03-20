@@ -20,8 +20,8 @@ public class AlignmentState extends PlayerState{
     @Override public void Enter()
     {
         super.Enter();
-        //alignToClosestReefCommand.schedule();
-        swerveTestCommand.schedule();
+        alignToClosestReefCommand.schedule();
+        //swerveTestCommand.schedule();
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
         System.out.println("Entered Alignment State");
     }

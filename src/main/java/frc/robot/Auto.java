@@ -13,19 +13,22 @@ import frc.robot.Constants.AutoConstants.TargetCoralStation;
 import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.managers.SwerveDriveManager;
+import frc.robot.managers.VisionManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralAndElevatorSubsystem;
 
 import static frc.robot.Constants.AutoConstants.*;
 
 public class Auto {
     private final AutoFactory autoFactory;
-    private final RobotContainer robotContainer;
-
     private final AutoRoutine autoRoutine;
-    private final SwerveDriveManager swerveDriveManager;
 
-    public Auto(SwerveDriveManager swerveDriveManager, RobotContainer _robotContainer)
+    private final SwerveDriveManager swerveDriveManager;
+    private final VisionManager visionManager;
+    private final CoralAndElevatorSubsystem coralAndElevatorSubsystem;
+
+    public Auto(SwerveDriveManager swerveDriveManager,  VisionManager visionManager, CoralAndElevatorSubsystem coralAndElevatorSubsystem)
     {   
         autoFactory = new AutoFactory(
             swerveDriveManager::getRobotPose, // A function that returns the current robot pose
@@ -36,7 +39,9 @@ public class Auto {
         );
 
         this.swerveDriveManager = swerveDriveManager;
-        robotContainer = _robotContainer;
+        this.visionManager = visionManager;
+        this.coralAndElevatorSubsystem = coralAndElevatorSubsystem;
+
         //autoRoutine = getAutoRoutine();
         autoRoutine = getTestRoutine();
 
@@ -114,11 +119,21 @@ public class Auto {
 
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
-        Command driveToPoseCommand = new AlignToReefCommand(swerveDriveManager, robotContainer.visionManager, null);
+        Command driveToPoseCommand = new AlignToReefCommand(swerveDriveManager, visionManager, null);
+        Command moveElevatorUpCommand = Commands.runOnce(() -> {
+            coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+            coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+            coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+        });
+
+
+
         return Commands.sequence(
             Commands.runOnce(swerveDriveManager::stopRobot),
-            //driveToPoseCommand.withDeadline(coralAndElevatorManager.getSetElevatorCommand(3)),
-            //coralAndElevatorManager.getScoreCoralComand(() -> false), //Should be hasCoral in the future
+            moveElevatorUpCommand,
+            driveToPoseCommand,
+            new WaitCommand(0.4),     
+            coralAndElevatorSubsystem.score(),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
             nexTrajectory.cmd()
         );
@@ -126,7 +141,9 @@ public class Auto {
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
                 Commands.runOnce(swerveDriveManager::stopRobot),
-                //coralAndElevatorManager.getIntakeCoralCommand(() -> false), //Should be hasCoral in the future
+                Commands.runOnce(coralAndElevatorSubsystem::startIntake),
+                new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
+                Commands.runOnce(coralAndElevatorSubsystem::endIntake),
                 Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
                 nexTrajectory.cmd()
             );
