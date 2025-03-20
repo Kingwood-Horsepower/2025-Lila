@@ -64,13 +64,13 @@ public class RobotContainer {
     private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager();
     
     
-    // Other references
+    // Other references (Managers in public so they can be used in robot)
 
     private final CommandXboxController driverController = new CommandXboxController(0);
     public final SwerveDriveManager swerveDriveManager = new SwerveDriveManager(driverController);
     public final VisionManager visionManager =  new VisionManager(swerveDriveManager);
     public final CoralAndElevatorSubsystem coralAndElevatorSubsystem = new CoralAndElevatorSubsystem();
-    private final PlayerStateMachine stateMachine = new PlayerStateMachine(swerveDriveManager, visionManager, coralAndElevatorSubsystem);
+    public final PlayerStateMachine stateMachine = new PlayerStateMachine(swerveDriveManager, visionManager, coralAndElevatorSubsystem);
         
 
     // public static final String tagKey = "tag to align to";

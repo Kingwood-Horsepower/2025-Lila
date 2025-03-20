@@ -38,4 +38,9 @@ public class PlayerStateMachine {
     public PlayerState getPlayerState(){
         return stateMachine.getState();
     }
+
+    public void startStateMachine()
+    {
+        stateMachine.startStateMachine();
+    }
 }

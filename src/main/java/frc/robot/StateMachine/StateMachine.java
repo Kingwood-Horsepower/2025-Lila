@@ -9,7 +9,7 @@ public class StateMachine {
     public StateMachine(PlayerState startingState)
     {
         currentState = startingState;
-        currentState.Enter();
+
     }
 
     public void ChangeState(PlayerState newState)
@@ -29,6 +29,11 @@ public class StateMachine {
     public PlayerState getState()
     {
         return currentState;
+    }
+
+    public void startStateMachine()
+    {
+        currentState.Enter();
     }
 
 }

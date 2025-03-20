@@ -7,8 +7,10 @@ import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.managers.SwerveDriveManager;
 
 public class AlignmentState extends PlayerState{
-    private Command driveToReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->driverController.b().getAsBoolean());
-    private Command driveToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null);
+    private Command alignToReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->driverController.b().getAsBoolean());
+    private Command alignToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null);
+
+    private Command swerveTestCommand = new DriveToPoseCommand(player.swerveDriveManager, player.visionManager);
 
     public AlignmentState(){
         super();
@@ -18,7 +20,8 @@ public class AlignmentState extends PlayerState{
     @Override public void Enter()
     {
         super.Enter();
-        driveToClosestReefCommand.schedule();
+        //alignToClosestReefCommand.schedule();
+        swerveTestCommand.schedule();
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
         System.out.println("Entered Alignment State");
     }
@@ -31,10 +34,10 @@ public class AlignmentState extends PlayerState{
     }
 
     @Override public void onX(){
-        driveToReefCommand.schedule();
+        alignToReefCommand.schedule();
     }
     @Override public void onB(){
-        driveToReefCommand.schedule();
+        alignToReefCommand.schedule();
     }
 
     @Override public void onY(){
@@ -42,6 +45,12 @@ public class AlignmentState extends PlayerState{
     }
     @Override public void onA(){
         player.coralAndElevatorSubsystem.decrementElevatorScoringLevel();
+    }
+
+    @Override public void onBack()
+    {
+        player.coralAndElevatorSubsystem.moveDown();
+        super.onBack();
     }
 
 
