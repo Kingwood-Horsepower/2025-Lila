@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.CoralAndElevatorState;
 
 public class CoralAndElevatorSubsystem {
@@ -32,6 +33,10 @@ public class CoralAndElevatorSubsystem {
         L3ALGAE
     };
 
+    public CoralAndElevatorSubsystem(){
+        lastState = STOW_UP;
+    }
+
     private Command moveToNormalState(CoralAndElevatorState newState) {
         return Commands.sequence(
             coralIntake.moveToSetPoint(newState.coralPrePosition),
@@ -45,6 +50,8 @@ public class CoralAndElevatorSubsystem {
     private Command rizzTheLevel4GyattCommand(BooleanSupplier endCondition) {
         return Commands.sequence(
             Commands.run(() -> coralIntake.setRollerVelocity(-1), coralIntake).until(endCondition)
+            .andThen(new WaitCommand(0.4))
+            
             //moveToNormalState(L4END)
             //i will add something here
         );
@@ -55,7 +62,9 @@ public class CoralAndElevatorSubsystem {
             // if lastState = L4
             rizzTheLevel4GyattCommand(endCondition), 
             // else
-            Commands.run(() -> coralIntake.setRollerVelocity(-1), coralIntake).until(endCondition), 
+            Commands.run(() -> coralIntake.setRollerVelocity(-1), coralIntake).until(endCondition)
+            .andThen( new WaitCommand(0.4))
+            , 
 
             () -> lastState == L4);
     }
@@ -69,7 +78,7 @@ public class CoralAndElevatorSubsystem {
                 System.out.print("Error, can't go to this state, (alberts state machine): ");
                 System.out.print(newState.toString());
                 System.out.print(" old state: ");
-                System.out.println(lastState.toString())
+                //System.out.println(lastState.toString())
 ;            }), 
             // else
             moveToNormalState(newState),
@@ -123,7 +132,7 @@ public class CoralAndElevatorSubsystem {
     }
 
     public boolean hasCoral(){
-        return coralIntake.hasCoral;
+        return !coralIntake.hasCoral;
       }
 
 

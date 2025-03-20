@@ -62,7 +62,7 @@ public class Constants {
         public static final CoralAndElevatorState L3 = new CoralAndElevatorState(15.75, .26, .26);
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(27, .23, .23);
         public static final CoralAndElevatorState L4END = new CoralAndElevatorState(27.8, .23, .23);
-        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(1.5, .04, .04, 1, STOW_UP, STOW_UP);
+        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(1.5, .04, .04, 1);
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(9, .26, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(15.75, .26, .23, -1);
         

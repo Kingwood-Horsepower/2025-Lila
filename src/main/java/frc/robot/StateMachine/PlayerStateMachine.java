@@ -7,7 +7,6 @@ import frc.robot.StateMachine.states.AlignmentState;
 import frc.robot.StateMachine.states.DriveState;
 import frc.robot.StateMachine.states.IntakeState;
 import frc.robot.StateMachine.states.ScoringState;
-import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
 import frc.robot.subsystems.CoralAndElevatorSubsystem;
@@ -16,11 +15,11 @@ public class PlayerStateMachine {
     public StateMachine stateMachine;
 
     //States
-    public DriveState driveState = new DriveState();
-    public AlignmentState alignmentState = new AlignmentState();
-    public IntakeState intakeState = new IntakeState();
-    public AlgeePickupState algeePickupState = new AlgeePickupState();
-    public ScoringState scoringState = new ScoringState();
+    public DriveState driveState;
+    public AlignmentState alignmentState;
+    public IntakeState intakeState;
+    public AlgeePickupState algeePickupState;
+    public ScoringState scoringState;
 
     public SwerveDriveManager swerveDriveManager;
     public VisionManager visionManager;
@@ -33,6 +32,14 @@ public class PlayerStateMachine {
         this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;
         this.coralAndElevatorSubsystem = coralAndElevatorSubsystem;
+
+
+        driveState = new DriveState();
+        alignmentState = new AlignmentState();
+        intakeState = new IntakeState();
+        algeePickupState = new AlgeePickupState();
+        scoringState = new ScoringState();
+
         stateMachine = new StateMachine(driveState);
     }
     public PlayerState getPlayerState(){

@@ -48,7 +48,6 @@ import frc.robot.commands.AlignToStationCommand;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.managers.VisionManager;
-import frc.robot.managers.CoralAndElevatorManager;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -61,7 +60,6 @@ public class RobotContainer {
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Winch winch = new Winch();
     private final Auto auto;
-    private final CoralAndElevatorManager coralAndElevatorManager = new CoralAndElevatorManager();
     
     
     // Other references (Managers in public so they can be used in robot)
@@ -79,13 +77,13 @@ public class RobotContainer {
     // Commands and Triggers
     private Command alignToReefCommand = new AlignToReefCommand(swerveDriveManager, visionManager, ()->driverController.povRight().getAsBoolean());
     private Command alignToStationCommand = new AlignToStationCommand(swerveDriveManager, visionManager);
-    private Trigger elevatorLimitSwitch = new Trigger(()-> coralAndElevatorManager.getElevator().getIsLimitSwitchZerod());
+    //private Trigger elevatorLimitSwitch = new Trigger(()-> coralAndElevatorManager.getElevator().getIsLimitSwitchZerod());
 
 
     public RobotContainer() {     
         configureCommands();
         configureBindings();  
-        auto = new Auto(swerveDriveManager, coralAndElevatorManager, this);
+        auto = new Auto(swerveDriveManager, this);
 
     }
 
@@ -110,26 +108,26 @@ public class RobotContainer {
 
         //driverController.b().whileTrue(alignRobotWithAprilTag);
 
-        // algae intake command
-        driverController.leftTrigger(0.1).whileTrue(
-            algaeIntake.intake()
-        );
+        // // algae intake command
+        // driverController.leftTrigger(0.1).whileTrue(
+        //     algaeIntake.intake()
+        // );
 
-        // algae score command
-        driverController.leftBumper().whileTrue(
-            algaeIntake.score()
-        );
+        // // algae score command
+        // driverController.leftBumper().whileTrue(
+        //     algaeIntake.score()
+        // );
 
-        // coral elevator increment level
-        driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
-        driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));                
+        // // coral elevator increment level
+        // driverController.y().onTrue(coralAndElevatorManager.getIncrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+        // driverController.a().onTrue(coralAndElevatorManager.getDecrementElevatorCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));                
         
-        //driverController.b().whileTrue(coralAndElevatorManager.getMoveRollersCommand());
+        // //driverController.b().whileTrue(coralAndElevatorManager.getMoveRollersCommand());
 
-        // coral score command
-        // uses stow
-        driverController.rightBumper().onTrue(Commands.run(() -> {}));
-        driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand(() -> !driverController.rightBumper().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        // // coral score command
+        // // uses stow
+        // driverController.rightBumper().onTrue(Commands.run(() -> {}));
+        // driverController.rightBumper().onTrue(coralAndElevatorManager.getScoreCoralComand(() -> !driverController.rightBumper().getAsBoolean()).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
         // coral intake command
         // uses stow

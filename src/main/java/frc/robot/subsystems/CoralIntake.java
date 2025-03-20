@@ -165,7 +165,7 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public boolean runningLowAmps(){
-        double threshold = 15;
+        double threshold = 35;
         return (rollerMotor.getOutputCurrent() < threshold);
     }
 
