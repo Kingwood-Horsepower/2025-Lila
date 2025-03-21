@@ -39,6 +39,8 @@ public class Constants {
         public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(23);
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5);
 
+        public static final double kDistanceFromApriltagWhenDealgeafy = inchesToMeters(20);
+
         public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
         public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(0.5); // center of the intake is 5 inches to the left of the center of the rboto
 
@@ -63,7 +65,7 @@ public class Constants {
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .23, .23);
         public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .23, .23);
         //public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(1.5, .04, .04, 1);
-        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .04, 1);
+        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .04, .4);
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .26, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(10.75, .26, .23, -1);
         

@@ -34,16 +34,21 @@ public class Winch extends SubsystemBase{
     }
 
     public Command winchForwardCommand() {
-        return Commands.startEnd(
+        return Commands.runOnce(
             ()->runWinch(1), 
-            ()->runWinch(0.1), 
             this);
     }
 
     public Command winchReverseCommand() {
-        return Commands.startEnd(
+        return Commands.runOnce(
             ()->runWinch(-1), 
-            ()->runWinch(0.1), 
             this);
     }
+
+    public Command winchStopCommand() {
+        return Commands.runOnce(
+            ()->runWinch(0), 
+            this);
+    }
+
 }

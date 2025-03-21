@@ -27,6 +27,14 @@ public abstract class PlayerState {
     public void onX(){}
     public void onB(){}
 
+    public void onPovLeft(){}
+    public void onPovRight(){}
+    public void onPovDown(){}
+    public void onPovUp(){}
+    public void onPovCenter(){}
+
+    public void onStart(){}
+
     public void onBack()
     {
         //onBack Always goes back to drive

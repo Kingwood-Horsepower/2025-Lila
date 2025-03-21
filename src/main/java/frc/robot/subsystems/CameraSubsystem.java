@@ -272,6 +272,20 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
 
   }
 
+  public Pose2d getDealgeafyPose2d(int AprilTagId){
+    boolean isBlue = AprilTagId > 15;
+    Translation2d reefCenter = isBlue ? kBlueReefCenter : kRedReefCenter;
+    
+    //Vector from the center to the april tag
+    Translation2d v = aprilTagFieldLayout.getTagPose(AprilTagId).get().getTranslation().toTranslation2d().minus(reefCenter);
+    double vMangnitude = v.getNorm();
+    Translation2d vNormalized = new Translation2d(v.getX()/vMangnitude, v.getY()/vMangnitude);
+    v = vNormalized.times(vMangnitude + kDistanceFromApriltagWhenDealgeafy);
+  
+    return new Pose2d(reefCenter.plus(v), 
+      new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
+  }
+
 //DOES NOT WORK because top camera does not align with the reef
 public Pose2d getStationPose2d(int AprilTagId){
   //int id =  getStationAprilTagId(AprilTagId);

@@ -123,7 +123,8 @@ public class SwerveDriveManager {
         Command command =  drivetrain.applyRequest(() -> driveRobotCentric
         .withVelocityX(-driverController.getLeftY()* translationVelocityMult
             * MaxSpeed  * 0.2 )
-        .withVelocityY(0)
+        .withVelocityY(-driverController.getRightX() * translationVelocityMult
+            * MaxSpeed * 0.2 )
         .withRotationalRate(0));
 
         command.addRequirements(drivetrain);
@@ -133,7 +134,7 @@ public class SwerveDriveManager {
 
     public Command goBackCommand(){
         Command command =  drivetrain.applyRequest(() -> driveRobotCentric
-        .withVelocityX(-0.6 * MaxSpeed)
+        .withVelocityX(-0.2 * MaxSpeed)
         .withVelocityY(0)
         .withRotationalRate(0));
 

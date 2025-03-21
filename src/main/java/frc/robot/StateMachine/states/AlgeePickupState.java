@@ -1,8 +1,14 @@
 package frc.robot.StateMachine.states;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
+import frc.robot.commands.AlignToReefCommand;
+import frc.robot.commands.DealgeafyAlignCommand;
 
 public class AlgeePickupState extends PlayerState{
+
+     private Command dealgeafyAlignCommand = new DealgeafyAlignCommand(player.swerveDriveManager, player.visionManager);
+
     public AlgeePickupState(){
         super();
     }
@@ -11,6 +17,7 @@ public class AlgeePickupState extends PlayerState{
     {
         super.Enter();
         player.coralAndElevatorSubsystem.incrementDeAlgaeifyScoringLevel();
+        dealgeafyAlignCommand.schedule();
         System.out.println("Entered AlgeePickup State");
     }
     @Override public void Exit(){
@@ -18,6 +25,7 @@ public class AlgeePickupState extends PlayerState{
     }
 
     @Override public void onY(){
+        dealgeafyAlignCommand.schedule();
         player.coralAndElevatorSubsystem.incrementDeAlgaeifyScoringLevel();
     }
     @Override public void onA(){

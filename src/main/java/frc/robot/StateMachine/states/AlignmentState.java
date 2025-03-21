@@ -7,6 +7,8 @@ import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.managers.SwerveDriveManager;
 
 public class AlignmentState extends PlayerState{
+    private boolean isRight = true;
+
     private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true);
     private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false);
 
@@ -19,12 +21,18 @@ public class AlignmentState extends PlayerState{
         //When the alignment is not working it gives control back to the player, only x robot centric
         player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.getSwerveDriveScoringCommand());
     }
+
+    public void setIsRight(boolean isRight) {
+        this.isRight = isRight;
+    } 
+
     @Override public void Enter()
     {
         super.Enter();
         alignToClosestReefCommand.schedule();
         //swerveTestCommand.schedule();
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+        player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.getSwerveDriveScoringCommand());
         System.out.println("Entered Alignment State");
     }
     @Override public void Exit(){
@@ -33,13 +41,6 @@ public class AlignmentState extends PlayerState{
 
     @Override public void onBumperPressed(){
         player.stateMachine.ChangeState(player.scoringState);
-    }
-
-    @Override public void onX(){
-        alignToLeftReefCommand.schedule();
-    }
-    @Override public void onB(){
-        alignToRightReefCommand.schedule();
     }
 
     @Override public void onY(){
@@ -53,6 +54,14 @@ public class AlignmentState extends PlayerState{
     {
         player.coralAndElevatorSubsystem.moveDown();
         super.onBack();
+    }
+
+    
+    @Override public void onPovLeft(){
+        alignToLeftReefCommand.schedule();
+    }
+    @Override public void onPovRight(){
+        alignToRightReefCommand.schedule();
     }
 
 

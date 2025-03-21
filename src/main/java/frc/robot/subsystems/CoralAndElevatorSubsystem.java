@@ -145,7 +145,19 @@ public class CoralAndElevatorSubsystem {
 
     public boolean hasCoral(){
         return coralIntake.hasCoral;
-      }
+    }
+
+    public Elevator getElevator() {
+        return elevator;
+    }
+
+    public CoralIntake getCoralIntake() {
+        return coralIntake;
+    }
+
+    public void jiggleIntake(){
+        coralIntake.jiggleIntakeLol( ()-> coralIntake.getRollerEncoderPosition());
+    }
 
 
 

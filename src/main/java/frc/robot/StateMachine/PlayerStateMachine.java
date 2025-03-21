@@ -9,7 +9,9 @@ import frc.robot.StateMachine.states.IntakeState;
 import frc.robot.StateMachine.states.ScoringState;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CoralAndElevatorSubsystem;
+import frc.robot.subsystems.Winch;
 
 public class PlayerStateMachine {
     public StateMachine stateMachine;
@@ -24,10 +26,12 @@ public class PlayerStateMachine {
     public SwerveDriveManager swerveDriveManager;
     public VisionManager visionManager;
     public CoralAndElevatorSubsystem  coralAndElevatorSubsystem;
+    public Winch winch;
+    public AlgaeIntake algaeIntake;
 
     public boolean estimatedHasCoral = false;
 
-    public PlayerStateMachine(SwerveDriveManager swerveDriveManager, VisionManager visionManager, CoralAndElevatorSubsystem coralAndElevatorSubsystem)
+    public PlayerStateMachine(SwerveDriveManager swerveDriveManager, VisionManager visionManager, CoralAndElevatorSubsystem coralAndElevatorSubsystem, Winch winch, AlgaeIntake algaeIntake)
     {
         PlayerState.player = this;
         
