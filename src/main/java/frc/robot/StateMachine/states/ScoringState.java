@@ -14,7 +14,7 @@ public class ScoringState extends PlayerState{
         super.Enter();
         Commands.sequence(
             player.coralAndElevatorSubsystem.score(),
-            player.swerveDriveManager.goBackCommand().withTimeout(0.2),
+            //player.swerveDriveManager.goBackCommand().withTimeout(0.2),
             Commands.runOnce(() -> player.stateMachine.ChangeState(player.driveState))
         ).schedule();
 
