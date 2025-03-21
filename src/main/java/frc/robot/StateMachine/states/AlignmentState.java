@@ -7,7 +7,9 @@ import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.managers.SwerveDriveManager;
 
 public class AlignmentState extends PlayerState{
-    private Command alignToReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->driverController.b().getAsBoolean());
+    private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true);
+    private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false);
+
     private Command alignToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null);
 
     private Command swerveTestCommand = new DriveToPoseCommand(player.swerveDriveManager, player.visionManager);
@@ -34,10 +36,10 @@ public class AlignmentState extends PlayerState{
     }
 
     @Override public void onX(){
-        alignToReefCommand.schedule();
+        alignToLeftReefCommand.schedule();
     }
     @Override public void onB(){
-        alignToReefCommand.schedule();
+        alignToRightReefCommand.schedule();
     }
 
     @Override public void onY(){

@@ -58,14 +58,14 @@ public class Constants {
         public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0, 0);
         public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26, .26);
         public static final CoralAndElevatorState L1 = new CoralAndElevatorState(4, .26, .26);
-        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(9, .26, .26);
-        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(15.75, .26, .26);
-        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(27, .23, .23);
-        public static final CoralAndElevatorState L4END = new CoralAndElevatorState(27.8, .23, .23);
+        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(8.25, .26, .26);
+        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(14.25, .26, .26);
+        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .23, .23);
+        public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .23, .23);
         //public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(1.5, .04, .04, 1);
         public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .04, 1);
-        public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(9, .26, .23, -1);
-        public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(15.75, .26, .23, -1);
+        public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .26, .23, -1);
+        public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(10.75, .26, .23, -1);
         
 
     }

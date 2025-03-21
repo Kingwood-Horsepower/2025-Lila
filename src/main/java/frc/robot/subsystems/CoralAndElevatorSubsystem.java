@@ -62,7 +62,13 @@ public class CoralAndElevatorSubsystem {
             // if lastState = L4
             rizzTheLevel4GyattCommand(endCondition), 
             // else
-            Commands.run(() -> coralIntake.setRollerVelocity(-1), coralIntake).until(endCondition)
+            Commands.run(() ->{
+             if(lastState == L1)
+                coralIntake.setRollerVelocity(-0.5);
+             else
+                coralIntake.setRollerVelocity(-1);
+        
+        }, coralIntake).until(endCondition)
             .andThen( new WaitCommand(0.4))
             , 
 
@@ -97,7 +103,8 @@ public class CoralAndElevatorSubsystem {
     public void moveDown() {
         Commands.sequence(
             moveToState(STOW_DOWN), 
-            moveToState(STOW_UP)
+            moveToState(STOW_UP),
+            Commands.runOnce(() -> resetAllIncrements())
         ).schedule();
     }
 
@@ -130,6 +137,11 @@ public class CoralAndElevatorSubsystem {
         moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
         return deAlgaeifyLevel == 0; //It's useful for the player state Machine
     }
+
+    public void resetAllIncrements() {
+        deAlgaeifyLevel = 0;
+        scoringLevel = 0;
+    } 
 
     public boolean hasCoral(){
         return coralIntake.hasCoral;

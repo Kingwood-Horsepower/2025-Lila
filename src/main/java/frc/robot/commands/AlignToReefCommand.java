@@ -12,6 +12,7 @@ public class AlignToReefCommand extends DriveToPoseCommand {
 
     public AlignToReefCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager, BooleanSupplier isRight) {
         super(swerveDriveManager, visionManager);
+        this.isRight = isRight;
     }
 
     @Override
