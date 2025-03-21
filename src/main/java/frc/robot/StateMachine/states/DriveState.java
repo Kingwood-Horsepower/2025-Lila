@@ -33,20 +33,20 @@ public class DriveState extends PlayerState{
     }
 
 
-    // private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true);
-    // private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false);
+    private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true);
+    private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false);
 
-    // @Override public void onPovLeft(){
-    //     if(player.coralAndElevatorSubsystem.hasCoral())
-    //     {
-    //         alignToLeftReefCommand.schedule();
-    //     }
-    // }
-    // @Override public void onPovRight(){
-    //     if(player.coralAndElevatorSubsystem.hasCoral())
-    //     {
-    //         alignToLeftReefCommand.schedule();
-    //     }
-    // }
+    @Override public void onPovLeft(){
+        if(player.coralAndElevatorSubsystem.hasCoral())
+        {
+            alignToLeftReefCommand.schedule();
+        }
+    }
+    @Override public void onPovRight(){
+        if(player.coralAndElevatorSubsystem.hasCoral())
+        {
+            alignToRightReefCommand.schedule();
+        }
+    }
 
 }

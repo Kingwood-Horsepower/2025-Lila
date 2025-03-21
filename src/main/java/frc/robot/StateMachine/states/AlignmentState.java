@@ -57,10 +57,10 @@ public class AlignmentState extends PlayerState{
     }
 
     
-    @Override public void onX(){
+    @Override public void onPovLeft(){
         alignToLeftReefCommand.schedule();
     }
-    @Override public void onB(){
+    @Override public void onPovRight(){
         alignToRightReefCommand.schedule();
     }
 
