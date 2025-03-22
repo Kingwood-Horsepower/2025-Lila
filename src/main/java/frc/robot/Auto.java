@@ -57,50 +57,49 @@ public class Auto {
     }
     
     @SuppressWarnings("unused")
-    AutoRoutine getAutoRoutine()
-    {
-        AutoRoutine routine = autoFactory.newRoutine("Autonomous");
-        AutoTrajectory goToCoralStation = getStartingAutoTrajectory(routine);
+    // AutoRoutine getAutoRoutine()
+    // {
+    //     AutoRoutine routine = autoFactory.newRoutine("Autonomous");
+    //     AutoTrajectory goToCoralStation = getStartingAutoTrajectory(routine);
 
-        //custom starting trajectory based on the starting position and the targetStation
-       routine.active().onTrue(
-        Commands.sequence(
-            goToCoralStation.resetOdometry(),
-            goToCoralStation.cmd()
-        )
-        );
-        //Move colar intake in the correct position
+    //     //custom starting trajectory based on the starting position and the targetStation
+    //    routine.active().onTrue(
+    //     Commands.sequence(
+    //         goToCoralStation.resetOdometry(),
+    //         goToCoralStation.cmd()
+    //     )
+    //     );
+    //     //Move colar intake in the correct position
 
-        AutoTrajectory goToCoral1 = routine.trajectory("Coral1S2");
-        AutoTrajectory goToCoral9 = routine.trajectory("Coral9S1");
+    //     AutoTrajectory goToCoral1 = routine.trajectory("Coral1S2");
+    //     AutoTrajectory goToCoral9 = routine.trajectory("Coral9S1");
 
-        //Go to the coral (coral 1 if station 2, coral 9 if station 1)
-        if(targetStation == TargetCoralStation.rightStation){
-            goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral9));
-        }else{
-            goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral1));
-        }
-        //Score Coral and come back to the station
-        AutoTrajectory goToCoral1R = routine.trajectory("Coral1S2R");
-        AutoTrajectory goToCoral9R = routine.trajectory("Coral9S1R");
+    //     //Go to the coral (coral 1 if station 2, coral 9 if station 1)
+    //     if(targetStation == TargetCoralStation.rightStation){
+    //         goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral9));
+    //     }else{
+    //         goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral1));
+    //     }
+    //     //Score Coral and come back to the station
+    //     AutoTrajectory goToCoral1R = routine.trajectory("Coral1S2R");
+    //     AutoTrajectory goToCoral9R = routine.trajectory("Coral9S1R");
 
-        goToCoral1.done().onTrue(ScoreCoralAndComeBack(goToCoral1R, true));     
-        goToCoral9.done().onTrue(ScoreCoralAndComeBack(goToCoral9R, true));
+    //     goToCoral1.done().onTrue(ScoreCoralAndComeBack(goToCoral1R, true));     
+    //     goToCoral9.done().onTrue(ScoreCoralAndComeBack(goToCoral9R, true));
 
-        AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
-        AutoTrajectory goToCoral10 = routine.trajectory("Coral10S1");
+    //     AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
+    //     AutoTrajectory goToCoral10 = routine.trajectory("Coral10S1");
 
-        goToCoral1R.done().onTrue(IntakeCoralAndGo(goToCoral2));
-        goToCoral9R.done().onTrue(IntakeCoralAndGo(goToCoral10));
-
-
+    //     goToCoral1R.done().onTrue(IntakeCoralAndGo(goToCoral2));
+    //     goToCoral9R.done().onTrue(IntakeCoralAndGo(goToCoral10));
 
 
-        return routine;
-    }
+    //     return routine;
+    // }
     AutoRoutine getTestRoutine()
     {
         AutoRoutine routine = autoFactory.newRoutine("Test");
+
         AutoTrajectory testTraj = routine.trajectory("Test");
         AutoTrajectory testTrajReversed = routine.trajectory("TestR");
 
