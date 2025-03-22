@@ -125,11 +125,13 @@ public class CoralAndElevatorSubsystem {
 
     public void incrementElevatorScoringLevel() {
         scoringLevel = Math.min(scoringLevel + 1, 4);
+        System.out.println(scoringLevel);
         moveToState(scoringStates[scoringLevel]).schedule();
     }
 
     public void decrementElevatorScoringLevel() {
         scoringLevel = Math.max(scoringLevel - 1, 0);
+        System.out.println(scoringLevel);
         moveToState(scoringStates[scoringLevel]).schedule();
     }
 
