@@ -89,13 +89,13 @@ public class VisionManager {
             visionEst.ifPresent(
                     est -> {
 
-                        
+                        //Ignore results that contain anything other than reef,s april tag
                         boolean hasBadAprilTag = false;
 
-                        for(PhotonTrackedTarget i : est.targetsUsed){
+                        for(PhotonTrackedTarget aprilTag : est.targetsUsed){
                             boolean isGood = false;
                             for(int id : kReefIDs){
-                                isGood = isGood || i.fiducialId == id;
+                                isGood = isGood || aprilTag.fiducialId == id;
                             }
                             hasBadAprilTag = hasBadAprilTag || !isGood;
                        }
@@ -114,12 +114,13 @@ public class VisionManager {
             visionEst = camera.getEstimatedGlobalLeftPose();
             visionEst.ifPresent(
                     est -> {
+                        //Ignore results that contain anything other than reef,s april tag
                         boolean hasBadAprilTag = false;
 
-                        for(PhotonTrackedTarget i : est.targetsUsed){
+                        for(PhotonTrackedTarget aprilTag : est.targetsUsed){
                             boolean isGood = false;
                             for(int id : kReefIDs){
-                                isGood = isGood || i.fiducialId == id;
+                                isGood = isGood || aprilTag.fiducialId == id;
                             }
                             hasBadAprilTag = hasBadAprilTag || !isGood;
                        }
@@ -147,16 +148,16 @@ public class VisionManager {
     }
 
     public Pose2d getRobotScoringPosition(boolean isRightCoral){
-        var target = getBestDownTargetOptional();
-        if(target.isPresent()){
+        // var target = getBestDownTargetOptional();
+        // if(target.isPresent()){
 
-            int targetId = target.get().fiducialId;
-            for (int reefId : kReefIDs) {
-                if (targetId == reefId) {
-                    return camera.getCoralScoreTransform(targetId, isRightCoral);
-                }           
-            }
-        }
+        //     int targetId = target.get().fiducialId;
+        //     for (int reefId : kReefIDs) {
+        //         if (targetId == reefId) {
+        //             return camera.getCoralScoreTransform(targetId, isRightCoral);
+        //         }           
+        //     }
+        // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
         System.out.println("No target found, using estimate using robot position");
@@ -183,15 +184,15 @@ public class VisionManager {
     }
 
     public Pose2d getRobotIntakePosition(){
-        var target = getBestDownTargetOptional();
-        if(target.isPresent()){
-            int targetId = target.get().fiducialId;
-            for (int reefId : kStationIDs) {
-                if (targetId == reefId) {
-                    return camera.getStationPose2d(targetId);
-                }           
-            }
-        }
+        // var target = getBestDownTargetOptional();
+        // if(target.isPresent()){
+        //     int targetId = target.get().fiducialId;
+        //     for (int reefId : kStationIDs) {
+        //         if (targetId == reefId) {
+        //             return camera.getStationPose2d(targetId);
+        //         }           
+        //     }
+        // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
         System.out.println("No target found, using estimate using robot position");
