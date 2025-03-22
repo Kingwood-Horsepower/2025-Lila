@@ -65,6 +65,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    CommandScheduler.getInstance().cancelAll();
     if(!isAutoStarted){
       m_robotContainer.swerveDriveManager.setStartPose();
     }
@@ -99,6 +100,7 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+    m_robotContainer.stateMachine.startStateMachineTest();
     
   }
 

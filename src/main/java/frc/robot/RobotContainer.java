@@ -229,12 +229,14 @@ public class RobotContainer {
 
         //ALGEE
         driverController.leftTrigger(0.1).whileTrue(
-                algaeIntake.intake()
-            );
+            algaeIntake.intake()
+        );
 
         driverController.leftBumper().whileTrue(
-                algaeIntake.score()
-            );
+            algaeIntake.score()
+        );
+
+        //SmartDashboard.putData("Autonomous Command", exampleCommand);
     
 
 

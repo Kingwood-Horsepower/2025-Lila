@@ -7,6 +7,7 @@ import frc.robot.StateMachine.states.AlignmentState;
 import frc.robot.StateMachine.states.DriveState;
 import frc.robot.StateMachine.states.IntakeState;
 import frc.robot.StateMachine.states.ScoringState;
+import frc.robot.StateMachine.states.TestingState;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
 import frc.robot.subsystems.AlgaeIntake;
@@ -22,6 +23,7 @@ public class PlayerStateMachine {
     public IntakeState intakeState;
     public AlgeePickupState algeePickupState;
     public ScoringState scoringState;
+    public TestingState testingState;
 
     public SwerveDriveManager swerveDriveManager;
     public VisionManager visionManager;
@@ -45,8 +47,9 @@ public class PlayerStateMachine {
         intakeState = new IntakeState();
         algeePickupState = new AlgeePickupState();
         scoringState = new ScoringState();
+        testingState = new TestingState();
 
-        stateMachine = new StateMachine(driveState);
+        stateMachine = new StateMachine(driveState, testingState);
     }
     public PlayerState getPlayerState(){
         return stateMachine.getState();
@@ -57,5 +60,12 @@ public class PlayerStateMachine {
         if(stateMachine.getState() == alignmentState)
             coralAndElevatorSubsystem.moveDown();
         stateMachine.startStateMachine();
+    }
+
+    public void startStateMachineTest() 
+    {
+        if(stateMachine.getState() == alignmentState) coralAndElevatorSubsystem.moveDown();
+        stateMachine.startStateMachineTest();
+
     }
 }
