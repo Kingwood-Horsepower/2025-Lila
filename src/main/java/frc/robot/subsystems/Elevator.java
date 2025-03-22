@@ -74,7 +74,7 @@ public class Elevator extends SubsystemBase{
     //private String maxExtensionPreferenceKey = "Elevator Max Extension Inches";
 
     private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(2000, 1000);
-    private final ProfiledPIDController elevatorController = new ProfiledPIDController(.5, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
+    private final ProfiledPIDController elevatorController = new ProfiledPIDController(.3, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
 
     //sim
     Mechanism2d mech = new Mechanism2d(20, 50);
@@ -132,31 +132,31 @@ public class Elevator extends SubsystemBase{
         this.setPoint = setPoint;
     }
 
-    public int getElevatorLevel() {
-        return elevatorLevel;
-    }
+    // public int getElevatorLevel() {
+    //     return elevatorLevel;
+    // }
 
-    public void incrementElevatorLevel(){
-        if (elevatorLevel == 4) elevatorLevel = 0;
-        else elevatorLevel += 1;
-        SmartDashboard.putNumber("elevator level", elevatorLevel);
-        System.out.println(elevatorLevel);
-    }
-    public void decrementElevatorLevel(){
-        if (elevatorLevel == 0) elevatorLevel = 4;
-        else elevatorLevel -= 1;
-        SmartDashboard.putNumber("elevator level", elevatorLevel);
-        System.out.println(elevatorLevel);
-    }
+    // public void incrementElevatorLevel(){
+    //     if (elevatorLevel == 4) elevatorLevel = 0;
+    //     else elevatorLevel += 1;
+    //     SmartDashboard.putNumber("elevator level", elevatorLevel);
+    //     System.out.println(elevatorLevel);
+    // }
+    // public void decrementElevatorLevel(){
+    //     if (elevatorLevel == 0) elevatorLevel = 4;
+    //     else elevatorLevel -= 1;
+    //     SmartDashboard.putNumber("elevator level", elevatorLevel);
+    //     System.out.println(elevatorLevel);
+    // }
 
-    public void setElevatorLevel(){
-        setSetPoint(ELEVATOR_LEVELS[elevatorLevel]);
-    }
+    // public void setElevatorLevel(){
+    //     setSetPoint(ELEVATOR_LEVELS[elevatorLevel]);
+    // }
 
-    public void setElevatorLevel(int level){
-        elevatorLevel = level;
-        setElevatorLevel();
-    }
+    // public void setElevatorLevel(int level){
+    //     elevatorLevel = level;
+    //     setElevatorLevel();
+    // }
 
     public double getLeadEncoderPosition() {
         double pos = -1;
@@ -226,7 +226,7 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
         SmartDashboard.putNumber("elevator setpoint", setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
-        SmartDashboard.putNumber("elevator level", getElevatorLevel());
+        //SmartDashboard.putNumber("elevator level", getElevatorLevel());
         SmartDashboard.putBoolean("is zeroed limitwsitch", isZerod);
         //SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
         SmartDashboard.putBoolean("elevator is near setpoint", getIsNearSetPoint());
