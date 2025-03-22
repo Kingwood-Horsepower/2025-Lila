@@ -143,6 +143,7 @@ public class Auto {
                 Commands.runOnce(swerveDriveManager::stopRobot),
                 Commands.runOnce(coralAndElevatorSubsystem::startIntake),
                 new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
+                new WaitCommand(0.2),     
                 Commands.runOnce(coralAndElevatorSubsystem::endIntake),
                 Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
                 nexTrajectory.cmd()

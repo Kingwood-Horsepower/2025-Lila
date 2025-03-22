@@ -6,10 +6,12 @@ public class StateMachine {
 
     private PlayerState currentState;
 
+    private PlayerState startingState;
+
     public StateMachine(PlayerState startingState)
     {
+        this.startingState = startingState;
         currentState = startingState;
-
     }
 
     public void ChangeState(PlayerState newState)
@@ -33,6 +35,7 @@ public class StateMachine {
 
     public void startStateMachine()
     {
+        currentState = startingState;
         currentState.Enter();
     }
 

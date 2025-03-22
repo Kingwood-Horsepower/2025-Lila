@@ -292,49 +292,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
-    //SwerveRequest used by the follow trajectory method;
-
-    private final SwerveRequest.ApplyFieldSpeeds trajectoryRequest = new SwerveRequest.ApplyFieldSpeeds()       
-        .withDriveRequestType(DriveRequestType.Velocity);
-
-    //Unused as of now
-    private final PIDController xController = new PIDController(5.6, 0, 0.4);
-    private final PIDController yController = new PIDController(5.6, 0, 0.4);
-    private final PIDController headingController = new PIDController(2.8, 0, 0.3);
-
-    public void followTrajectory(SwerveSample sample) {
-        // Get the current pose of the robot
-        Pose2d pose = getRobotPose();
-        //System.out.println("est: " +pose.getTranslation());
-        //System.out.println("right: " + Double.toString(sample.x) + "   y: " + Double.toString(sample.y));
-        System.out.println("Xdiff: " + (pose.getTranslation().getX()-sample.x));
-
-        //WE NEED TO APPLY PID AND FEED FORWARD
-        //use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
-        // ChassisSpeeds speeds = new ChassisSpeeds(
-        //     sample.vx + xController.calculate(pose.getX(), sample.x),
-        //     sample.vy + yController.calculate(pose.getY(), sample.y),
-        //     sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
-        // );
-        ChassisSpeeds speeds = new ChassisSpeeds(
-            sample.vx + xController.calculate(pose.getX(), sample.x),
-            sample.vy,
-            sample.omega
-        );
-
-        // Apply the generated speeds
-        this.setControl(trajectoryRequest.withSpeeds(speeds));
-    }
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    public void stopRobot(){
-        ChassisSpeeds speeds = new ChassisSpeeds(
-            0, 0, 0
-        );
-
-        // Apply the generated speeds
-        this.setControl(brake);
-
-    }
     public Pose2d getRobotPose()
     {
         return this.getState().Pose;
