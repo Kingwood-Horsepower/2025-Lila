@@ -259,10 +259,6 @@ public class RobotContainer {
         swerveDriveManager.stopRobot();
     }
 
-    public void teleopInit() {
-        stateMachine.getPlayerState().onBack();
-    }
-
     /* #endregion */
 
 
