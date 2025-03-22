@@ -84,8 +84,8 @@ public class Auto {
         AutoTrajectory goToCoral1R = routine.trajectory("Coral1S2R");
         AutoTrajectory goToCoral9R = routine.trajectory("Coral9S1R");
 
-        goToCoral1.done().onTrue(ScoreCoralAndComeBack(goToCoral1R));     
-        goToCoral9.done().onTrue(ScoreCoralAndComeBack(goToCoral9R));
+        goToCoral1.done().onTrue(ScoreCoralAndComeBack(goToCoral1R, true));     
+        goToCoral9.done().onTrue(ScoreCoralAndComeBack(goToCoral9R, true));
 
         AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
         AutoTrajectory goToCoral10 = routine.trajectory("Coral10S1");
@@ -110,7 +110,7 @@ public class Auto {
             testTraj.cmd()
         )
         );
-        testTraj.done().onTrue(ScoreCoralAndComeBack(testTrajReversed));
+        testTraj.done().onTrue(ScoreCoralAndComeBack(testTrajReversed, true));
         //testTrajReversed.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
         //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
         return routine;
@@ -118,8 +118,8 @@ public class Auto {
 
 
 
-    private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
-        Command driveToPoseCommand = new AlignToReefCommand(swerveDriveManager, visionManager, null, ()->false);//modify the boolean supplier to score l4
+    private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
+        Command driveToPoseCommand = new AlignToReefCommand(swerveDriveManager, visionManager, () -> isRightCoral, ()->false);//modify the boolean supplier to score l4
         Command moveElevatorUpCommand = Commands.runOnce(() -> {
             coralAndElevatorSubsystem.incrementElevatorScoringLevel();
             coralAndElevatorSubsystem.incrementElevatorScoringLevel();
