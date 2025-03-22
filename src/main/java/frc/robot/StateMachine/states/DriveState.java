@@ -1,5 +1,7 @@
 package frc.robot.StateMachine.states;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
 import frc.robot.StateMachine.PlayerStateMachine;
@@ -32,9 +34,10 @@ public class DriveState extends PlayerState{
             player.stateMachine.ChangeState(player.algeePickupState);
     }
 
+    private BooleanSupplier isL4 = () -> player.coralAndElevatorSubsystem.getScoringLevel() == 4;
 
-    private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true);
-    private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false);
+    private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true, isL4);
+    private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false, isL4);
 
     @Override public void onPovLeft(){
         if(player.coralAndElevatorSubsystem.hasCoral())

@@ -1,7 +1,10 @@
 package frc.robot.StateMachine.states;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
+
 import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.managers.SwerveDriveManager;
@@ -9,12 +12,16 @@ import frc.robot.managers.SwerveDriveManager;
 public class AlignmentState extends PlayerState{
     private boolean isRight = true;
 
-    private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true);
-    private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false);
+    private BooleanSupplier isL4 = () -> player.coralAndElevatorSubsystem.getScoringLevel() == 4;
 
-    private Command alignToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null);
+    private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true, isL4);
+    private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false, isL4);
+
+    private Command alignToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null, isL4);
 
     private Command swerveTestCommand = new DriveToPoseCommand(player.swerveDriveManager, player.visionManager);
+
+
 
     public AlignmentState(){
         super();
@@ -45,9 +52,11 @@ public class AlignmentState extends PlayerState{
 
     @Override public void onY(){
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+        alignToClosestReefCommand.schedule();
     }
     @Override public void onA(){
         player.coralAndElevatorSubsystem.decrementElevatorScoringLevel();
+        alignToClosestReefCommand.schedule();
     }
 
     @Override public void onBack()

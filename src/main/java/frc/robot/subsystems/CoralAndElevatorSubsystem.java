@@ -10,10 +10,13 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.CoralAndElevatorState;
 
+import frc.robot.managers.SwerveDriveManager;
+
 public class CoralAndElevatorSubsystem {
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake();
-
+    //private final SwerveDriveManager swerveDriveManager;
+    
     private CoralAndElevatorState lastState;
     private int scoringLevel = 0;
 
@@ -34,8 +37,11 @@ public class CoralAndElevatorSubsystem {
     };
 
     public CoralAndElevatorSubsystem(){
-        lastState = STOW_UP;
+        //lastState = STOW_UP;
     }
+    
+
+
 
     private Command moveToNormalState(CoralAndElevatorState newState) {
         return Commands.sequence(
@@ -157,6 +163,10 @@ public class CoralAndElevatorSubsystem {
 
     public void jiggleIntake(){
         coralIntake.jiggleIntakeLol( ()-> coralIntake.getRollerEncoderPosition());
+    }
+
+    public int getScoringLevel() {
+        return scoringLevel;
     }
 
 

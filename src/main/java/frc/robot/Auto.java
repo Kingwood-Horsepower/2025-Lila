@@ -119,7 +119,7 @@ public class Auto {
 
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory){
-        Command driveToPoseCommand = new AlignToReefCommand(swerveDriveManager, visionManager, null);
+        Command driveToPoseCommand = new AlignToReefCommand(swerveDriveManager, visionManager, null, ()->false);//modify the boolean supplier to score l4
         Command moveElevatorUpCommand = Commands.runOnce(() -> {
             coralAndElevatorSubsystem.incrementElevatorScoringLevel();
             coralAndElevatorSubsystem.incrementElevatorScoringLevel();

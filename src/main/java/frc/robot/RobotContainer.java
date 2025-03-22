@@ -76,11 +76,12 @@ public class RobotContainer {
     // private static int tag = 21;
 
     // Commands and Triggers
-    private Command alignToReefCommand = new AlignToReefCommand(swerveDriveManager, visionManager, ()->driverController.povRight().getAsBoolean());
+    private Command alignToReefCommand = new AlignToReefCommand(swerveDriveManager, visionManager, ()->driverController.povRight().getAsBoolean(), () -> coralAndElevatorSubsystem.getScoringLevel() == 4);
     private Command alignToStationCommand = new AlignToStationCommand(swerveDriveManager, visionManager);
     private Trigger elevatorLimitSwitch = new Trigger(()-> coralAndElevatorSubsystem.getElevator().getIsLimitSwitchZerod());
 
-
+    //these are used for L4 alignment in the coralAndElevatorSubsystem
+   
     public RobotContainer() {     
         configureCommands();
         configureBindings();  
@@ -258,9 +259,9 @@ public class RobotContainer {
         swerveDriveManager.stopRobot();
     }
 
-    // public void teleopInit() {
-    //     coralAndElevatorManager.getElevator().resetEncoders();
-    // }
+    public void teleopInit() {
+        stateMachine.getPlayerState().onBack();
+    }
 
     /* #endregion */
 

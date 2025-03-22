@@ -170,19 +170,21 @@ public class Elevator extends SubsystemBase{
         double tolerance = 2;  // in encoder rotations
         double currPosition = getLeadEncoderPosition(); 
         double targetPosition = setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS;
-        if ((currPosition > targetPosition - tolerance) && (currPosition < targetPosition + tolerance)) return true;
-        return false;
+        // System.out.print("elevatorIsNearSetPoint: ");
+        // System.out.println(Math.abs(currPosition-targetPosition));
+        return Math.abs(currPosition-targetPosition) < tolerance;
     }
 
     /**
      * Marked for Deprecation
      */    
-    public boolean getIsNearZero() {
-        double tolerance = 5; // in encoder rotations
-        double currPosition = getLeadEncoderPosition();
-        if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
-        return false;
-    }
+    // public boolean getIsNearZero() {
+    //     double tolerance = 5; // in encoder rotations
+    //     double currPosition = getLeadEncoderPosition();
+        
+    //     if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
+    //     return false;
+    // }
 
     public boolean getIsLimitSwitchZerod() {
         return isZerod;
@@ -226,7 +228,7 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putNumber("elevator setpoint", setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
         SmartDashboard.putNumber("elevator level", getElevatorLevel());
         SmartDashboard.putBoolean("is zeroed limitwsitch", isZerod);
-        SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
+        //SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
         SmartDashboard.putBoolean("elevator is near setpoint", getIsNearSetPoint());
         SmartDashboard.putNumber("elevator motor current", leadMotor.getOutputCurrent());
 

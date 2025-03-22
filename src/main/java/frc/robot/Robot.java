@@ -70,6 +70,7 @@ public class Robot extends TimedRobot {
     }
     isAutoStarted = false;
     m_robotContainer.stateMachine.startStateMachine();
+    m_robotContainer.teleopInit();
     
     //m_robotContainer.loadPreferences();
   

@@ -46,6 +46,11 @@ public class Constants {
 
     }
 
+    public static class AlignToL4Constants 
+    {
+        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(5);
+    }
+
     public static class ElevatorConstants
     {
         //Elevator Levels
@@ -65,7 +70,7 @@ public class Constants {
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .23, .23);
         public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .23, .23);
         //public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(1.5, .04, .04, 1);
-        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .04, .4);
+        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .04, 1);
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .26, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(10.75, .26, .23, -1);
         
