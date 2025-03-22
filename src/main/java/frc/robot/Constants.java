@@ -48,7 +48,7 @@ public class Constants {
 
     public static class AlignToL4Constants 
     {
-        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(5);
+        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(10);
     }
 
     public static class ElevatorConstants

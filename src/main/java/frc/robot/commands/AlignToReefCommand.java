@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import frc.robot.Constants.AlignToL4Constants;
 import frc.robot.managers.SwerveDriveManager;
@@ -28,8 +29,11 @@ public class AlignToReefCommand extends DriveToPoseCommand {
             else newGoal = visionManager.getRobotScoringPosition(isRight.getAsBoolean());
         //}
 
-        Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, newGoal.getRotation());
-        if (isL4.getAsBoolean()) newGoal.plus(l4Transform);
+        Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
+        if (isL4.getAsBoolean()) {
+            newGoal = newGoal.plus(l4Transform);
+            System.out.println("tranformed to l4");
+        }
 
         return new Pose3d(newGoal);
     }
