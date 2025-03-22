@@ -110,7 +110,7 @@ public class Auto {
             testTraj.cmd()
         )
         );
-        //testTraj.done().onTrue(ScoreCoralAndComeBack(testTrajReversed));
+        testTraj.done().onTrue(ScoreCoralAndComeBack(testTrajReversed));
         //testTrajReversed.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
         //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
         return routine;

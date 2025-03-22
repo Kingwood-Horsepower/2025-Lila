@@ -54,6 +54,8 @@ public class PlayerStateMachine {
 
     public void startStateMachine()
     {
+        if(stateMachine.getState() == alignmentState)
+            coralAndElevatorSubsystem.moveDown();
         stateMachine.startStateMachine();
     }
 }
