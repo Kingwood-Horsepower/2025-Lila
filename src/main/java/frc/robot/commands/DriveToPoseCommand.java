@@ -41,9 +41,9 @@ public class DriveToPoseCommand extends Command {
     protected final VisionManager visionManager;
 
 
-    protected final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.2, X_CONSTRAINTS);
-    protected final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
-    protected final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
+    protected static final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.2, X_CONSTRAINTS);
+    protected static final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
+    protected static final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
 
 
     // private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
