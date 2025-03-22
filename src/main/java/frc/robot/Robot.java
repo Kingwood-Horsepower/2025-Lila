@@ -77,21 +77,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() 
-  {
-    //robotContainer.sendSwerveData();
-    // CommandScheduler.getInstance()
-    //   .onCommandInitialize(
-    //       command ->
-    //           // Shuffleboard.addEventMarker(
-    //           //     "Command initialized", command.getName(), EventImportance.kNormal));
-    //           SmartDashboard.putString("commands", "initialize " + command.getName()));
-    // CommandScheduler.getInstance()
-    //   .onCommandFinish(
-    //       command ->
-    //           // Shuffleboard.addEventMarker(
-    //           //     "Command finished", command.getName(), EventImportance.kNormal));
-    //           SmartDashboard.putString("commands", "end command " + command.getName()));
-  }
+  {}
 
   @Override
   public void teleopExit() {

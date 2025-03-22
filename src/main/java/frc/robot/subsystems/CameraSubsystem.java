@@ -53,9 +53,9 @@ public class CameraSubsystem extends SubsystemBase {
   
   AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
-  PhotonPoseEstimator rightPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToRightCam);
-  PhotonPoseEstimator leftPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToLeftCam);
-  PhotonPoseEstimator upPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToUpCam);
+  PhotonPoseEstimator rightPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, kRobotToRightCam);
+  PhotonPoseEstimator leftPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, kRobotToLeftCam);
+  PhotonPoseEstimator upPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, kRobotToUpCam);
 
   double ambiguityRight;
   boolean hasTargetRight = false;
@@ -73,7 +73,12 @@ public class CameraSubsystem extends SubsystemBase {
   double targetRangeUp = 0;
 
   /** Creates a new CameraSubsystem. */
-  public CameraSubsystem() {}
+  public CameraSubsystem() {
+
+    rightPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    leftPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    upPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+  }
 
   @Override
   public void periodic() {
@@ -267,7 +272,7 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
     return new Pose2d(reefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag+kRobotToCoralIntakeLeftOffset))), 
     new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
   else 
-    return new Pose2d(reefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+inchesToMeters(0.5)))), 
+    return new Pose2d(reefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+kExtraLeftAlignmentAddition))), 
     new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
 
   }

@@ -40,6 +40,7 @@ public class PlayerStateMachine {
         this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;
         this.coralAndElevatorSubsystem = coralAndElevatorSubsystem;
+        this.winch = winch;
 
 
         driveState = new DriveState();
@@ -59,6 +60,9 @@ public class PlayerStateMachine {
     {
         if(stateMachine.getState() == alignmentState)
             coralAndElevatorSubsystem.moveDown();
+        else 
+            coralAndElevatorSubsystem.endIntake();
+    
         stateMachine.startStateMachine();
     }
 

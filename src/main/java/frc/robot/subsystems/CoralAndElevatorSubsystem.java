@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.CoralAndElevatorState;
 
-import frc.robot.managers.SwerveDriveManager;
 
 public class CoralAndElevatorSubsystem {
     private final Elevator elevator = new Elevator();

@@ -56,22 +56,9 @@ public class Elevator extends SubsystemBase{
     private final double ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS = ELEVATOR_GEAR_RATIO/ELEVATOR_SPROCKET_CIRCUMFERENCE;
     
 
-    private final double[] ELEVATOR_LEVELS = {
-        ELEVATOR_HOME_INCHES,
-        ELEVATOR_L1_INCHES,
-        ELEVATOR_L2_INCHES,
-        ELEVATOR_L3_INCHES,
-        ELEVATOR_L4_INCHES,
-        ELEVATOR_MAX_INCHES,
-        ELEVATOR_MAX_INCHES,
-    };
-
     private double setPoint = 0.0;
-    private int elevatorLevel = 0;
     private boolean isZerod = true;
     
-    //private double ElevatorMaxExtensionInches = ELEVATOR_MAX_INCHES;
-    //private String maxExtensionPreferenceKey = "Elevator Max Extension Inches";
 
     private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(2000, 1000);
     private final ProfiledPIDController elevatorController = new ProfiledPIDController(.3, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
@@ -97,21 +84,9 @@ public class Elevator extends SubsystemBase{
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)
             .inverted(false)
-            // .closedLoop
-            // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-
-            // .pid(0.5, 0, 0)
-
-            // .outputRange(-1, 1)
-            // .velocityFF(0) // calculated using recalc
-            // .maxMotion
-            // //idk if i want to use the units library on top of the units math util, its very verbose
-            // .maxVelocity(5000) // takes an rpm 
-
-            // .maxAcceleration(9000) // takes an rpm/s
-            // .allowedClosedLoopError(0.6)
-
-            ; // <- this semicolon is important
+            
+            
+            ; // <- this semicolon is VERY important
         leadMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
         followMotorConfig
@@ -119,8 +94,6 @@ public class Elevator extends SubsystemBase{
             .idleMode(IdleMode.kBrake)
             .follow(leadMotor, true);
         followMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-        //Preferences.initDouble(maxExtensionPreferenceKey, ElevatorMaxExtensionInches);
     }
 
     /**
@@ -132,37 +105,11 @@ public class Elevator extends SubsystemBase{
         this.setPoint = setPoint;
     }
 
-    // public int getElevatorLevel() {
-    //     return elevatorLevel;
-    // }
-
-    // public void incrementElevatorLevel(){
-    //     if (elevatorLevel == 4) elevatorLevel = 0;
-    //     else elevatorLevel += 1;
-    //     SmartDashboard.putNumber("elevator level", elevatorLevel);
-    //     System.out.println(elevatorLevel);
-    // }
-    // public void decrementElevatorLevel(){
-    //     if (elevatorLevel == 0) elevatorLevel = 4;
-    //     else elevatorLevel -= 1;
-    //     SmartDashboard.putNumber("elevator level", elevatorLevel);
-    //     System.out.println(elevatorLevel);
-    // }
-
-    // public void setElevatorLevel(){
-    //     setSetPoint(ELEVATOR_LEVELS[elevatorLevel]);
-    // }
-
-    // public void setElevatorLevel(int level){
-    //     elevatorLevel = level;
-    //     setElevatorLevel();
-    // }
 
     public double getLeadEncoderPosition() {
         double pos = -1;
         if(Robot.isSimulation()) pos = leadEncoderSim.getPosition();
         pos = leadEncoder.getPosition();
-        //System.out.println(pos);
         return pos;
     }
 
@@ -170,32 +117,12 @@ public class Elevator extends SubsystemBase{
         double tolerance = 2;  // in encoder rotations
         double currPosition = getLeadEncoderPosition(); 
         double targetPosition = setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS;
-        // System.out.print("elevatorIsNearSetPoint: ");
-        // System.out.println(Math.abs(currPosition-targetPosition));
         return Math.abs(currPosition-targetPosition) < tolerance;
     }
-
-    /**
-     * Marked for Deprecation
-     */    
-    // public boolean getIsNearZero() {
-    //     double tolerance = 5; // in encoder rotations
-    //     double currPosition = getLeadEncoderPosition();
-        
-    //     if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
-    //     return false;
-    // }
 
     public boolean getIsLimitSwitchZerod() {
         return isZerod;
     }
-
-    // private boolean getIsSuperNearZero() {
-    //     double tolerance = .3; // in encoder rotations
-    //     double currPosition = leadEncoder.getPosition();
-    //     if ((currPosition > -1*tolerance) && (currPosition < tolerance)) return true;
-    //     return false;
-    // }
 
     public void resetEncoders() {
         leadEncoder.setPosition(0.0);
@@ -218,10 +145,7 @@ public class Elevator extends SubsystemBase{
         //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
         leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
         isZerod = !limitSwitch.get();
-        // if(isZerod && !getIsSuperNearZero()) {
-        //     System.out.println("RESETTING ELEVATOR ENCODERS");
-        //     resetEncoders();
-        // }
+
 
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());

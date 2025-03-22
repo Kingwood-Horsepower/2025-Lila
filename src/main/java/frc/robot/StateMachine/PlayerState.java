@@ -38,6 +38,7 @@ public abstract class PlayerState {
     public void onBack()
     {
         //onBack Always goes back to drive
+        player.coralAndElevatorSubsystem.endIntake();
         player.stateMachine.ChangeState(player.driveState);
     }
 

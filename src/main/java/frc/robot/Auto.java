@@ -156,7 +156,7 @@ public class Auto {
                   return routine.trajectory("AutoStart1S1");
                 else
                   return routine.trajectory("AutoStart1S2");
-            case sigmaCage:
+            case sigmaCenter:
                 if(targetStation == TargetCoralStation.rightStation)
                    return routine.trajectory("AutoStart2S1");
                 else

@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
+import static frc.robot.Constants.CameraConstants.*;
+
 public class VisionManager {
     
     private static CameraSubsystem camera = new CameraSubsystem(); 
@@ -33,7 +35,7 @@ public class VisionManager {
 
     public VisionManager(SwerveDriveManager swerveDriveManager){
         this.swerveDriveManager = swerveDriveManager;
-        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1.0, 1.0, 99.0);
+        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 99.0);
         swerveDriveManager.setVisionTrust(matrix);
 
         SmartDashboard.putString("CameraLeftOdometry", "0");
@@ -86,25 +88,58 @@ public class VisionManager {
             var visionEst = camera.getEstimatedGlobalRightPose();
             visionEst.ifPresent(
                     est -> {
-                        //System.out.println("right: " +est.estimatedPose.getTranslation());
-                        SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+
                         
-                       
-                        
+                        boolean hasBadAprilTag = false;
+
+                        for(PhotonTrackedTarget i : est.targetsUsed){
+                            boolean isGood = false;
+                            for(int id : kReefIDs){
+                                isGood = isGood || i.fiducialId == id;
+                            }
+                            hasBadAprilTag = hasBadAprilTag || !isGood;
+                       }
+                       if(!hasBadAprilTag)
+                       {
                         swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
+                        SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));;
+                       }
+                        
+                        
+                        
                     });
             //Left camera
 
             visionEst = camera.getEstimatedGlobalLeftPose();
             visionEst.ifPresent(
                     est -> {
-                        //System.out.println("left: " + est.estimatedPose.getTranslation());
+                        boolean hasBadAprilTag = false;
+
+                        for(PhotonTrackedTarget i : est.targetsUsed){
+                            boolean isGood = false;
+                            for(int id : kReefIDs){
+                                isGood = isGood || i.fiducialId == id;
+                            }
+                            hasBadAprilTag = hasBadAprilTag || !isGood;
+                       }
+                       if(!hasBadAprilTag)
+                       {
+                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                         SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
-        
-                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                       }
+                        
                     });
+
+            // visionEst = camera.getEstimatedGlobalUpPose();
+            // visionEst.ifPresent(
+            //         est -> {
+            //             SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
+            //             SmartDashboard.putNumber("CameraUpOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+                
+            //             swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+            //         });          
         }
 
         SmartDashboard.putString("Robot Translation", swerveDriveManager.getRobotPose().getTranslation().toString());

@@ -33,62 +33,53 @@ public class Constants {
         public static final Translation2d kBlueReefCenter = new Translation2d(inchesToMeters(176.745), inchesToMeters(158.5));
         public static final Translation2d kRedReefCenter = new Translation2d(inchesToMeters(514.13), inchesToMeters(158.5));
 
-        public static final int[] kReefIDs = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
+        public static final int[] kReefIDs = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}; 
         public static final int[] kStationIDs = {12, 13, 1, 2};
 
-        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(23);
-        public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5);
+        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(23); //Vertical distance from the center of the robot
+        public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5); //Orizzontal distance when scoring
 
         public static final double kDistanceFromApriltagWhenDealgeafy = inchesToMeters(20);
 
         public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
-        public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(0.5); // center of the intake is 5 inches to the left of the center of the rboto
-
+        public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(0.5); // Center of the intake is 5 inches to the left of the center of the rboto
+        public static final double kExtraLeftAlignmentAddition = inchesToMeters(1.25); 
     }
 
     public static class AlignToL4Constants 
     {
-        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(10);
+        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(10); //How much you have to go back when you score L4 (Compared to L3)
     }
 
     public static class ElevatorConstants
     {
-        //Elevator Levels
-        public static final double ELEVATOR_HOME_INCHES = 0;    //0
-        public static final double ELEVATOR_L1_INCHES = 2;      //1
-        public static final double ELEVATOR_L2_INCHES = 8.25;      //2
-        public static final double ELEVATOR_L3_INCHES = 14.25;   //3
-        public static final double ELEVATOR_L4_INCHES = 27.5;      //4
-        public static final double ELEVATOR_MAX_INCHES = 28.7;    //Max
-
-
+        //Elevator states 
         public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0, 0);
         public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26, .26);
         public static final CoralAndElevatorState L1 = new CoralAndElevatorState(4, .26, .26);
         public static final CoralAndElevatorState L2 = new CoralAndElevatorState(8.25, .26, .26);
-        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(14.25, .26, .26);
+        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(15.4, .26, .26);
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .23, .23);
         public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .23, .23);
         //public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(1.5, .04, .04, 1);
         public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .04, 1);
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .26, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(10.75, .26, .23, -1);
-        
-
     }
+
     public static class AutoConstants
     {
-        //Can be 1, 2 or 3.  1 is the one closest to the center
-        public static final StartCage startingPosition = StartCage.sigmaCage;
+        //Used to determine which auto to choose
+        public static final StartCage startingPosition = StartCage.sigmaCenter;
 
-        //Can be 1 or 2. 1 is the one furthest from the starting position (to the right of the player)
+        //Deprecated
         public static final TargetCoralStation targetStation = TargetCoralStation.leftStation;
 
 
         enum StartCage{
-            edgeCage,
-            sigmaCage, //Second cage
-            goonCage //Center cage
+            edgeCage, //Farthest left cage from the driver (Same color)
+            sigmaCenter, //Center of the field
+            goonCage //Farthest right cage from the driver(opposite color)
         }
         enum TargetCoralStation{
             leftStation,
@@ -99,7 +90,7 @@ public class Constants {
             switch (startingPosition) {
                 case edgeCage:
                     return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(286.779));
-                case sigmaCage:
+                case sigmaCenter:
                     return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(242.855));
                 case goonCage:             
                     return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(199.947));

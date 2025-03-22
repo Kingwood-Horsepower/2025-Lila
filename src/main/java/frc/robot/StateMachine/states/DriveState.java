@@ -52,4 +52,16 @@ public class DriveState extends PlayerState{
         }
     }
 
+    
+    @Override public void onPovUp(){
+        player.winch.winchForwardCommand().schedule();
+    }
+    @Override public void onPovDown(){
+        player.winch.winchReverseCommand().schedule();
+    }
+    @Override public void onPovCenter(){
+        player.winch.winchStopCommand().schedule();
+    }
+
+
 }
