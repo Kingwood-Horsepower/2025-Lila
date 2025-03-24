@@ -59,7 +59,7 @@ public class RobotContainer {
     // Subsystems
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Winch winch = new Winch();
-    private final Auto auto;
+    public final Auto auto;
     
     
     // Other references (Managers in public so they can be used in robot)

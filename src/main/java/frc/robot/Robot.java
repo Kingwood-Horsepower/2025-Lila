@@ -22,6 +22,7 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   private boolean isAutoStarted = false;
+   
 
   private final AutoChooser autoChooser;
 
@@ -31,8 +32,8 @@ public class Robot extends TimedRobot {
 
     //elia, use .addRoutine() to do things
     //autoChooser.addRoutine(null, null);
-    //autoChooser.addCmd("dumboBlueRightAutoRoutine", )
-
+    autoChooser.addCmd("dumboBlueRightAutoRoutine", ()->m_robotContainer.auto.dumboBlueRightAutoRoutine1Command());
+//whr
     
     // Put the auto chooser on the dashboard
     SmartDashboard.putData(autoChooser);

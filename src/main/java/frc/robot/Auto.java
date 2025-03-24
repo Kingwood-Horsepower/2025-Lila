@@ -121,7 +121,7 @@ public class Auto {
         return routine;
     }
 
-    private Command dumboBlueRightAutoRoutine1Command() {
+    public Command dumboBlueRightAutoRoutine1Command() {
         Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
         //newGoal = newGoal.plus(l4Transform);
         Pose2d wayPoint1Score = visionManager.getRobotScoringPosition(20, true, true);
