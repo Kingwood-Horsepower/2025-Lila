@@ -19,30 +19,22 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 //import frc.robot.subsystems.Elevator;
 
 public class CoralIntake extends SubsystemBase {
     private final DigitalInput IRsensor = new DigitalInput(4); // false = broken
-    //private final Elevator elevator;
 
     private final int rollerMotorID = 23;
     private final int armMotorID = 24;
 
     private final SparkMax armMotor = new SparkMax(armMotorID, MotorType.kBrushless);
     private final SparkMaxConfig armMotorConfig = new SparkMaxConfig();
-    //private final SparkClosedLoopController armMotorController = armMotor.getClosedLoopController();
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
     private final RelativeEncoder altEncoder = armMotor.getAlternateEncoder();
     
-    //look at revlib for arm motor: getForwardLimitSwitch
-    //look at revlib for intake motor: getOutputCurrent
-
-    private double setPoint = 0.0;
-    private double velocity = 0.0;
-    public boolean hasCoral = false;
-
     private final SparkMax rollerMotor = new SparkMax(rollerMotorID, MotorType.kBrushless);
     private final SparkMaxConfig rollerMotorConfig = new SparkMaxConfig();
     private final SparkClosedLoopController rollerMotorController = rollerMotor.getClosedLoopController();
@@ -51,6 +43,9 @@ public class CoralIntake extends SubsystemBase {
     private final int GEARBOX_RATIO = 15; // this is the sprocket gear ratio now
     private final int SPROCKET_RATIO = 3;
 
+    private double setPoint = 0.0;
+    private double velocity = 0.0;
+    public boolean hasCoral = false;
     
     private final TrapezoidProfile.Constraints ARM_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(5000.0/15*0.1, 5);
     private final ProfiledPIDController armController = new ProfiledPIDController(10, 0, 0, ARM_ROTATION_CONSTRAINTS);
@@ -108,6 +103,14 @@ public class CoralIntake extends SubsystemBase {
         return rollerEncoder.getPosition();
     }
 
+    public Command primeCoralForL4() {
+        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-3), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition()-3));
+    }
+
+    public Command retractCoralFromL4() {
+        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()+5), this);
+    }
+
     
 
     public Command jiggleIntakeLol(DoubleSupplier currentRollerEncoderPosition) {
@@ -155,11 +158,11 @@ public class CoralIntake extends SubsystemBase {
     /**
      * Marked for Deprecation
      */    
-    public boolean getIsNearZero() {
-        double tolerance = 1; // in encoder rotations
-        double currPosition = armEncoder.getPosition(); 
-        return Math.abs(currPosition) < tolerance;
-    }
+    // public boolean getIsNearZero() {
+    //     double tolerance = 1; // in encoder rotations
+    //     double currPosition = armEncoder.getPosition(); 
+    //     return Math.abs(currPosition) < tolerance;
+    // }
 
     public boolean runningHighAmps(){
         double threshold = 10;
@@ -170,15 +173,32 @@ public class CoralIntake extends SubsystemBase {
         double threshold = 35;
         return (rollerMotor.getOutputCurrent() < threshold);
     }
+    
+    public boolean hasCoral()
+    {
+        return hasCoral;
+    }
 
     /**
      * Move the Coral Intake to the setPoint and return when finished
      * 
      * @param setPoint setpoint to move the arm to
      */    
+    // public Command moveToSetPoint(double setPoint) {
+    //     if (setPoint == this.setPoint) return Commands.none();
+    //     return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
+    // }
     public Command moveToSetPoint(double setPoint) {
         if (setPoint == this.setPoint) return Commands.none();
-        return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
+        return new FunctionalCommand(
+            () -> {
+                setSetPoint(setPoint);
+            }, 
+            null, 
+            null,
+            () -> getIsNearSetPoint(), 
+            this);
+        
     }
 
     @Override
@@ -191,7 +211,7 @@ public class CoralIntake extends SubsystemBase {
         hasCoral = !IRsensor.get(); //!
 
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
-        SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());
+        //SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());
         SmartDashboard.putNumber("arm setPoint", setPoint*SPROCKET_RATIO);
         SmartDashboard.putNumber("arm encoder", armEncoder.getPosition());
         SmartDashboard.putNumber("arm alt encoder", altEncoder.getPosition());
@@ -201,9 +221,6 @@ public class CoralIntake extends SubsystemBase {
                 
         
     }
-    public boolean hasCoral()
-    {
-        return hasCoral;
-    }
+    
 
 }

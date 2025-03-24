@@ -45,7 +45,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.StateMachine.PlayerStateMachine;
 import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.AlignToStationCommand;
-import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.commands.AlignCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.managers.VisionManager;
 import frc.robot.managers.SwerveDriveManager;

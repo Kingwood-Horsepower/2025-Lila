@@ -6,12 +6,15 @@ package frc.robot;
 
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -20,8 +23,23 @@ public class Robot extends TimedRobot {
 
   private boolean isAutoStarted = false;
 
+  private final AutoChooser autoChooser;
+
   public Robot() {
     m_robotContainer = new RobotContainer();
+    autoChooser = new AutoChooser();
+
+    //elia, use .addRoutine() to do things
+    //autoChooser.addRoutine(null, null);
+    //autoChooser.addCmd("dumboBlueRightAutoRoutine", )
+
+    
+    // Put the auto chooser on the dashboard
+    SmartDashboard.putData(autoChooser);
+    
+    // Schedule the selected auto during the autonomous period
+    RobotModeTriggers.autonomous().whileTrue(autoChooser.selectedCommandScheduler());
+
   }
 
   @Override

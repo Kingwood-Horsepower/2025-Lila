@@ -7,11 +7,14 @@ import java.util.function.BooleanSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.CoralAndElevatorState;
 
 
-public class CoralAndElevatorSubsystem {
+public class CoralAndElevatorSubsystem extends SubsystemBase {
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake();
     //private final SwerveDriveManager swerveDriveManager;
@@ -37,7 +40,17 @@ public class CoralAndElevatorSubsystem {
 
     public CoralAndElevatorSubsystem(){
         //lastState = STOW_UP;
+        onL4().onTrue(coralIntake.primeCoralForL4());
+        onL4().onFalse(coralIntake.retractCoralFromL4());
     }
+
+    // private Command moveToStateTest(CoralAndElevatorState newState) {
+    //     return new FunctionalCommand(
+    //     () -> {
+    //         coralIntake.setSetPoint(deAlgaeifyLevel);
+    //     }
+    //         , null, null, null, null)
+    // } 
     
 
 
@@ -54,7 +67,7 @@ public class CoralAndElevatorSubsystem {
 
     private Command rizzTheLevel4GyattCommand(BooleanSupplier endCondition) {
         return Commands.sequence(
-            Commands.run(() -> coralIntake.setRollerVelocity(-1), coralIntake).until(endCondition)
+            Commands.run(() -> coralIntake.setRollerVelocity(-.5), coralIntake).until(endCondition)
             .andThen(new WaitCommand(0.4))
             
             //moveToNormalState(L4END)
@@ -145,6 +158,18 @@ public class CoralAndElevatorSubsystem {
         return deAlgaeifyLevel == 0; //It's useful for the player state Machine
     }
 
+    public void moveToElevatorScoringLevel(int scoringLevel) {
+        System.out.println(scoringLevel);
+        this.scoringLevel = scoringLevel;
+        moveToState(scoringStates[scoringLevel]).schedule();
+    }
+
+    public void moveToDeAlgaeifyLevel(int deAlgaeifyLevelLevel) {
+        System.out.println(deAlgaeifyLevel);
+        this.deAlgaeifyLevel = deAlgaeifyLevel;
+        moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
+    }
+
     public void resetAllIncrements() {
         deAlgaeifyLevel = 0;
         scoringLevel = 0;
@@ -169,6 +194,11 @@ public class CoralAndElevatorSubsystem {
     public int getScoringLevel() {
         return scoringLevel;
     }
+
+    public Trigger onL4() {
+        return new Trigger(() -> scoringLevel == 4);
+    }
+
 
 
 

@@ -10,6 +10,8 @@ public class ClimbState extends PlayerState{
     //CLIMB STATE SHOULDN'T EXIST, IT SHOULD BE PART OF DRIVE MODE, REASONS:
     //When are you entering this state? Are you really gonna add a button just for that? 
     //When are you exiting this state? What if the driver enters this state accidentaly?
+    
+    //shadap elia , its good, you can just exit with back button
 
     public ClimbState(){
         super();

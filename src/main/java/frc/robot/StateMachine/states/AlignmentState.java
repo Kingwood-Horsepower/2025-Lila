@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
 
 import frc.robot.commands.AlignToReefCommand;
-import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.commands.AlignCommand;
 import frc.robot.managers.SwerveDriveManager;
 
 public class AlignmentState extends PlayerState{
@@ -19,7 +19,7 @@ public class AlignmentState extends PlayerState{
 
     private Command alignToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null, isL4);
 
-    private Command swerveTestCommand = new DriveToPoseCommand(player.swerveDriveManager, player.visionManager);
+    private Command swerveTestCommand = new AlignCommand(player.swerveDriveManager, player.visionManager);
 
 
 

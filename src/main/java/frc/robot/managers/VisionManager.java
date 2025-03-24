@@ -48,8 +48,8 @@ public class VisionManager {
 
     public void printScoringPosition(){
         for (int id : kReefIDs) {
-            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true).toString());
-            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false).toString());
+            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true, false).toString());
+            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false, false).toString());
         }
     }
 
@@ -147,7 +147,7 @@ public class VisionManager {
         SmartDashboard.putNumber("Robot rotation", Math.toDegrees(swerveDriveManager.getRobotPose().getRotation().getDegrees()));
     }
 
-    public Pose2d getRobotScoringPosition(boolean isRightCoral){
+    public Pose2d getRobotScoringPosition(boolean isRightCoral, boolean isL4){
         // var target = getBestDownTargetOptional();
         // if(target.isPresent()){
 
@@ -160,30 +160,34 @@ public class VisionManager {
         // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
-        System.out.println("No target found, using estimate using robot position");
+        System.out.println("using purely pose to align");
 
         List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
         for (int id : kReefIDs) {
-            reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral));
+            reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral, isL4));
         }
         return swerveDriveManager.getRobotPose().nearest(reefPoses);
 
     }
 
+    public Pose2d getRobotScoringPosition(int scoringTag, boolean isRightCoral, boolean isL4) {
+        return camera.getCoralScoreTransform(scoringTag, isRightCoral, isL4);
+    }
+
     /**
-     * Returns the closest scoring position of the robot.
-     * Authomatically determines if the robot is closer to the right or left coral
+     * Returns the closest scoring position of the robot, then which one is l4.
+     * This will do the math for all non l4 scoring positions and will return a non l4 scoring position, used only for teleop
      */    
     public Pose2d getClosestRobotScoringPosition()
     {
-        Pose2d rightPose = getRobotScoringPosition(true);
-        Pose2d leftPose = getRobotScoringPosition(false);
+        Pose2d rightPose = getRobotScoringPosition(true, false);
+        Pose2d leftPose = getRobotScoringPosition(false, false);
 
         return swerveDriveManager.getRobotPose().nearest(List.of(rightPose, leftPose));
 
     }
 
-    public Pose2d getRobotIntakePosition(){
+    public Pose2d getRobotIntakePosition() {
         // var target = getBestDownTargetOptional();
         // if(target.isPresent()){
         //     int targetId = target.get().fiducialId;
@@ -195,7 +199,7 @@ public class VisionManager {
         // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
-        System.out.println("No target found, using estimate using robot position");
+        System.out.println("using estimate using robot position");
 
         List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
         for (int id : kStationIDs) {
@@ -205,20 +209,24 @@ public class VisionManager {
 
     }
 
-    public Pose2d getRobotDealgeafyPosition(){
-        var target = getBestDownTargetOptional();
-        if(target.isPresent()){
+    public Pose2d getRobotIntakePosition(int scoringTag) {
+        return camera.getStationPose2d(scoringTag);
+    }
 
-            int targetId = target.get().fiducialId;
-            for (int reefId : kReefIDs) {
-                if (targetId == reefId) {
-                    return camera.getDealgeafyPose2d(targetId);
-                }           
-            }
-        }
+    public Pose2d getRobotDealgeafyPosition(){
+        // var target = getBestDownTargetOptional();
+        // if(target.isPresent()){
+
+        //     int targetId = target.get().fiducialId;
+        //     for (int reefId : kReefIDs) {
+        //         if (targetId == reefId) {
+        //             return camera.getDealgeafyPose2d(targetId);
+        //         }           
+        //     }
+        // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
-        System.out.println("No target found, using estimate using robot position");
+        System.out.println("using estimate using robot position");
 
         List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
         for (int id : kReefIDs) {

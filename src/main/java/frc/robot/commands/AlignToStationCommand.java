@@ -5,7 +5,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
 
-public class AlignToStationCommand extends DriveToPoseCommand {
+public class AlignToStationCommand extends AlignCommand {
 
     public AlignToStationCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager) {
         super(swerveDriveManager, visionManager);
