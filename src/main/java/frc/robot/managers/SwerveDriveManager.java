@@ -72,8 +72,8 @@ public class SwerveDriveManager {
     private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 2);
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(10,2);
     private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 10);
-    private final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0, Y_CONSTRAINTS);
+    private final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.2, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
     private final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
 
     //Variables
@@ -149,28 +149,6 @@ public class SwerveDriveManager {
         yController.reset(getRobotPose().getY());
         thetaController.reset(getRobotPose().getRotation().getRadians());
     }
-    // public void followTrajectory(SwerveSample sample) {
-    //     // Get the current pose of the robot
-    //     Pose2d pose = getRobotPose();
-    //     //System.out.println("est: " +pose.getTranslation());
-    //     //System.out.println("right: " + Double.toString(sample.x) + "   y: " + Double.toString(sample.y));
-    //     System.out.println("Xdiff: " + (pose.getTranslation().getX()-sample.x));
-
-    //     //WE NEED TO APPLY PID AND FEED FORWARD
-    //     //use sample.x, sample.y, and sample.heading for where the robot is supposed to be (and confront it with the pose)
-    //     ChassisSpeeds speeds = new ChassisSpeeds(
-    //         sample.vx + xController.calculate(pose.getX(), sample.x),
-    //         sample.vy + yController.calculate(pose.getY(), sample.y),
-    //         sample.omega + thetaController.calculate(pose.getRotation().getRadians(), sample.heading)
-    //     );
-    //     // ChassisSpeeds speeds = new ChassisSpeeds(
-    //     //     sample.vx,
-    //     //     sample.vy,
-    //     //     sample.omega 
-    //     // );
-    //     // Apply the generated speeds
-    //     drivetrain.setControl(trajectoryRequest.withSpeeds(speeds));
-    // }
 
 
     //Exact same function as the example on GitHub
@@ -189,6 +167,14 @@ public class SwerveDriveManager {
         targetSpeeds.omegaRadiansPerSecond += thetaController.calculate(
             pose.getRotation().getRadians(), sample.heading
         );
+
+        System.out.println("PIDY: ROBOT: " + pose.getX() + " SAMPLE: " + sample.x);
+        System.out.println("PIDY: ROBOT: " + pose.getY() + " SAMPLE: " + sample.y);
+        System.out.println("RESULT: X: " +  xController.calculate(
+            pose.getX(), sample.x
+        )+ " Y: " +yController.calculate(
+            pose.getY(), sample.y
+        ));
 
         drivetrain.setControl(
             trajectoryRequest.withSpeeds(targetSpeeds)

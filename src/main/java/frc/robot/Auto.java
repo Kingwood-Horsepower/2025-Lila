@@ -57,45 +57,41 @@ public class Auto {
     }
     
     @SuppressWarnings("unused")
-    // AutoRoutine getAutoRoutine()
-    // {
-    //     AutoRoutine routine = autoFactory.newRoutine("Autonomous");
-    //     AutoTrajectory goToCoralStation = getStartingAutoTrajectory(routine);
+    AutoRoutine getLeftAutoRoutine()
+    {
+        AutoRoutine leftRoutine = autoFactory.newRoutine("LeftAuto");
 
-    //     //custom starting trajectory based on the starting position and the targetStation
-    //    routine.active().onTrue(
-    //     Commands.sequence(
-    //         goToCoralStation.resetOdometry(),
-    //         goToCoralStation.cmd()
-    //     )
-    //     );
-    //     //Move colar intake in the correct position
+        AutoTrajectory goToCoral6 = leftRoutine.trajectory("Start6S2");
 
-    //     AutoTrajectory goToCoral1 = routine.trajectory("Coral1S2");
-    //     AutoTrajectory goToCoral9 = routine.trajectory("Coral9S1");
+        leftRoutine.active().onTrue(Commands.sequence(
+            goToCoral6.resetOdometry(),
+            Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
+            Commands.runOnce(coralAndElevatorSubsystem::incrementElevatorScoringLevel),
+            goToCoral6.cmd()
+        ));
 
-    //     //Go to the coral (coral 1 if station 2, coral 9 if station 1)
-    //     if(targetStation == TargetCoralStation.rightStation){
-    //         goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral9));
-    //     }else{
-    //         goToCoralStation.done().onTrue(IntakeCoralAndGo(goToCoral1));
-    //     }
-    //     //Score Coral and come back to the station
-    //     AutoTrajectory goToCoral1R = routine.trajectory("Coral1S2R");
-    //     AutoTrajectory goToCoral9R = routine.trajectory("Coral9S1R");
+        AutoTrajectory coral6R = leftRoutine.trajectory("Coral6S2R");
 
-    //     goToCoral1.done().onTrue(ScoreCoralAndComeBack(goToCoral1R, true));     
-    //     goToCoral9.done().onTrue(ScoreCoralAndComeBack(goToCoral9R, true));
-
-    //     AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
-    //     AutoTrajectory goToCoral10 = routine.trajectory("Coral10S1");
-
-    //     goToCoral1R.done().onTrue(IntakeCoralAndGo(goToCoral2));
-    //     goToCoral9R.done().onTrue(IntakeCoralAndGo(goToCoral10));
+        goToCoral6.done().onTrue(ScoreCoralAndComeBack(coral6R, false));
 
 
-    //     return routine;
-    // }
+        AutoTrajectory coral4 = leftRoutine.trajectory("Coral4S2");
+        coral6R.done().onTrue(IntakeCoralAndGo(coral4));
+
+        AutoTrajectory coral4R = leftRoutine.trajectory("Coral4S2R");
+        coral4.done().onTrue(ScoreCoralAndComeBack(coral4R, false));
+
+        AutoTrajectory coral3 = leftRoutine.trajectory("Coral3S2");
+        coral4R.done().onTrue(IntakeCoralAndGo(coral3));
+
+        AutoTrajectory coral3R= leftRoutine.trajectory("Coral3S2R");
+        coral3.done().onTrue(ScoreCoralAndComeBack(coral3R, false));
+
+        return leftRoutine;
+    }
+
+
+
     AutoRoutine getTestRoutine()
     {
         AutoRoutine routine = autoFactory.newRoutine("Test");
@@ -106,6 +102,8 @@ public class Auto {
         routine.active().onTrue(
         Commands.sequence(
             testTraj.resetOdometry(),
+            Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
+            Commands.runOnce(coralAndElevatorSubsystem::incrementElevatorScoringLevel),
             testTraj.cmd()
         )
         );
@@ -133,6 +131,8 @@ public class Auto {
             driveToPoseCommand,
             new WaitCommand(0.4),     
             coralAndElevatorSubsystem.score(),
+            Commands.runOnce(() -> coralAndElevatorSubsystem.moveDown()),
+            new WaitCommand(0.2),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
             nexTrajectory.cmd()
         );
