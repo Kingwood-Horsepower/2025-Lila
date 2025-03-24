@@ -3,10 +3,11 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
+import frc.robot.commands.AlignCommand;
 
-public class DealgeafyAlignCommand extends DriveToPoseCommand {
+public class AlignDeAlgaeifyCommand extends AlignCommand {
 
-    public DealgeafyAlignCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager) {
+    public AlignDeAlgaeifyCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager) {
         super(swerveDriveManager, visionManager);
     }
 

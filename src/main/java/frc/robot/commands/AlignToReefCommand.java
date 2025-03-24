@@ -10,11 +10,18 @@ import frc.robot.Constants.AlignToL4Constants;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
 
-public class AlignToReefCommand extends DriveToPoseCommand {
+public class AlignToReefCommand extends AlignCommand {
 
     private BooleanSupplier isRight;
     private BooleanSupplier isL4;
 
+    /**
+     * Aligns to the nearest coral scoring position. It will not align to l4 if
+     * @param swerveDriveManager
+     * @param visionManager
+     * @param isRight
+     * @param isL4
+     */
     public AlignToReefCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager, BooleanSupplier isRight, BooleanSupplier isL4) {
         super(swerveDriveManager, visionManager);
         this.isRight = isRight;
@@ -26,15 +33,8 @@ public class AlignToReefCommand extends DriveToPoseCommand {
         Pose2d newGoal = null;
         //if(goal == null) {
             if(isRight == null) newGoal = visionManager.getClosestRobotScoringPosition();
-            else newGoal = visionManager.getRobotScoringPosition(isRight.getAsBoolean());
+            else newGoal = visionManager.getRobotScoringPosition(isRight.getAsBoolean(), isL4.getAsBoolean());
         //}
-
-        Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
-        if (isL4.getAsBoolean()) {
-            newGoal = newGoal.plus(l4Transform);
-            System.out.println("tranformed to l4");
-        }
-
         return new Pose3d(newGoal);
     }
     

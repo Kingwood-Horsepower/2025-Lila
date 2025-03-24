@@ -29,9 +29,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.Constants.AlignToL4Constants;
 import frc.robot.Constants.CameraConstants;
 
 import static edu.wpi.first.math.util.Units.inchesToMeters;
@@ -255,7 +257,7 @@ public double getDownTargetRange(){
     return targetRangeRight;
 }
 
-public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
+public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral, boolean isL4){
   boolean isBlue = AprilTagId > 15;
   Translation2d reefCenter = isBlue ? kBlueReefCenter : kRedReefCenter;
   
@@ -268,12 +270,23 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
   //CounterClockwise
   Translation2d vPerpendicular = new Translation2d(-vNormalized.getY(), vNormalized.getX());
 
+  Pose2d goal;
+
   if(getRightCoral)
-    return new Pose2d(reefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag+kRobotToCoralIntakeLeftOffset))), 
+    goal = new Pose2d(reefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag+kRobotToCoralIntakeLeftOffset))), 
     new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
   else 
-    return new Pose2d(reefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+kExtraLeftAlignmentAddition))), 
+    goal = new Pose2d(reefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+kExtraLeftAlignmentAddition))), 
     new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
+
+
+  Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
+  if (isL4) {
+    goal = goal.plus(l4Transform);
+    System.out.println("tranformed to l4");
+  }
+
+  return goal;
 
   }
 

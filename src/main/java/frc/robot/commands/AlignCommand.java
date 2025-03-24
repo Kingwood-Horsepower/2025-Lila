@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** drive to score command!!! yay. */
-public class DriveToPoseCommand extends Command {
+public class AlignCommand extends Command {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 2);
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(10,2);
@@ -50,7 +50,7 @@ public class DriveToPoseCommand extends Command {
     //    .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
     
 
-    public DriveToPoseCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager) {
+    public AlignCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager) {
         
         this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;

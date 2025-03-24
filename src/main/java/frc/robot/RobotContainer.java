@@ -45,7 +45,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.StateMachine.PlayerStateMachine;
 import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.AlignToStationCommand;
-import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.commands.AlignCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.managers.VisionManager;
 import frc.robot.managers.SwerveDriveManager;
@@ -59,7 +59,7 @@ public class RobotContainer {
     // Subsystems
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Winch winch = new Winch();
-    private final Auto auto;
+    public final Auto auto;
     
     
     // Other references (Managers in public so they can be used in robot)

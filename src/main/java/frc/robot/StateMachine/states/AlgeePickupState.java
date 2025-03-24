@@ -3,11 +3,12 @@ package frc.robot.StateMachine.states;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
 import frc.robot.commands.AlignToReefCommand;
-import frc.robot.commands.DealgeafyAlignCommand;
+import frc.robot.commands.AlignDeAlgaeifyCommand;
+import frc.robot.commands.AlignToPoseCommand;
 
 public class AlgeePickupState extends PlayerState{
 
-     private Command dealgeafyAlignCommand = new DealgeafyAlignCommand(player.swerveDriveManager, player.visionManager);
+     private Command dealgeafyAlignCommand = new AlignDeAlgaeifyCommand(player.swerveDriveManager, player.visionManager);
 
     public AlgeePickupState(){
         super();
