@@ -33,7 +33,7 @@ public class Auto {
         autoFactory = new AutoFactory(
             swerveDriveManager::getRobotPose, // A function that returns the current robot pose
             swerveDriveManager::resetPose, // A function that resets the current robot pose to the provided Pose2d
-            swerveDriveManager::followTrajectory, // The drive subsystem trajectory follower 
+            swerveDriveManager::followPath, // The drive subsystem trajectory follower 
         true, // If alliance flipping should be enabled 
             swerveDriveManager.getDrivetrain() // The drive subsystem
         );
