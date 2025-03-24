@@ -194,11 +194,15 @@ public class CoralIntake extends SubsystemBase {
             () -> {
                 setSetPoint(setPoint);
             }, 
-            null, 
-            null,
+            ()->{}, 
+            this:: bullShitFunc,
             () -> getIsNearSetPoint(), 
             this);
         
+    }
+
+    public void bullShitFunc(boolean b){
+
     }
 
     @Override
