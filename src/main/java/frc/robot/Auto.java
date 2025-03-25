@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.AlignToL4Constants;
@@ -98,7 +99,7 @@ public class Auto {
 
 
 
-    AutoRoutine getTestRoutine()
+    public AutoRoutine getTestRoutine()
     {
         AutoRoutine routine = autoFactory.newRoutine("Test");
 
@@ -114,7 +115,7 @@ public class Auto {
         )
         );
         testTraj.done().onTrue(ScoreCoralAndComeBack(testTrajReversed, true));
-        //testTrajReversed.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
+        testTrajReversed.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
         //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
         return routine;
     }
@@ -172,23 +173,29 @@ public class Auto {
 
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
-        Pose2d l4ScorePose = visionManager.getRobotScoringPosition(20, true, true);
+        Pose2d l4ScorePose = visionManager.getRobotScoringPosition(18, true, false);
         Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, l4ScorePose);
-        Command moveElevatorUpCommand = Commands.runOnce(() -> {
-            coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-            coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-            coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-        });
-
-
+        Command moveElevatorCommand = Commands.runOnce(() -> {
+         coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+         //coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+         coralAndElevatorSubsystem.incrementElevatorScoringLevel();});
 
         return Commands.sequence(
             Commands.runOnce(swerveDriveManager::stopRobot),
-            moveElevatorUpCommand,
+            new PrintCommand("Awhattttt"),
+            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            new PrintCommand("elevate again!!"),
+            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            new PrintCommand("command???"),
             driveToPoseCommand,
-            new WaitCommand(0.4),     
+            new PrintCommand("Aligned"),
+            Commands.runOnce(swerveDriveManager::stopRobot),
+            new WaitCommand(.2),  
+            new PrintCommand("About to score"),
             coralAndElevatorSubsystem.score(),
-            Commands.runOnce(() -> coralAndElevatorSubsystem.moveDown()),
+            new PrintCommand("Scored"),
+            coralAndElevatorSubsystem.moveDownCommand(),
+            new PrintCommand("Moved Down"),
             new WaitCommand(0.2),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
             nexTrajectory.cmd()

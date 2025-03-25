@@ -126,6 +126,14 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         ).schedule();
     }
 
+    public Command moveDownCommand() {
+        return Commands.sequence(
+            moveToState(STOW_DOWN), 
+            moveToState(STOW_UP),
+            Commands.runOnce(() -> resetAllIncrements())
+        );
+    }
+
     public void startIntake() {
         moveToState(INTAKE).schedule();
     }
@@ -139,6 +147,12 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         scoringLevel = Math.min(scoringLevel + 1, 4);
         System.out.println(scoringLevel);
         moveToState(scoringStates[scoringLevel]).schedule();
+    }
+
+    public Command incrementElevatorScoringLevelCommand() {
+        scoringLevel = Math.min(scoringLevel + 1, 4);
+        System.out.println(scoringLevel);
+        return moveToState(scoringStates[scoringLevel]);
     }
 
     public void decrementElevatorScoringLevel() {

@@ -32,6 +32,9 @@ public class TestingState extends PlayerState{
         player.coralAndElevatorSubsystem.decrementElevatorScoringLevel();
 
     }
+    @Override public void onBumperPressed() {
+        player.coralAndElevatorSubsystem.score().schedule();
+    }
 
 
 }

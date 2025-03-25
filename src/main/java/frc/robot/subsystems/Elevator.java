@@ -136,7 +136,7 @@ public class Elevator extends SubsystemBase{
      */    
     public Command moveToSetPoint(double setPoint) {
         if (setPoint == this.setPoint) return Commands.none();
-        return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
+        return Commands.runOnce(()-> setSetPoint(setPoint), this);//.until(() -> getIsNearSetPoint());
     }
 
     @Override

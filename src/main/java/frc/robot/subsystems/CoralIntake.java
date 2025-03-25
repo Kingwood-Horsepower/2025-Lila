@@ -63,7 +63,7 @@ public class CoralIntake extends SubsystemBase {
         armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     
         rollerMotorConfig
-            .smartCurrentLimit(40)
+            .smartCurrentLimit(38)
             .idleMode(IdleMode.kCoast)
             .inverted(false)
             .closedLoop
@@ -96,7 +96,7 @@ public class CoralIntake extends SubsystemBase {
     }
 
     private boolean getRollerIsNearPosition(double targetPosition) {
-        return Math.abs(rollerEncoder.getPosition()-targetPosition) < .05;
+        return Math.abs(rollerEncoder.getPosition()-targetPosition) < .1;
     }
 
     public double getRollerEncoderPosition() {
@@ -104,11 +104,11 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public Command primeCoralForL4() {
-        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-3), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition()-3));
+        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-1), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition()-3));
     }
 
     public Command retractCoralFromL4() {
-        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()+5), this);
+        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()+1.5), this);
     }
 
     
@@ -184,22 +184,22 @@ public class CoralIntake extends SubsystemBase {
      * 
      * @param setPoint setpoint to move the arm to
      */    
-    // public Command moveToSetPoint(double setPoint) {
-    //     if (setPoint == this.setPoint) return Commands.none();
-    //     return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
-    // }
     public Command moveToSetPoint(double setPoint) {
         if (setPoint == this.setPoint) return Commands.none();
-        return new FunctionalCommand(
-            () -> {
-                setSetPoint(setPoint);
-            }, 
-            ()->{}, 
-            this:: bullShitFunc,
-            () -> getIsNearSetPoint(), 
-            this);
-        
+        return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
     }
+    // public Command moveToSetPoint(double setPoint) {
+    //     if (setPoint == this.setPoint) return Commands.none();
+    //     return new FunctionalCommand(
+    //         () -> {
+    //             setSetPoint(setPoint);
+    //         }, 
+    //         ()->{}, 
+    //         this:: bullShitFunc,
+    //         () -> getIsNearSetPoint(), 
+    //         this);
+        
+    // }
 
     public void bullShitFunc(boolean b){
 

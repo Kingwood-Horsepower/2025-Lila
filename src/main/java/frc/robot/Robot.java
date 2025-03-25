@@ -33,13 +33,14 @@ public class Robot extends TimedRobot {
     //elia, use .addRoutine() to do things
     //autoChooser.addRoutine(null, null);
     autoChooser.addCmd("dumboBlueRightAutoRoutine", ()->m_robotContainer.auto.dumboBlueRightAutoRoutine1Command());
+    autoChooser.addRoutine("eliatestroutine", () -> m_robotContainer.auto.getTestRoutine());
 //whr
     
     // Put the auto chooser on the dashboard
-    SmartDashboard.putData(autoChooser);
+    // SmartDashboard.putData(autoChooser);
     
-    // Schedule the selected auto during the autonomous period
-    RobotModeTriggers.autonomous().whileTrue(autoChooser.selectedCommandScheduler());
+    // // Schedule the selected auto during the autonomous period
+    // RobotModeTriggers.autonomous().whileTrue(autoChooser.selectedCommandScheduler());
 
   }
 

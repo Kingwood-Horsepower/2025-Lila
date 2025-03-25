@@ -30,6 +30,7 @@ public class AlignToReefCommand extends AlignCommand {
 
     @Override
     public Pose3d initializeGoal() {
+        if (isL4.getAsBoolean()) System.out.println("align initialize initialized at l4");
         Pose2d newGoal = null;
         //if(goal == null) {
             if(isRight == null) newGoal = visionManager.getClosestRobotScoringPosition();
