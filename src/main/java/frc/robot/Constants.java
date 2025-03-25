@@ -33,7 +33,9 @@ public class Constants {
         public static final Translation2d kBlueReefCenter = new Translation2d(inchesToMeters(176.745), inchesToMeters(158.5));
         public static final Translation2d kRedReefCenter = new Translation2d(inchesToMeters(514.13), inchesToMeters(158.5));
 
-        public static final int[] kReefIDs = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}; 
+        public static final int[] kBlueReefIDs = {17, 18, 19, 20, 21, 22}; 
+        public static final int[] kRedReefIDs = {6, 7, 8, 9, 10, 11}; 
+
         public static final int[] kStationIDs = {12, 13, 1, 2};
 
         public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(23); //Vertical distance from the center of the robot

@@ -115,21 +115,28 @@ public class Auto {
         )
         );
         testTraj.done().onTrue(ScoreCoralAndComeBack(testTrajReversed, true));
-        testTrajReversed.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
-        //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
+       // testTrajReversed.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
+
+
+        AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
+        testTrajReversed.done().onTrue(IntakeCoralAndGo(goToCoral2));
+        
+        AutoTrajectory goToCoral2R = routine.trajectory("Coral2S2R");
+        goToCoral2.done().onTrue(ScoreCoralAndComeBack(goToCoral2R, false));
         return routine;
     }
     
 
-
+    /**
+     * Intake 
+     * @param nexTrajectory the trajectory to load after scoring
+     * @param isRightCoral
+     * @return
+     */
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
-        Pose2d l4ScorePose = visionManager.getRobotScoringPosition(18, true, false);
-        Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, l4ScorePose);
-        Command moveElevatorCommand = Commands.runOnce(() -> {
-         coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-         //coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-         coralAndElevatorSubsystem.incrementElevatorScoringLevel();});
+        Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
+             () -> visionManager.getRobotScoringPosition(isRightCoral,  false));
 
         return Commands.sequence(
             Commands.runOnce(swerveDriveManager::stopRobot),
@@ -154,17 +161,20 @@ public class Auto {
     }
 
     /**
-     * 
-     * @param nexTrajectory
+     * Intake Coral, then load and start the next traject
+     * @param nexTrajectory the trajectory to load after intaking
      * @return
      */
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
                 Commands.runOnce(swerveDriveManager::stopRobot),
-                Commands.runOnce(coralAndElevatorSubsystem::startIntake),
-                new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
-                new WaitCommand(0.2),     
-                Commands.runOnce(coralAndElevatorSubsystem::endIntake),
+                coralAndElevatorSubsystem.startIntakeCommand(),
+                new PrintCommand("Intaking"),
+                new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()).withTimeout(2),
+                new WaitCommand(0.2),  
+                new PrintCommand("Finished intaking"),   
+                coralAndElevatorSubsystem.endIntakeCommand(),
+                new PrintCommand("Ended Intake"),   
                 Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
                 nexTrajectory.cmd()
             );
@@ -215,41 +225,41 @@ public class Auto {
         Pose2d wayPoint5Score = visionManager.getRobotScoringPosition(19, false, true);
         //Command align1stCoral = new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint1Score);
 
-
+        //I HAD TO COMMMENT THIS CAUSE WE CHANGE THE ALIGN TO POSE COMMAND
         
         // Command moveAway = new 
         return Commands.sequence(
             //score l4 
             Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
-            new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint1Score),
-            new WaitCommand(0.4),
-            coralAndElevatorSubsystem.score(),
-            Commands.runOnce(()->coralAndElevatorSubsystem.moveDown()),
-            //go to intake
-            new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint2Move),
-            new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint3Intake),
-            Commands.runOnce(coralAndElevatorSubsystem::startIntake),
-            new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
-            new WaitCommand(0.2),     
-            Commands.runOnce(coralAndElevatorSubsystem::endIntake),
-            //score another l4
-            Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
-            new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint4Score),
-            new WaitCommand(0.4),
-            coralAndElevatorSubsystem.score(),
-            Commands.runOnce(()->coralAndElevatorSubsystem.moveDown()),
-            //go to intake
-            new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint3Intake),
-            Commands.runOnce(coralAndElevatorSubsystem::startIntake),
-            new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
-            new WaitCommand(0.2),     
-            Commands.runOnce(coralAndElevatorSubsystem::endIntake),
-            //score the third l4???
-            Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
-            new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint4Score),
+            //new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint1Score),
             new WaitCommand(0.4),
             coralAndElevatorSubsystem.score(),
             Commands.runOnce(()->coralAndElevatorSubsystem.moveDown())
+            //go to intake
+            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint2Move),
+            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint3Intake),
+            // Commands.runOnce(coralAndElevatorSubsystem::startIntake),
+            // new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
+            // new WaitCommand(0.2),     
+            // Commands.runOnce(coralAndElevatorSubsystem::endIntake),
+            // //score another l4
+            // Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
+            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint4Score),
+            // new WaitCommand(0.4),
+            // coralAndElevatorSubsystem.score(),
+            // Commands.runOnce(()->coralAndElevatorSubsystem.moveDown()),
+            // //go to intake
+            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint3Intake),
+            // Commands.runOnce(coralAndElevatorSubsystem::startIntake),
+            // new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
+            // new WaitCommand(0.2),     
+            // Commands.runOnce(coralAndElevatorSubsystem::endIntake),
+            // //score the third l4???
+            // Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
+            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint4Score),
+            // new WaitCommand(0.4),
+            // coralAndElevatorSubsystem.score(),
+            // Commands.runOnce(()->coralAndElevatorSubsystem.moveDown())
 
         );
     }
