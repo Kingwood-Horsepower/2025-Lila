@@ -116,20 +116,27 @@ public class Auto {
         );
         testTraj.done().onTrue(ScoreCoralAndComeBack(testTrajReversed, true));
         testTrajReversed.done().onTrue(Commands.runOnce(swerveDriveManager::stopRobot));
-        //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
+
+
+        AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
+        testTrajReversed.done().onTrue(IntakeCoralAndGo(goToCoral2));
+        
+        AutoTrajectory goToCoral2R = routine.trajectory("Coral2S2R");
+        goToCoral2.done().onTrue(ScoreCoralAndComeBack(goToCoral2R, false));
         return routine;
     }
     
 
-
+    /**
+     * Intake 
+     * @param nexTrajectory the trajectory to load after scoring
+     * @param isRightCoral
+     * @return
+     */
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
-        Pose2d l4ScorePose = visionManager.getRobotScoringPosition(18, true, false);
+        Pose2d l4ScorePose = visionManager.getRobotScoringPosition(isRightCoral,  false);
         Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, l4ScorePose);
-        Command moveElevatorCommand = Commands.runOnce(() -> {
-         coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-         //coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-         coralAndElevatorSubsystem.incrementElevatorScoringLevel();});
 
         return Commands.sequence(
             Commands.runOnce(swerveDriveManager::stopRobot),
@@ -154,17 +161,20 @@ public class Auto {
     }
 
     /**
-     * 
-     * @param nexTrajectory
+     * Intake Coral, then load and start the next traject
+     * @param nexTrajectory the trajectory to load after intaking
      * @return
      */
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
         return Commands.sequence(
                 Commands.runOnce(swerveDriveManager::stopRobot),
-                Commands.runOnce(coralAndElevatorSubsystem::startIntake),
+                coralAndElevatorSubsystem.startIntakeCommand(),
+                new PrintCommand("Intaking"),
                 new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
-                new WaitCommand(0.2),     
-                Commands.runOnce(coralAndElevatorSubsystem::endIntake),
+                new WaitCommand(0.2),  
+                new PrintCommand("Finished intaking"),   
+                coralAndElevatorSubsystem.endIntakeCommand(),
+                new PrintCommand("Ended Intake"),   
                 Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
                 nexTrajectory.cmd()
             );

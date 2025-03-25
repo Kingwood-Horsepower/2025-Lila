@@ -48,8 +48,8 @@ public class VisionManager {
 
     public void printScoringPosition(){
         for (int id : kReefIDs) {
-            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true, false).toString());
-            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false, false).toString());
+            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true, true).toString());
+            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false, true).toString());
         }
     }
 
