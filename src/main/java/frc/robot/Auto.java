@@ -92,9 +92,42 @@ public class Auto {
         coral4R.done().onTrue(IntakeCoralAndGo(coral3));
 
         AutoTrajectory coral3R= leftRoutine.trajectory("Coral3S2R");
-        coral3.done().onTrue(ScoreCoralAndComeBack(coral3R, false));
+        coral3.done().onTrue(ScoreCoralAndComeBack(coral3R, true));
 
         return leftRoutine;
+    }
+
+    AutoRoutine getRightAutoRoutine()
+    {
+        AutoRoutine rightRoutine = autoFactory.newRoutine("RightAuto");
+        
+        AutoTrajectory goToCoral9 = rightRoutine.trajectory("Start9S1");
+
+        rightRoutine.active().onTrue(Commands.sequence(
+            goToCoral9.resetOdometry(),
+            Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
+            Commands.runOnce(coralAndElevatorSubsystem::incrementElevatorScoringLevel),
+            goToCoral9.cmd()
+        ));
+
+        AutoTrajectory coral9R = rightRoutine.trajectory("Coral9S1R");
+
+        goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
+
+        AutoTrajectory coral11 = rightRoutine.trajectory("Coral11S1");
+        coral9R.done().onTrue(IntakeCoralAndGo(coral11));
+
+        AutoTrajectory coral11R = rightRoutine.trajectory("Coral11S1R");
+        coral11.done().onTrue(ScoreCoralAndComeBack(coral11R, true));
+
+        AutoTrajectory coral12 = rightRoutine.trajectory("Coral12S1");
+        coral11R.done().onTrue(IntakeCoralAndGo(coral12));
+
+        AutoTrajectory coral12R = rightRoutine.trajectory("Coral12S1R");
+        coral12.done().onTrue(ScoreCoralAndComeBack(coral12R, false));
+
+
+        return rightRoutine;
     }
 
 
