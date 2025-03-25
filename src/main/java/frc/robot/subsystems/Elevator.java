@@ -61,7 +61,7 @@ public class Elevator extends SubsystemBase{
     
 
     private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(2000, 1000);
-    private final ProfiledPIDController elevatorController = new ProfiledPIDController(.3, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
+    private final ProfiledPIDController elevatorController = new ProfiledPIDController(.6, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
 
     //sim
     Mechanism2d mech = new Mechanism2d(20, 50);

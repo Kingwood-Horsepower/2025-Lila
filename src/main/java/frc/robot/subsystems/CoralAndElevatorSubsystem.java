@@ -43,7 +43,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
 
     private double testSetPoint = 0.0;
     
-    
+
     public CoralAndElevatorSubsystem(){
         //lastState = STOW_UP;
         onL4().onTrue(coralIntake.primeCoralForL4());
@@ -215,11 +215,11 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     }
 
     public void incrementDeAlgaeifyLevel() {
-        incrementDeAlgaeifyLevelCommand();
+        incrementDeAlgaeifyLevelCommand().schedule();;
     }
 
     public boolean decrementDeAlgaeifyLevel() {
-        decrementDeAlgaeifyLevelCommand();
+        decrementDeAlgaeifyLevelCommand().schedule();;
         return deAlgaeifyLevel == 0; //It's useful for the player state Machine
     }
 

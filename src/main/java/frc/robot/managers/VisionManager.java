@@ -171,7 +171,7 @@ public class VisionManager {
         }
 
         SmartDashboard.putString("Robot Translation", swerveDriveManager.getRobotPose().getTranslation().toString());
-        SmartDashboard.putNumber("Robot rotation", Math.toDegrees(swerveDriveManager.getRobotPose().getRotation().getDegrees()));
+        SmartDashboard.putNumber("Robot rotation", swerveDriveManager.getRobotPose().getRotation().getDegrees());
     }
 
     public Pose2d getRobotScoringPosition(boolean isRightCoral, boolean isL4){
