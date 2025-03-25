@@ -21,6 +21,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -29,7 +31,7 @@ import static frc.robot.Constants.CameraConstants.*;
 
 public class VisionManager {
     
-    private static CameraSubsystem camera = new CameraSubsystem(); 
+    private static CameraSubsystem camera = new CameraSubsystem();  
 
     private static SwerveDriveManager swerveDriveManager;
 
@@ -47,7 +49,11 @@ public class VisionManager {
     }
 
     public void printScoringPosition(){
-        for (int id : kReefIDs) {
+        for (int id : kRedReefIDs) {
+            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true, true).toString());
+            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false, true).toString());
+        }
+        for (int id : kBlueReefIDs) {
             System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true, true).toString());
             System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false, true).toString());
         }
@@ -80,6 +86,7 @@ public class VisionManager {
     }
 
     public void UpdateRobotPosition() {
+        boolean isBlue = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() == Alliance.Blue : false;
         //System.out.println("swerveRot: " + drivetrain.getRobotPose().getRotation().getRadians());
         //System.out.println("swervePos: " + drivetrain.getRobotPose().getTranslation());
 
@@ -94,9 +101,19 @@ public class VisionManager {
 
                         for(PhotonTrackedTarget aprilTag : est.targetsUsed){
                             boolean isGood = false;
-                            for(int id : kReefIDs){
-                                isGood = isGood || aprilTag.fiducialId == id;
+                            if(isBlue)
+                            {
+                                for(int id : kBlueReefIDs){
+                                    isGood = isGood || aprilTag.fiducialId == id;
+                                }
+                            
+                            }else
+                            {
+                                for(int id : kRedReefIDs){
+                                    isGood = isGood || aprilTag.fiducialId == id;
+                                }
                             }
+                            
                             hasBadAprilTag = hasBadAprilTag || !isGood;
                        }
                        if(!hasBadAprilTag)
@@ -119,9 +136,19 @@ public class VisionManager {
 
                         for(PhotonTrackedTarget aprilTag : est.targetsUsed){
                             boolean isGood = false;
-                            for(int id : kReefIDs){
-                                isGood = isGood || aprilTag.fiducialId == id;
+                            if(isBlue)
+                            {
+                                for(int id : kBlueReefIDs){
+                                    isGood = isGood || aprilTag.fiducialId == id;
+                                }
+                            
+                            }else
+                            {
+                                for(int id : kRedReefIDs){
+                                    isGood = isGood || aprilTag.fiducialId == id;
+                                }
                             }
+                            
                             hasBadAprilTag = hasBadAprilTag || !isGood;
                        }
                        if(!hasBadAprilTag)
@@ -161,9 +188,21 @@ public class VisionManager {
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
         List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
-        for (int id : kReefIDs) {
-            reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral, isL4));
+        boolean isBlue = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() == Alliance.Blue : false;
+        if(isBlue)
+        {
+            
+            for(int id : kBlueReefIDs){
+                reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral, isL4));
+            }
+        
+        }else
+        {
+            for(int id : kRedReefIDs){
+                reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral, isL4));
+            }
         }
+        
         return swerveDriveManager.getRobotPose().nearest(reefPoses);
 
     }
@@ -226,8 +265,18 @@ public class VisionManager {
 
 
         List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
-        for (int id : kReefIDs) {
-            reefPoses.add(camera.getDealgeafyPose2d(id));
+        boolean isBlue = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() == Alliance.Blue : false;
+        if(isBlue)
+        {
+            for(int id : kBlueReefIDs){
+                reefPoses.add(camera.getDealgeafyPose2d(id));
+            }
+        
+        }else
+        {
+            for(int id : kRedReefIDs){
+                reefPoses.add(camera.getDealgeafyPose2d(id));
+            }
         }
         return swerveDriveManager.getRobotPose().nearest(reefPoses);
 
