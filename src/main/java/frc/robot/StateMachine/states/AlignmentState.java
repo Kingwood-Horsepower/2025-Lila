@@ -54,8 +54,11 @@ public class AlignmentState extends PlayerState{
         alignToClosestReefCommand.schedule();
     }
     @Override public void onA(){
-        player.coralAndElevatorSubsystem.decrementElevatorScoringLevel();
-        alignToClosestReefCommand.schedule();
+       ;
+        if(player.coralAndElevatorSubsystem.decrementElevatorScoringLevel())
+            player.stateMachine.ChangeState(player.driveState);
+        else   
+            alignToClosestReefCommand.schedule();
     }
 
     @Override public void onBack()

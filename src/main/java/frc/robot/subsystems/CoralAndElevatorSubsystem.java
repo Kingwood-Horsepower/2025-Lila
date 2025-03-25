@@ -4,7 +4,6 @@ import static frc.robot.Constants.ElevatorConstants.*;
 
 import java.util.function.BooleanSupplier;
 
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -13,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
 import frc.robot.CoralAndElevatorState;
 
 
@@ -41,35 +39,11 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         L3ALGAE
     };
 
-    private double testSetPoint = 0.0;
-    
-    
     public CoralAndElevatorSubsystem(){
         //lastState = STOW_UP;
         onL4().onTrue(coralIntake.primeCoralForL4());
         onL4().onFalse(coralIntake.retractCoralFromL4());
         SmartDashboard.putData("IR Override", overrideHasCoral());
-        initPreferences();
-        SmartDashboard.putData("testCommand", testMoveCommand());
-        SmartDashboard.putData("load preferences", loadPreferencesCommand());
-    }
-
-    private void initPreferences(){
-        Preferences.initDouble("testSetPoint", testSetPoint);
-    }
-
-    private void loadPreferences(){
-        System.out.println("loaded preferences");
-        testSetPoint = Preferences.getDouble("testSetPoint", testSetPoint);
-        System.out.println(Preferences.getDouble("testSetPoint", testSetPoint));
-    }
-
-    private Command loadPreferencesCommand() {
-        return Commands.runOnce(()->loadPreferences());
-    }
-
-    private Command testMoveCommand(){
-        return Commands.runOnce(()->coralIntake.setSetPoint(testSetPoint), this);
     }
 
     private Command moveToNormalState(CoralAndElevatorState newState) {
@@ -210,16 +184,17 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         incrementElevatorScoringLevelCommand().schedule();
     }
 
-    public void decrementElevatorScoringLevel() {
+    public boolean decrementElevatorScoringLevel() {
         decrementElevatorScoringLevelCommand().schedule();
+        return scoringLevel ==  0;
     }
 
     public void incrementDeAlgaeifyLevel() {
-        incrementDeAlgaeifyLevelCommand();
+        incrementDeAlgaeifyLevelCommand().schedule();;
     }
 
     public boolean decrementDeAlgaeifyLevel() {
-        decrementDeAlgaeifyLevelCommand();
+        decrementDeAlgaeifyLevelCommand().schedule();
         return deAlgaeifyLevel == 0; //It's useful for the player state Machine
     }
 
@@ -262,12 +237,6 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
 
     public Command overrideHasCoral() {
         return Commands.runOnce(()->coralIntake.hasCoralOverride(true));
-    }
-
-    @Override
-    public void periodic() {
-        //System.out.println(testSetPoint);
-        SmartDashboard.putNumber("testSetPoint number", testSetPoint);
     }
 
 
