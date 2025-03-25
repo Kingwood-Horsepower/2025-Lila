@@ -4,6 +4,7 @@ import static frc.robot.Constants.ElevatorConstants.*;
 
 import java.util.function.BooleanSupplier;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -42,18 +43,8 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         //lastState = STOW_UP;
         onL4().onTrue(coralIntake.primeCoralForL4());
         onL4().onFalse(coralIntake.retractCoralFromL4());
+        SmartDashboard.putData("IR Override", overrideHasCoral());
     }
-
-    // private Command moveToStateTest(CoralAndElevatorState newState) {
-    //     return new FunctionalCommand(
-    //     () -> {
-    //         coralIntake.setSetPoint(deAlgaeifyLevel);
-    //     }
-    //         , null, null, null, null)
-    // } 
-    
-
-
 
     private Command moveToNormalState(CoralAndElevatorState newState) {
         return Commands.sequence(
@@ -241,6 +232,10 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
 
     public Trigger onL4() {
         return new Trigger(() -> scoringLevel == 4);
+    }
+
+    public Command overrideHasCoral() {
+        return Commands.runOnce(()->coralIntake.hasCoralOverride(true));
     }
 
 

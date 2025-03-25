@@ -160,8 +160,6 @@ public class VisionManager {
         // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
-        System.out.println("using purely pose to align");
-
         List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
         for (int id : kReefIDs) {
             reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral, isL4));
@@ -176,12 +174,12 @@ public class VisionManager {
 
     /**
      * Returns the closest scoring position of the robot, then which one is l4.
-     * This will do the math for all non l4 scoring positions and will return a non l4 scoring position, used only for teleop
+     * 
      */    
-    public Pose2d getClosestRobotScoringPosition()
+    public Pose2d getClosestRobotScoringPosition(boolean isL4)
     {
-        Pose2d rightPose = getRobotScoringPosition(true, false);
-        Pose2d leftPose = getRobotScoringPosition(false, false);
+        Pose2d rightPose = getRobotScoringPosition(true, isL4);
+        Pose2d leftPose = getRobotScoringPosition(false, isL4);
 
         return swerveDriveManager.getRobotPose().nearest(List.of(rightPose, leftPose));
 
@@ -199,7 +197,7 @@ public class VisionManager {
         // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
-        System.out.println("using estimate using robot position");
+
 
         List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
         for (int id : kStationIDs) {
@@ -226,7 +224,6 @@ public class VisionManager {
         // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
 
-        System.out.println("using estimate using robot position");
 
         List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
         for (int id : kReefIDs) {

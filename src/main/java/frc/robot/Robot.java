@@ -36,11 +36,11 @@ public class Robot extends TimedRobot {
     autoChooser.addRoutine("eliatestroutine", () -> m_robotContainer.auto.getTestRoutine());
 //whr
     
-    // Put the auto chooser on the dashboard
-    // SmartDashboard.putData(autoChooser);
+    //Put the auto chooser on the dashboard
+    SmartDashboard.putData(autoChooser);
     
-    // // Schedule the selected auto during the autonomous period
-    // RobotModeTriggers.autonomous().whileTrue(autoChooser.selectedCommandScheduler());
+    // Schedule the selected auto during the autonomous period
+    RobotModeTriggers.autonomous().whileTrue(autoChooser.selectedCommandScheduler());
 
   }
 

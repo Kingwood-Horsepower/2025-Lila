@@ -30,10 +30,10 @@ public class AlignToReefCommand extends AlignCommand {
 
     @Override
     public Pose3d initializeGoal() {
-        if (isL4.getAsBoolean()) System.out.println("align initialize initialized at l4");
+        //if (isL4.getAsBoolean()) System.out.println("align initialize initialized at l4");
         Pose2d newGoal = null;
         //if(goal == null) {
-            if(isRight == null) newGoal = visionManager.getClosestRobotScoringPosition();
+            if(isRight == null) newGoal = visionManager.getClosestRobotScoringPosition(isL4.getAsBoolean());
             else newGoal = visionManager.getRobotScoringPosition(isRight.getAsBoolean(), isL4.getAsBoolean());
         //}
         return new Pose3d(newGoal);

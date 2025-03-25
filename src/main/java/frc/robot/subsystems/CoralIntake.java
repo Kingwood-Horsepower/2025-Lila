@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralIntake extends SubsystemBase {
     private final DigitalInput IRsensor = new DigitalInput(4); // false = broken
+    private boolean hasCoralOverride = false;
 
     private final int rollerMotorID = 23;
     private final int armMotorID = 24;
@@ -205,6 +206,10 @@ public class CoralIntake extends SubsystemBase {
 
     }
 
+    public void hasCoralOverride(boolean hasCoral) {
+        hasCoralOverride = hasCoral;
+    }
+
     @Override
     public void periodic() {
         // ill change this later
@@ -212,7 +217,7 @@ public class CoralIntake extends SubsystemBase {
         //armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
         armMotor.setVoltage(armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
         SmartDashboard.putNumber("applied voltage", armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
-        hasCoral = !IRsensor.get(); //!
+        hasCoral = !IRsensor.get()||hasCoralOverride; //!
 
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
         //SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());
