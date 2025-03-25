@@ -118,14 +118,11 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         return scoringCommand(() -> coralIntake.runningLowAmps());
     }
 
-    public void moveDown() {
-        Commands.sequence(
-            moveToState(STOW_DOWN), 
-            moveToState(STOW_UP),
-            Commands.runOnce(() -> resetAllIncrements())
-        ).schedule();
-    }
 
+    /**
+     * kind of borked, returns command to move the elevator down
+     * @return
+     */    
     public Command moveDownCommand() {
         return Commands.sequence(
             moveToState(STOW_DOWN), 
@@ -133,55 +130,88 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
             Commands.runOnce(() -> resetAllIncrements())
         );
     }
-
-    public void startIntake() {
-        moveToState(INTAKE).schedule();
+    
+    public Command startIntakeCommand() {
+        return moveToState(INTAKE);
     }
 
-    public void endIntake() {
-        moveToState(STOW_UP).schedule();
+    public Command endIntakeCommand() {
+        return moveToState(STOW_UP);
     }
-
-
-    public void incrementElevatorScoringLevel() {
-        scoringLevel = Math.min(scoringLevel + 1, 4);
-        System.out.println(scoringLevel);
-        moveToState(scoringStates[scoringLevel]).schedule();
-    }
-
+    
     public Command incrementElevatorScoringLevelCommand() {
         scoringLevel = Math.min(scoringLevel + 1, 4);
         System.out.println(scoringLevel);
         return moveToState(scoringStates[scoringLevel]);
     }
-
-    public void decrementElevatorScoringLevel() {
+    
+    public Command decrementElevatorScoringLevelCommand() {
         scoringLevel = Math.max(scoringLevel - 1, 0);
         System.out.println(scoringLevel);
-        moveToState(scoringStates[scoringLevel]).schedule();
+        return moveToState(scoringStates[scoringLevel]);
     }
-
-    public void incrementDeAlgaeifyScoringLevel() {
+    
+    public Command incrementDeAlgaeifyLevelCommand() {
         deAlgaeifyLevel = Math.min(deAlgaeifyLevel + 1, 2);
-        moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
+        return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
     }
 
-    public boolean decrementDeAlgaeifyScoringLevel() {
+    public Command decrementDeAlgaeifyLevelCommand() {
         deAlgaeifyLevel = Math.max(deAlgaeifyLevel - 1, 0);
-        moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
+        return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+    }
+
+    public Command moveToElevatorScoringLevelCommand(int scoringLevel) {
+        System.out.println(scoringLevel);
+        this.scoringLevel = scoringLevel;
+        return moveToState(scoringStates[scoringLevel]);
+    }
+
+    public Command moveToDeAlgaeifyLevelCommand(int deAlgaeifyLevel) {
+        System.out.println(deAlgaeifyLevel);
+        this.deAlgaeifyLevel = deAlgaeifyLevel;
+        return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+    }
+
+    /**
+     * kind of borked, schedules a command to move the elevator down
+     * @return
+     */    
+    public void moveDown() {
+        moveDownCommand().schedule();
+    }
+
+    public void startIntake() {
+        startIntakeCommand().schedule();
+    }
+
+    public void endIntake() {
+        endIntakeCommand().schedule();
+    }
+
+    public void incrementElevatorScoringLevel() {
+        incrementElevatorScoringLevelCommand().schedule();
+    }
+
+    public void decrementElevatorScoringLevel() {
+        decrementElevatorScoringLevelCommand().schedule();
+    }
+
+    public void incrementDeAlgaeifyLevel() {
+        incrementDeAlgaeifyLevelCommand();
+    }
+
+    public boolean decrementDeAlgaeifyLevel() {
+        decrementDeAlgaeifyLevelCommand();
         return deAlgaeifyLevel == 0; //It's useful for the player state Machine
     }
 
     public void moveToElevatorScoringLevel(int scoringLevel) {
-        System.out.println(scoringLevel);
-        this.scoringLevel = scoringLevel;
-        moveToState(scoringStates[scoringLevel]).schedule();
+        moveToElevatorScoringLevelCommand(scoringLevel);
     }
 
-    public void moveToDeAlgaeifyLevel(int deAlgaeifyLevelLevel) {
-        System.out.println(deAlgaeifyLevel);
-        this.deAlgaeifyLevel = deAlgaeifyLevel;
-        moveToState(deAlgaeifyStates[deAlgaeifyLevel]).schedule();
+    public void moveToDeAlgaeifyLevel(int deAlgaeifyLevel) {
+        moveToDeAlgaeifyLevelCommand(deAlgaeifyLevel);
     }
 
     public void resetAllIncrements() {
@@ -212,16 +242,6 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     public Trigger onL4() {
         return new Trigger(() -> scoringLevel == 4);
     }
-
-
-
-
-
-
-
-
-
-    
 
 
 }

@@ -119,6 +119,91 @@ public class Auto {
         //testTraj.done().onTrue(IntakeCoralAndGo(testTrajReversed));
         return routine;
     }
+    
+
+
+
+    private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
+        Pose2d l4ScorePose = visionManager.getRobotScoringPosition(18, true, false);
+        Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, l4ScorePose);
+        Command moveElevatorCommand = Commands.runOnce(() -> {
+         coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+         //coralAndElevatorSubsystem.incrementElevatorScoringLevel();
+         coralAndElevatorSubsystem.incrementElevatorScoringLevel();});
+
+        return Commands.sequence(
+            Commands.runOnce(swerveDriveManager::stopRobot),
+            new PrintCommand("Awhattttt"),
+            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            new PrintCommand("elevate again!!"),
+            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            new PrintCommand("command???"),
+            driveToPoseCommand,
+            new PrintCommand("Aligned"),
+            Commands.runOnce(swerveDriveManager::stopRobot),
+            new WaitCommand(.2),  
+            new PrintCommand("About to score"),
+            coralAndElevatorSubsystem.score(),
+            new PrintCommand("Scored"),
+            coralAndElevatorSubsystem.moveDownCommand(),
+            new PrintCommand("Moved Down"),
+            new WaitCommand(0.2),
+            Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
+            nexTrajectory.cmd()
+        );
+    }
+
+    /**
+     * 
+     * @param nexTrajectory
+     * @return
+     */
+    private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
+        return Commands.sequence(
+                Commands.runOnce(swerveDriveManager::stopRobot),
+                Commands.runOnce(coralAndElevatorSubsystem::startIntake),
+                new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
+                new WaitCommand(0.2),     
+                Commands.runOnce(coralAndElevatorSubsystem::endIntake),
+                Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
+                nexTrajectory.cmd()
+            );
+    }
+
+
+
+    //Deprecated
+    private AutoTrajectory getStartingAutoTrajectory(AutoRoutine routine){
+        switch (startingPosition) {
+            case goonCage:
+                if(targetStation == TargetCoralStation.rightStation)
+                  return routine.trajectory("AutoStart1S1");
+                else
+                  return routine.trajectory("AutoStart1S2");
+            case sigmaCenter:
+                if(targetStation == TargetCoralStation.rightStation)
+                   return routine.trajectory("AutoStart2S1");
+                else
+                   return routine.trajectory("AutoStart2S2");
+            case edgeCage:
+                if(targetStation == TargetCoralStation.rightStation)
+                   return routine.trajectory("AutoStart3S1");
+                else
+                   return routine.trajectory("AutoStart3S2");
+            default:
+                System.out.println("Wrong auto constants");
+                return null;
+       }
+
+    }
+
+
+    
+
+
+
+
+    //Albert's trashcan
 
     public Command dumboBlueRightAutoRoutine1Command() {
         Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
@@ -168,76 +253,6 @@ public class Auto {
 
         );
     }
-    
-
-
-
-    private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
-        Pose2d l4ScorePose = visionManager.getRobotScoringPosition(18, true, false);
-        Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, l4ScorePose);
-        Command moveElevatorCommand = Commands.runOnce(() -> {
-         coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-         //coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-         coralAndElevatorSubsystem.incrementElevatorScoringLevel();});
-
-        return Commands.sequence(
-            Commands.runOnce(swerveDriveManager::stopRobot),
-            new PrintCommand("Awhattttt"),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            new PrintCommand("elevate again!!"),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            new PrintCommand("command???"),
-            driveToPoseCommand,
-            new PrintCommand("Aligned"),
-            Commands.runOnce(swerveDriveManager::stopRobot),
-            new WaitCommand(.2),  
-            new PrintCommand("About to score"),
-            coralAndElevatorSubsystem.score(),
-            new PrintCommand("Scored"),
-            coralAndElevatorSubsystem.moveDownCommand(),
-            new PrintCommand("Moved Down"),
-            new WaitCommand(0.2),
-            Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
-            nexTrajectory.cmd()
-        );
-    }
-    private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
-        return Commands.sequence(
-                Commands.runOnce(swerveDriveManager::stopRobot),
-                Commands.runOnce(coralAndElevatorSubsystem::startIntake),
-                new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
-                new WaitCommand(0.2),     
-                Commands.runOnce(coralAndElevatorSubsystem::endIntake),
-                Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
-                nexTrajectory.cmd()
-            );
-    }
-    private AutoTrajectory getStartingAutoTrajectory(AutoRoutine routine){
-        switch (startingPosition) {
-            case goonCage:
-                if(targetStation == TargetCoralStation.rightStation)
-                  return routine.trajectory("AutoStart1S1");
-                else
-                  return routine.trajectory("AutoStart1S2");
-            case sigmaCenter:
-                if(targetStation == TargetCoralStation.rightStation)
-                   return routine.trajectory("AutoStart2S1");
-                else
-                   return routine.trajectory("AutoStart2S2");
-            case edgeCage:
-                if(targetStation == TargetCoralStation.rightStation)
-                   return routine.trajectory("AutoStart3S1");
-                else
-                   return routine.trajectory("AutoStart3S2");
-            default:
-                System.out.println("Wrong auto constants");
-                return null;
-       }
-
-    }
-
-
-
 
 
 }

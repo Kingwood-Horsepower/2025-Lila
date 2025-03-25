@@ -60,8 +60,13 @@ public class PlayerStateMachine {
     {
         if(stateMachine.getState() == alignmentState)
             coralAndElevatorSubsystem.moveDown();
-        else 
+        else {
             coralAndElevatorSubsystem.endIntake();
+            coralAndElevatorSubsystem.resetAllIncrements();
+        }
+            
+
+        
     
         stateMachine.startStateMachine();
     }

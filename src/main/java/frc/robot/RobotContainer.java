@@ -4,53 +4,15 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
 
-import java.lang.ModuleLayer.Controller;
-import java.util.function.BooleanSupplier;
-
-import org.opencv.core.Mat;
-
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.AlgaeConstants;
-import frc.robot.Constants.AutoConstants;
 import frc.robot.StateMachine.PlayerStateMachine;
-import frc.robot.commands.AlignToReefCommand;
-import frc.robot.commands.AlignToStationCommand;
-import frc.robot.commands.AlignCommand;
-import frc.robot.generated.TunerConstants;
 import frc.robot.managers.VisionManager;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.subsystems.AlgaeIntake;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralAndElevatorSubsystem;
 import frc.robot.subsystems.Winch;
 

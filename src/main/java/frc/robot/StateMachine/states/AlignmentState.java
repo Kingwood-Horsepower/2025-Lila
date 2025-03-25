@@ -7,7 +7,6 @@ import frc.robot.StateMachine.PlayerState;
 
 import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.AlignCommand;
-import frc.robot.managers.SwerveDriveManager;
 
 public class AlignmentState extends PlayerState{
     private boolean isRight = true;

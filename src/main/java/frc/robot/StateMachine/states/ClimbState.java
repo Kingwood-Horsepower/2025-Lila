@@ -3,8 +3,6 @@ package frc.robot.StateMachine.states;
 import static frc.robot.Constants.AlgaeConstants.ALGAE_DOWN_POINT;
 
 import frc.robot.StateMachine.PlayerState;
-import frc.robot.subsystems.AlgaeIntake;
-import frc.robot.subsystems.Winch;
 
 public class ClimbState extends PlayerState{
     //CLIMB STATE SHOULDN'T EXIST, IT SHOULD BE PART OF DRIVE MODE, REASONS:

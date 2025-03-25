@@ -2,9 +2,7 @@ package frc.robot.StateMachine.states;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
-import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.AlignDeAlgaeifyCommand;
-import frc.robot.commands.AlignToPoseCommand;
 
 public class AlgeePickupState extends PlayerState{
 
@@ -17,20 +15,21 @@ public class AlgeePickupState extends PlayerState{
     @Override public void Enter()
     {
         super.Enter();
-        player.coralAndElevatorSubsystem.incrementDeAlgaeifyScoringLevel();
+        player.coralAndElevatorSubsystem.incrementDeAlgaeifyLevel();
         dealgeafyAlignCommand.schedule();
         System.out.println("Entered AlgeePickup State");
     }
     @Override public void Exit(){
         super.Exit();
+        player.coralAndElevatorSubsystem.resetAllIncrements();
     }
 
     @Override public void onY(){
         dealgeafyAlignCommand.schedule();
-        player.coralAndElevatorSubsystem.incrementDeAlgaeifyScoringLevel();
+        player.coralAndElevatorSubsystem.incrementDeAlgaeifyLevel();
     }
     @Override public void onA(){
-        if(player.coralAndElevatorSubsystem.decrementDeAlgaeifyScoringLevel())
+        if(player.coralAndElevatorSubsystem.decrementDeAlgaeifyLevel())
             player.stateMachine.ChangeState(player.driveState);
     }
 
