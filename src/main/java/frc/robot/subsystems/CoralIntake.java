@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.RelativeEncoder;
@@ -196,15 +197,11 @@ public class CoralIntake extends SubsystemBase {
     //             setSetPoint(setPoint);
     //         }, 
     //         ()->{}, 
-    //         this:: bullShitFunc,
+    //         t->{},
     //         () -> getIsNearSetPoint(), 
     //         this);
         
     // }
-
-    public void bullShitFunc(boolean b){
-
-    }
 
     public void hasCoralOverride(boolean hasCoral) {
         hasCoralOverride = hasCoral;

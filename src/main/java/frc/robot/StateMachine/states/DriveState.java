@@ -1,5 +1,7 @@
 package frc.robot.StateMachine.states;
 
+import static frc.robot.Constants.AlgaeConstants.ALGAE_DOWN_POINT;
+
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -54,12 +56,15 @@ public class DriveState extends PlayerState{
     
     @Override public void onPovUp(){
         player.winch.winchForwardCommand().schedule();
+        player.algaeIntake.setSetPoint(ALGAE_DOWN_POINT);
     }
     @Override public void onPovDown(){
         player.winch.winchReverseCommand().schedule();
+        player.algaeIntake.setSetPoint(ALGAE_DOWN_POINT);
     }
     @Override public void onPovCenter(){
         player.winch.winchStopCommand().schedule();
+        player.algaeIntake.setSetPoint(ALGAE_DOWN_POINT);
     }
 
 

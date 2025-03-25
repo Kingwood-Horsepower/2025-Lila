@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "name": "/Preferences/algae down point",
+    "type": "double",
+    "value": 0.12,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/algae store point",
+    "type": "double",
+    "value": 0.08,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/tag to align to",
+    "type": "double",
+    "value": 11.0,
+    "properties": {
+      "persistent": true
+    }
+  }
+]
