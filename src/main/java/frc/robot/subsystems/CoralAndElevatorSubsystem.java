@@ -2,14 +2,19 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.ElevatorConstants.*;
 
+import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -109,6 +114,17 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         );
     }
 
+    private Command moveToSupplierState(Supplier<CoralAndElevatorState> stateSupplier) {
+        return Commands.sequence(
+            new PrintCommand("moveToSupplierState has state with elevator distance: " + Double.toString(stateSupplier.get().elevatorPosition)),
+            moveToNormalState(stateSupplier.get())
+        );
+    }
+
+    private CoralAndElevatorState getScoringState(IntSupplier levelSupplier) {
+        return scoringStates[levelSupplier.getAsInt()];
+    }
+
     public void scheduleNewState(CoralAndElevatorState newState) {
         moveToState(newState).schedule();
     }
@@ -153,9 +169,12 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         // System.out.println(scoringLevel);
         // return moveToState(scoringStates[scoringLevel]);
         return Commands.sequence(
-            Commands.runOnce(()->scoringLevel = Math.min(scoringLevel + 1, 4)),
-            moveToState(scoringStates[scoringLevel])
-
+            Commands.runOnce(()->scoringLevel = Math.min(scoringLevel + 1, 4)), // correctly incremented
+            //Commands.runOnce(()-> System.out.println(scoringLevel)),              // correct
+            //new PrintCommand(Integer.toString(scoringLevel)),                     // incorrect, still 0
+            // moveToSupplierState(()->scoringStates[getScoringLevel()])               // incorrect
+            // moveToSupplierState(()->getScoringState(()-> scoringLevel))                // incorrect
+            new DeferredCommand(()-> moveToState(scoringStates[scoringLevel]), Set.of(this)) // You arent supposed to use deffered but im so done with this shit so
         );
     }
     
@@ -166,30 +185,47 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         // return moveToState(scoringStates[scoringLevel]);
         return Commands.sequence(
             Commands.runOnce(()->scoringLevel = Math.max(scoringLevel - 1, 0)),
-            moveToState(scoringStates[scoringLevel])
+            new DeferredCommand(()-> moveToState(scoringStates[scoringLevel]), Set.of(this))
         );
     }
     
     public Command incrementDeAlgaeifyLevelCommand() {
-        deAlgaeifyLevel = Math.min(deAlgaeifyLevel + 1, 2);
-        return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+        //deAlgaeifyLevel = Math.min(deAlgaeifyLevel + 1, 2);
+        // return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+        return Commands.sequence(
+            Commands.runOnce(()->deAlgaeifyLevel = Math.min(deAlgaeifyLevel + 1, 2)),
+            new DeferredCommand(()-> moveToState(deAlgaeifyStates[deAlgaeifyLevel]), Set.of(this))
+        );
     }
 
     public Command decrementDeAlgaeifyLevelCommand() {
-        deAlgaeifyLevel = Math.max(deAlgaeifyLevel - 1, 0);
-        return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+        // deAlgaeifyLevel = Math.max(deAlgaeifyLevel - 1, 0);
+        // return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+        return Commands.sequence(
+            Commands.runOnce(()-> deAlgaeifyLevel = Math.max(deAlgaeifyLevel - 1, 0)),
+            new DeferredCommand(()-> moveToState(deAlgaeifyStates[deAlgaeifyLevel]), Set.of(this))
+        );
     }
 
     public Command moveToElevatorScoringLevelCommand(int scoringLevel) {
-        System.out.println(scoringLevel);
-        this.scoringLevel = scoringLevel;
-        return moveToState(scoringStates[scoringLevel]);
+        // System.out.println(scoringLevel);
+        // this.scoringLevel = scoringLevel;
+        // return moveToState(scoringStates[scoringLevel]);
+        return Commands.sequence(
+            Commands.runOnce(()-> this.scoringLevel = scoringLevel),
+            new DeferredCommand(()-> moveToState(scoringStates[scoringLevel]), Set.of(this))
+        );
+        
     }
 
     public Command moveToDeAlgaeifyLevelCommand(int deAlgaeifyLevel) {
-        System.out.println(deAlgaeifyLevel);
-        this.deAlgaeifyLevel = deAlgaeifyLevel;
-        return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+        // System.out.println(deAlgaeifyLevel);
+        // this.deAlgaeifyLevel = deAlgaeifyLevel;
+        // return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);
+        return Commands.sequence(
+            Commands.runOnce(()-> this.deAlgaeifyLevel = deAlgaeifyLevel),
+            new DeferredCommand(()-> moveToState(deAlgaeifyStates[deAlgaeifyLevel]), Set.of(this))
+        );
     }
 
     /**
