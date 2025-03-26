@@ -143,6 +143,11 @@ public class RobotContainer {
         swerveDriveManager.stopRobot();
     }
 
+    public void teleopInit(){
+        coralAndElevatorSubsystem.bindTriggers();
+    }
+
+
     /* #endregion */
 
 
