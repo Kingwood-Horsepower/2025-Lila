@@ -41,6 +41,7 @@ public class PlayerStateMachine {
         this.visionManager = visionManager;
         this.coralAndElevatorSubsystem = coralAndElevatorSubsystem;
         this.winch = winch;
+        this.algaeIntake = algaeIntake;
 
 
         driveState = new DriveState();
