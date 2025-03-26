@@ -64,16 +64,28 @@ public class Elevator extends SubsystemBase{
     private final ProfiledPIDController elevatorController = new ProfiledPIDController(.6, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
 
     //sim
-    Mechanism2d mech = new Mechanism2d(1, 6);
-    MechanismRoot2d rootMech = mech.getRoot("base", 0.5, 0);
-    DCMotor elevatorDCMotor = DCMotor.getNEO(1);
+
+    private final DCMotor elevatorDCMotor = DCMotor.getNEO(1);
     private final SparkMaxSim leadMotorSim = new SparkMaxSim(leadMotor, elevatorDCMotor);
 
     private final ElevatorSim elevatorSim = new ElevatorSim(
-        elevatorDCMotor, 12, 9, 0.0152, 0, 1.25, true, 0, 0.01, 0);
+        elevatorDCMotor, 
+        ELEVATOR_GEAR_RATIO, 
+        9, 
+        0.0152, 
+        0.1, 
+        11.6, 
+        false, 
+        0, 
+        0.01,
+        0
+    );
+
+    private final Mechanism2d mech = new Mechanism2d(50, 100);
+    private final MechanismRoot2d rootMech = mech.getRoot("base", 10, 0);
     private final MechanismLigament2d elevatorMech2d =
       rootMech.append(
-          new MechanismLigament2d("elevator", 0.1, 90)
+          new MechanismLigament2d("elevator", 0.1*20, 90) // 20 is pixels per meter
           );
     private final SparkRelativeEncoderSim leadEncoderSim = leadMotorSim.getRelativeEncoderSim();
     
@@ -83,9 +95,7 @@ public class Elevator extends SubsystemBase{
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)
             .inverted(false)
-            
-            
-            ; // <- this semicolon is VERY important
+                ; // <- this semicolon is VERY important
         leadMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
         followMotorConfig
@@ -93,6 +103,7 @@ public class Elevator extends SubsystemBase{
             .idleMode(IdleMode.kBrake)
             .follow(leadMotor, true);
         followMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     }
 
     /**
@@ -159,21 +170,35 @@ public class Elevator extends SubsystemBase{
 
     @Override 
     public void simulationPeriodic() {
-        
+
+        //m_elevatorSim.setInput(elevatorMotor.getAppliedOutput() * RobotController.getBatteryVoltage());
+        // calculate the mechanism's new velocity with the motor sim
+        elevatorSim.setInput(leadMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
+
+        //update on standard loop time
         elevatorSim.update(0.02);
 
         // setting the motor sim to the mechanism's current calculated velocity
-        leadMotorSim.iterate(elevatorSim.getVelocityMetersPerSecond(), RoboRioSim.getVInVoltage(), 0.02);
+        // Iterate the elevator and arm SPARK simulations
+        double inchesPerMeter = 39.37;
+        
+        leadMotorSim.iterate(elevatorSim.getVelocityMetersPerSecond()*inchesPerMeter*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, RobotController.getBatteryVoltage(), 0.02);
+        // meters   inches   revolutions 
+        // ------ * ------ * ----------- * seconds = revolutions of the motor
+        // second   meter    inch      
+        
         // simulating the power draw from the battery by this mechanism
         RoboRioSim.setVInVoltage(
         BatterySim.calculateDefaultBatteryLoadedVoltage(elevatorSim.getCurrentDrawAmps()));
-        // calculate the mechanism's new velocity with the motor sim
-        elevatorSim.setInput(leadMotorSim.getVelocity() * RobotController.getBatteryVoltage());
+        
         // set the encododer sim 
         leadEncoderSim.setPosition(leadMotorSim.getPosition());
         // modify the mechanism
-        elevatorMech2d.setLength(1+elevatorSim.getPositionMeters());
-        //System.out.println(leadMotorSim.getPosition());
+        elevatorMech2d.setLength(.1+elevatorSim.getPositionMeters());
+        //System.out.println(leadMotorSim.getPosition());\
+
+        //System.out.println(leadMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
+
 
         SmartDashboard.putData("elevator please", mech);
         
