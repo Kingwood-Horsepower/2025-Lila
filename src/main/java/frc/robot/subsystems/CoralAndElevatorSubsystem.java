@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -47,8 +48,9 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         onL4().onTrue(coralIntake.primeCoralForL4());
         onL4().onFalse(coralIntake.retractCoralFromL4());
         SmartDashboard.putData("IR Override", overrideHasCoral());
-        SmartDashboard.putData("Increment", incrementElevatorScoringLevelCommand());
-        SmartDashboard.putData("Decrement", decrementElevatorScoringLevelCommand());
+        SmartDashboard.putData("Increment", Commands.sequence(incrementElevatorScoringLevelCommand()));
+        SmartDashboard.putData("Decrement", Commands.sequence(decrementElevatorScoringLevelCommand()));
+        SmartDashboard.putData("testPrint", new PrintCommand("testPrint"));
 
     }
 
@@ -147,15 +149,25 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     }
     
     public Command incrementElevatorScoringLevelCommand() {
-        scoringLevel = Math.min(scoringLevel + 1, 4);
-        System.out.println(scoringLevel);
-        return moveToState(scoringStates[scoringLevel]);
+        // scoringLevel = Math.min(scoringLevel + 1, 4);
+        // System.out.println(scoringLevel);
+        // return moveToState(scoringStates[scoringLevel]);
+        return Commands.sequence(
+            Commands.runOnce(()->scoringLevel = Math.min(scoringLevel + 1, 4)),
+            moveToState(scoringStates[scoringLevel])
+
+        );
     }
     
     public Command decrementElevatorScoringLevelCommand() {
-        scoringLevel = Math.max(scoringLevel - 1, 0);
-        System.out.println(scoringLevel);
-        return moveToState(scoringStates[scoringLevel]);
+        // scoringLevel = Math.max(scoringLevel - 1, 0);
+
+        // Commands.runOnce(()-> scoringLevel = 1);
+        // return moveToState(scoringStates[scoringLevel]);
+        return Commands.sequence(
+            Commands.runOnce(()->scoringLevel = Math.max(scoringLevel - 1, 0)),
+            moveToState(scoringStates[scoringLevel])
+        );
     }
     
     public Command incrementDeAlgaeifyLevelCommand() {
@@ -253,6 +265,12 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
 
     public Command overrideHasCoral() {
         return Commands.runOnce(()->coralIntake.hasCoralOverride(true));
+    }
+
+    @Override 
+    public void periodic() {
+        SmartDashboard.putNumber("scoring level", scoringLevel);
+        SmartDashboard.putNumber("dealgae level", deAlgaeifyLevel);
     }
 
 
