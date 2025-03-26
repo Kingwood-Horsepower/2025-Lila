@@ -106,7 +106,6 @@ public class Auto {
         rightRoutine.active().onTrue(Commands.sequence(
             goToCoral9.resetOdometry(),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
-            Commands.runOnce(coralAndElevatorSubsystem::incrementElevatorScoringLevel),
             goToCoral9.cmd()
         ));
 
@@ -177,6 +176,8 @@ public class Auto {
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             new PrintCommand("elevate again!!"),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            new PrintCommand("third time"),
+            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             new PrintCommand("command???"),
             driveToPoseCommand,
             new PrintCommand("Aligned"),
@@ -185,7 +186,7 @@ public class Auto {
             new PrintCommand("About to score"),
             coralAndElevatorSubsystem.score(),
             new PrintCommand("Scored"),
-            coralAndElevatorSubsystem.moveDownCommand(),
+            coralAndElevatorSubsystem.moveDownAutonomousCommand(),
             new PrintCommand("Moved Down"),
             new WaitCommand(0.2),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory

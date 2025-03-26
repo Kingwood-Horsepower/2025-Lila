@@ -47,6 +47,9 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         onL4().onTrue(coralIntake.primeCoralForL4());
         onL4().onFalse(coralIntake.retractCoralFromL4());
         SmartDashboard.putData("IR Override", overrideHasCoral());
+        SmartDashboard.putData("Increment", incrementElevatorScoringLevelCommand());
+        SmartDashboard.putData("Decrement", decrementElevatorScoringLevelCommand());
+
     }
 
     private Command moveToNormalState(CoralAndElevatorState newState) {
@@ -121,6 +124,16 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         return Commands.sequence(
             moveToState(STOW_DOWN), 
             moveToState(STOW_UP),
+            Commands.runOnce(() -> resetAllIncrements())
+        );
+    }
+
+    public Command moveDownAutonomousCommand() {
+        return Commands.sequence(
+            moveToState(STOW_DOWN),
+            new WaitCommand(0.2), 
+            moveToState(STOW_UP),
+            new WaitCommand(0.5),
             Commands.runOnce(() -> resetAllIncrements())
         );
     }

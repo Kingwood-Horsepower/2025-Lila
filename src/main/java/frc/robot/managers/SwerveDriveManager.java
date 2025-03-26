@@ -168,13 +168,13 @@ public class SwerveDriveManager {
             pose.getRotation().getRadians(), sample.heading
         );
 
-        System.out.println("PIDY: ROBOT: " + pose.getX() + " SAMPLE: " + sample.x);
-        System.out.println("PIDY: ROBOT: " + pose.getY() + " SAMPLE: " + sample.y);
-        System.out.println("RESULT: X: " +  xController.calculate(
-            pose.getX(), sample.x
-        )+ " Y: " +yController.calculate(
-            pose.getY(), sample.y
-        ));
+        // System.out.println("PIDY: ROBOT: " + pose.getX() + " SAMPLE: " + sample.x);
+        // System.out.println("PIDY: ROBOT: " + pose.getY() + " SAMPLE: " + sample.y);
+        // System.out.println("RESULT: X: " +  xController.calculate(
+        //     pose.getX(), sample.x
+        // )+ " Y: " +yController.calculate(
+        //     pose.getY(), sample.y
+        // ));
 
         drivetrain.setControl(
             trajectoryRequest.withSpeeds(targetSpeeds)

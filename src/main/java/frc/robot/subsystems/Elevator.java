@@ -64,17 +64,16 @@ public class Elevator extends SubsystemBase{
     private final ProfiledPIDController elevatorController = new ProfiledPIDController(.6, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
 
     //sim
-    Mechanism2d mech = new Mechanism2d(20, 50);
-    MechanismRoot2d rootMech = mech.getRoot("Elevator Root", 10, 0);
-
-    DCMotor elevatorDCMotor = DCMotor.getNEO(2);
+    Mechanism2d mech = new Mechanism2d(1, 6);
+    MechanismRoot2d rootMech = mech.getRoot("base", 0.5, 0);
+    DCMotor elevatorDCMotor = DCMotor.getNEO(1);
     private final SparkMaxSim leadMotorSim = new SparkMaxSim(leadMotor, elevatorDCMotor);
 
     private final ElevatorSim elevatorSim = new ElevatorSim(
         elevatorDCMotor, 12, 9, 0.0152, 0, 1.25, true, 0, 0.01, 0);
     private final MechanismLigament2d elevatorMech2d =
       rootMech.append(
-          new MechanismLigament2d("elevator", elevatorSim.getPositionMeters(), 90)
+          new MechanismLigament2d("elevator", 0.1, 90)
           );
     private final SparkRelativeEncoderSim leadEncoderSim = leadMotorSim.getRelativeEncoderSim();
     
