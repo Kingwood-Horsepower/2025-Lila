@@ -26,7 +26,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     private final CoralIntake coralIntake = new CoralIntake();
     //private final SwerveDriveManager swerveDriveManager;
     
-    private CoralAndElevatorState lastState;
+    private CoralAndElevatorState lastState = STOW_UP;
     private int scoringLevel = 0;
 
     private final CoralAndElevatorState[] scoringStates = {
@@ -47,11 +47,15 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
 
     private double testSetPoint = 0.0;
     
+ 
+    public void bindTriggers(){
+        onL4().onTrue(coralIntake.primeCoralForL4());
+        onL4().onFalse(coralIntake.retractCoralFromL4());
+    }
 
     public CoralAndElevatorSubsystem(){
         //lastState = STOW_UP;
-        onL4().onTrue(coralIntake.primeCoralForL4());
-        onL4().onFalse(coralIntake.retractCoralFromL4());
+
         SmartDashboard.putData("IR Override", overrideHasCoral());
         SmartDashboard.putData("Increment", Commands.sequence(incrementElevatorScoringLevelCommand()));
         SmartDashboard.putData("Decrement", Commands.sequence(decrementElevatorScoringLevelCommand()));
@@ -60,13 +64,20 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     }
 
     private Command moveToNormalState(CoralAndElevatorState newState) {
-        return Commands.sequence(
+        Command seq = Commands.sequence(
             coralIntake.moveToSetPoint(newState.coralPrePosition),
             elevator.moveToSetPoint(newState.elevatorPosition),
             coralIntake.moveToSetPoint(newState.coralEndPosition),
             Commands.runOnce(() -> coralIntake.setRollerVelocity(newState.runRollers), coralIntake),
             Commands.runOnce(() -> lastState = newState)
-            );
+        );
+        // adding the full subsystem as a requirement
+        seq.addRequirements(this);
+        return seq;
+    }
+
+    public Command primeCoralForL4() {
+        return coralIntake.primeCoralForL4();
     }
 
     private Command rizzTheLevel4GyattCommand(BooleanSupplier endCondition) {
@@ -80,38 +91,38 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     }
 
     private Command scoringCommand(BooleanSupplier endCondition) {
-        return new ConditionalCommand(
+        Command seq = new ConditionalCommand(
             // if lastState = L4
             rizzTheLevel4GyattCommand(endCondition), 
             // else
             Commands.run(() ->{
-             if(lastState == L1)
-                coralIntake.setRollerVelocity(-0.5);
-             else
-                coralIntake.setRollerVelocity(-1);
-        
-        }, coralIntake).until(endCondition)
-            .andThen( new WaitCommand(0.4))
-            , 
-
+                if(lastState == L1)
+                    coralIntake.setRollerVelocity(-0.5);
+                else
+                    coralIntake.setRollerVelocity(-1);
+            }, 
+            coralIntake).until(endCondition).andThen( new WaitCommand(0.4)), 
             () -> lastState == L4);
+        seq.addRequirements(this);
+        return seq;
     }
 
     // the public commands
 
-    private Command moveToState(CoralAndElevatorState newState) {
-        return new ConditionalCommand(
-            // if i cant go to this new state
-            Commands.runOnce(() -> {
-                System.out.print("Error, can't go to this state, (alberts state machine): ");
-                System.out.print(newState.toString());
-                System.out.print(" old state: ");
-                //System.out.println(lastState.toString())
-;            }), 
-            // else
-            moveToNormalState(newState),
-            () -> newState.canComeFrom != null && newState.canComeFrom != lastState.canGoTo
-        );
+    public Command moveToState(CoralAndElevatorState newState) {
+        return moveToNormalState(newState);
+//         return new ConditionalCommand(
+//             // if i cant go to this new state
+//             Commands.runOnce(() -> {
+//                 System.out.print("Error, can't go to this state, (alberts state machine): ");
+//                 System.out.print(newState.toString());
+//                 System.out.print(" old state: ");
+//                 //System.out.println(lastState.toString())
+// ;            }), 
+//             // else
+//             moveToNormalState(newState),
+//             () -> newState.canComeFrom != null && newState.canComeFrom != lastState.canGoTo
+        //);
     }
 
     private Command moveToSupplierState(Supplier<CoralAndElevatorState> stateSupplier) {
@@ -148,11 +159,8 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
 
     public Command moveDownAutonomousCommand() {
         return Commands.sequence(
-            moveToState(STOW_DOWN),
-            new WaitCommand(0.2), 
-            moveToState(STOW_UP),
-            new WaitCommand(0.5),
-            Commands.runOnce(() -> resetAllIncrements())
+            moveToElevatorScoringLevelCommand(0)
+            //moveToState(STOW_UP)
         );
     }
     

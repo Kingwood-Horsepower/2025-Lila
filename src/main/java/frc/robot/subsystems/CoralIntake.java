@@ -21,7 +21,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 //import frc.robot.subsystems.Elevator;
 
@@ -98,7 +101,7 @@ public class CoralIntake extends SubsystemBase {
     }
 
     private boolean getRollerIsNearPosition(double targetPosition) {
-        return Math.abs(rollerEncoder.getPosition()-targetPosition) < .25;
+        return Math.abs(rollerEncoder.getPosition()-targetPosition) < .3;
     }
 
     public double getRollerEncoderPosition() {
@@ -106,8 +109,12 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public Command primeCoralForL4() {
-        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-.7), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition()-3));
+        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-.7), this)
+        .andThen(new WaitCommand(0.1))
+        .andThen(new PrintCommand("prime Ended"));
     }
+
+
 
     public Command retractCoralFromL4() {
         return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()+1.2), this);
@@ -186,22 +193,22 @@ public class CoralIntake extends SubsystemBase {
      * 
      * @param setPoint setpoint to move the arm to
      */    
-    public Command moveToSetPoint(double setPoint) {
-        if (setPoint == this.setPoint) return Commands.none();
-        return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
-    }
     // public Command moveToSetPoint(double setPoint) {
     //     if (setPoint == this.setPoint) return Commands.none();
-    //     return new FunctionalCommand(
-    //         () -> {
-    //             setSetPoint(setPoint);
-    //         }, 
-    //         ()->{}, 
-    //         t->{},
-    //         () -> getIsNearSetPoint(), 
-    //         this);
-        
+    //     return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
     // }
+    public Command moveToSetPoint(double setPoint) {
+        if (setPoint == this.setPoint) return Commands.none();
+        return new FunctionalCommand(
+            () -> {
+                setSetPoint(setPoint);
+            }, 
+            ()->{}, 
+            t->{},
+            () -> getIsNearSetPoint(), 
+            this);
+        
+    }
 
     public void hasCoralOverride(boolean hasCoral) {
         hasCoralOverride = hasCoral;

@@ -67,7 +67,8 @@ public class Robot extends TimedRobot {
     isAutoStarted = true;
     //m_robotContainer.swerveDriveManager.setStartPose();;
 
-    m_autonomousCommand = m_robotContainer.auto.scoreTestElevatorCommand();
+    //Enable this for auto testing. Don't forget to comment the autoroutine.poll in Auto
+    //m_autonomousCommand = m_robotContainer.auto.scoreTestElevatorCommand();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
