@@ -76,7 +76,6 @@ public class Auto {
             goToCoral6.resetOdometry(),
             coralAndElevatorSubsystem.moveToState(STOW_UP),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
-            Commands.runOnce(coralAndElevatorSubsystem::incrementElevatorScoringLevel),
             goToCoral6.cmd()
         ));
 
@@ -147,7 +146,6 @@ public class Auto {
             testTraj.resetOdometry(),
             coralAndElevatorSubsystem.moveToState(STOW_UP),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
-            Commands.runOnce(coralAndElevatorSubsystem::incrementElevatorScoringLevel),
             testTraj.cmd()
         )
         );
@@ -173,7 +171,7 @@ public class Auto {
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
         Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
-             () -> visionManager.getRobotScoringPosition(isRightCoral,  false));
+             () -> visionManager.getRobotScoringPosition(isRightCoral,  true));
 
         //This is where coding dies
         //Lila please don't watch

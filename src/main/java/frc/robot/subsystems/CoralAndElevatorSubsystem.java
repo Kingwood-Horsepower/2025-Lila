@@ -258,7 +258,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
 
     public boolean decrementElevatorScoringLevel() {
         decrementElevatorScoringLevelCommand().schedule();
-        return scoringLevel ==  0;
+        return scoringLevel == 0;
     }
 
     public void incrementDeAlgaeifyLevel() {

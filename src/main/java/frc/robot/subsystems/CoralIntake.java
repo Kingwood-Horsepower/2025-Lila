@@ -73,7 +73,7 @@ public class CoralIntake extends SubsystemBase {
             .inverted(false)
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .pid(3, 0.0, 0)
+            .pid(1.5, 0.0, 0)
             .outputRange(-1, 1) //what does this do??
             ;
         rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -101,7 +101,7 @@ public class CoralIntake extends SubsystemBase {
     }
 
     private boolean getRollerIsNearPosition(double targetPosition) {
-        return Math.abs(rollerEncoder.getPosition()-targetPosition) < .3;
+        return Math.abs(rollerEncoder.getPosition()-targetPosition) < .2;
     }
 
     public double getRollerEncoderPosition() {
@@ -109,7 +109,7 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public Command primeCoralForL4() {
-        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-.7), this)
+        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-.7))
         .andThen(new WaitCommand(0.1))
         .andThen(new PrintCommand("prime Ended"));
     }
@@ -117,7 +117,7 @@ public class CoralIntake extends SubsystemBase {
 
 
     public Command retractCoralFromL4() {
-        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()+1.2), this);
+        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()+1.2));
     }
 
     
