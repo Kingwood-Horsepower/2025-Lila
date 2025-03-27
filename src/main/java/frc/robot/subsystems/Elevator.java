@@ -115,6 +115,7 @@ public class Elevator extends SubsystemBase{
      * @param setPoint double that represents distance of the middle stage to its bottom 
      */
     public void setSetPoint(double setPoint) {
+        System.out.println("elevator setpoint set to: " + Double.toString(setPoint));
         this.setPoint = setPoint;
     }
 
@@ -186,7 +187,7 @@ public class Elevator extends SubsystemBase{
 
     @Override 
     public void simulationPeriodic() {
-        //if (elevatorController.getP() != 3) elevatorController.setP(3);
+        if (elevatorController.getP() != 90) elevatorController.setP(90);
 
         //m_elevatorSim.setInput(elevatorMotor.getAppliedOutput() * RobotController.getBatteryVoltage());
         // calculate the mechanism's new velocity with the motor sim
@@ -211,7 +212,7 @@ public class Elevator extends SubsystemBase{
         // set the encododer sim 
         leadEncoderSim.setPosition(leadMotorSim.getPosition());
         // modify the mechanism
-        elevatorMech2d.setLength(.1+elevatorSim.getPositionMeters());
+        elevatorMech2d.setLength(.1+elevatorSim.getPositionMeters()*10);
         //System.out.println(leadMotorSim.getPosition());\
 
         //System.out.println(leadMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());

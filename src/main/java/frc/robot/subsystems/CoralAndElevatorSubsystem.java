@@ -49,8 +49,8 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     
  
     public void bindTriggers(){
-        onL4().onTrue(coralIntake.primeCoralForL4());
-        onL4().onFalse(coralIntake.retractCoralFromL4());
+        // onL4().onTrue(coralIntake.primeCoralForL4());
+        // onL4().onFalse(coralIntake.retractCoralFromL4());
     }
 
     public CoralAndElevatorSubsystem(){
@@ -64,21 +64,32 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     }
 
     private Command moveToNormalState(CoralAndElevatorState newState) {
-        Command seq = Commands.sequence(
-            coralIntake.moveToSetPoint(newState.coralPrePosition),
-            elevator.moveToSetPoint(newState.elevatorPosition),
-            coralIntake.moveToSetPoint(newState.coralEndPosition),
-            Commands.runOnce(() -> coralIntake.setRollerVelocity(newState.runRollers), coralIntake),
-            Commands.runOnce(() -> lastState = newState)
+        // Command seq = Commands.sequence(
+        //     //coralIntake.moveToSetPoint(newState.coralPrePosition),
+        //     new PrintCommand("HeYY " + Double.toString(newState.elevatorPosition)),
+        //     elevator.moveToSetPoint(newState.elevatorPosition),
+        //     coralIntake.moveToSetPoint(newState.coralEndPosition),
+        //     Commands.runOnce(() -> coralIntake.setRollerVelocity(newState.runRollers), coralIntake),
+        //     Commands.runOnce(() -> lastState = newState)
+        // );
+        // // adding the full subsystem as a requirement
+        // seq.addRequirements(this);
+        // return seq;
+        Command com = new FunctionalCommand(
+            ()->{
+                elevator.setSetPoint(newState.elevatorPosition);
+                coralIntake.setSetPoint(newState.coralEndPosition);
+                coralIntake.setRollerVelocity(newState.runRollers);
+                lastState = newState;
+            }, 
+            ()->{}, 
+            _condition->{}, 
+            ()->true, this
         );
-        // adding the full subsystem as a requirement
-        seq.addRequirements(this);
-        return seq;
+        return com;
+
     }
 
-    public Command primeCoralForL4() {
-        return coralIntake.primeCoralForL4();
-    }
 
     private Command rizzTheLevel4GyattCommand(BooleanSupplier endCondition) {
         return Commands.sequence(
@@ -110,6 +121,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     // the public commands
 
     public Command moveToState(CoralAndElevatorState newState) {
+        System.out.println("moving to: " + Double.toString(newState.elevatorPosition));
         return moveToNormalState(newState);
 //         return new ConditionalCommand(
 //             // if i cant go to this new state
@@ -177,7 +189,11 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         // System.out.println(scoringLevel);
         // return moveToState(scoringStates[scoringLevel]);
         return Commands.sequence(
+            
             Commands.runOnce(()->scoringLevel = Math.min(scoringLevel + 1, 4)), // correctly incremented
+            // Commands.runOnce(()->{
+            //     //if(scoringLevel==4) coralIntake.primeCoralForL4();  
+            // }),
             //Commands.runOnce(()-> System.out.println(scoringLevel)),              // correct
             //new PrintCommand(Integer.toString(scoringLevel)),                     // incorrect, still 0
             // moveToSupplierState(()->scoringStates[getScoringLevel()])               // incorrect
@@ -192,6 +208,9 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         // Commands.runOnce(()-> scoringLevel = 1);
         // return moveToState(scoringStates[scoringLevel]);
         return Commands.sequence(
+            // Commands.runOnce(()->{
+            //     if(scoringLevel==4) coralIntake.retractCoralFromL4();  
+            // }),
             Commands.runOnce(()->scoringLevel = Math.max(scoringLevel - 1, 0)),
             new DeferredCommand(()-> moveToState(scoringStates[scoringLevel]), Set.of(this))
         );
@@ -220,13 +239,17 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         // this.scoringLevel = scoringLevel;
         // return moveToState(scoringStates[scoringLevel]);
         return Commands.sequence(
+            // Commands.runOnce(()->{
+            //     if(scoringLevel==4) coralIntake.primeCoralForL4();  
+            //     else if (this.scoringLevel == 4 && scoringLevel <4) coralIntake.retractCoralFromL4();
+            // }),
             Commands.runOnce(()-> this.scoringLevel = scoringLevel),
             new DeferredCommand(()-> moveToState(scoringStates[scoringLevel]), Set.of(this))
         );
         
     }
 
-    public Command moveToDeAlgaeifyLevelCommand(int deAlgaeifyLevel) {
+    public Command moveToDeAlgaeifyLevelCommand(int deAlgaeifyLevel) {  
         // System.out.println(deAlgaeifyLevel);
         // this.deAlgaeifyLevel = deAlgaeifyLevel;
         // return moveToState(deAlgaeifyStates[deAlgaeifyLevel]);

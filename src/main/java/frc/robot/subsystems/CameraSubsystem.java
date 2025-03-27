@@ -269,7 +269,7 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral, bool
   Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
   if (isL4) {
     goal = goal.plus(l4Transform);
-    System.out.println("tranformed to l4");
+    //System.out.println("tranformed to l4");
   }
 
   return goal;

@@ -108,17 +108,16 @@ public class CoralIntake extends SubsystemBase {
         return rollerEncoder.getPosition();
     }
 
-    public Command primeCoralForL4() {
-        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-.7))
-        .andThen(new WaitCommand(0.1))
-        .andThen(new PrintCommand("prime Ended"));
-    }
+    // public void primeCoralForL4() {
+    //     moveRollerPosition(getRollerEncoderPosition()-.7);
+    //     System.out.println("primed");
+    // }
 
 
 
-    public Command retractCoralFromL4() {
-        return Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()+1.2));
-    }
+    // public void retractCoralFromL4() {
+    //     moveRollerPosition(getRollerEncoderPosition()+1.2);
+    // }
 
     
 

@@ -187,7 +187,7 @@ public class Auto {
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.primeCoralForL4(),
+            //coralAndElevatorSubsystem.primeCoralForL4(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             new WaitCommand(0.4),
             driveToPoseCommand,
