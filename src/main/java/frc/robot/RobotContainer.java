@@ -21,26 +21,25 @@ public class RobotContainer {
     // Subsystems
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Winch winch = new Winch();
-    public final Auto auto;
-    
-    
-    // Other references (Managers in public so they can be used in robot)
+    public final CoralAndElevatorSubsystem coralAndElevatorSubsystem = new CoralAndElevatorSubsystem();
 
+    //Controller
     private final CommandXboxController driverController = new CommandXboxController(0);
+    
+    // Managers
     public final SwerveDriveManager swerveDriveManager = new SwerveDriveManager(driverController);
     public final VisionManager visionManager =  new VisionManager(swerveDriveManager);
 
-    public final CoralAndElevatorSubsystem coralAndElevatorSubsystem = new CoralAndElevatorSubsystem();
+    //State Machine and Auto
     public final PlayerStateMachine stateMachine = new PlayerStateMachine(swerveDriveManager, visionManager, coralAndElevatorSubsystem, winch, algaeIntake);
-        
+    public final Auto auto = new Auto(swerveDriveManager, visionManager, coralAndElevatorSubsystem);
+
     // Commands and Triggers
     private Trigger elevatorLimitSwitch = new Trigger(()-> coralAndElevatorSubsystem.getElevator().getIsLimitSwitchZerod());
 
-    //these are used for L4 alignment in the coralAndElevatorSubsystem
    
     public RobotContainer() {  
         configureBindings();  
-        auto = new Auto(swerveDriveManager, visionManager, coralAndElevatorSubsystem);
     }
 
 
@@ -132,22 +131,10 @@ public class RobotContainer {
         
     }
 
-    public void autonomousPeriodic(){
-        if(!driverController.b().getAsBoolean()){
-            auto.PollAutoRoutine();
-
-        }
-    }
-    public void disabledAuto(){
-        auto.KillAutoRoutine();
-        swerveDriveManager.stopRobot();
-    }
-
     public void teleopInit(){
+        swerveDriveManager.stopRobot();
         coralAndElevatorSubsystem.bindTriggers();
     }
-
-
     /* #endregion */
 
 
