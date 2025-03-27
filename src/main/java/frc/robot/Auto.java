@@ -83,7 +83,7 @@ public class Auto {
 
         leftRoutine.active().onTrue(Commands.sequence(
             goToCoral6.resetOdometry(),
-            //coralAndElevatorSubsystem.moveToState(STOW_UP),
+            coralAndElevatorSubsystem.moveToState(STOW_UP),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
             Commands.runOnce(coralAndElevatorSubsystem::incrementElevatorScoringLevel),
             goToCoral6.cmd()
@@ -117,7 +117,7 @@ public class Auto {
 
         rightRoutine.active().onTrue(Commands.sequence(
             goToCoral9.resetOdometry(),
-            //coralAndElevatorSubsystem.moveToState(STOW_UP),
+            coralAndElevatorSubsystem.moveToState(STOW_UP),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
             goToCoral9.cmd()
         ));
@@ -150,7 +150,7 @@ public class Auto {
 
         middleRoutine.active().onTrue(Commands.sequence(
             goToCoral9.resetOdometry(),
-            //coralAndElevatorSubsystem.moveToState(STOW_UP),
+            coralAndElevatorSubsystem.moveToState(STOW_UP),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
             goToCoral9.cmd()
         ));
@@ -186,7 +186,7 @@ public class Auto {
         routine.active().onTrue(
         Commands.sequence(
             testTraj.resetOdometry(),
-            //coralAndElevatorSubsystem.moveToState(STOW_UP),
+            coralAndElevatorSubsystem.moveToState(STOW_UP),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
             Commands.runOnce(coralAndElevatorSubsystem::incrementElevatorScoringLevel),
             testTraj.cmd()
