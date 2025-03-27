@@ -213,8 +213,10 @@ public class Auto {
      */
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
-        Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
+        Command alignToReefCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
              () -> visionManager.getRobotScoringPosition(isRightCoral,  true));
+
+        Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
 
         //This is where coding dies
         //Lila please don't watch
@@ -223,8 +225,10 @@ public class Auto {
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
             nexTrajectory.cmd()
         );
+        
 
         return Commands.sequence(
+            alignToPoseCommand,
             Commands.runOnce(swerveDriveManager::stopRobot),
             coralAndElevatorSubsystem.moveToState(STOW_DOWN),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
@@ -233,7 +237,7 @@ public class Auto {
             //coralAndElevatorSubsystem.primeCoralForL4(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             new WaitCommand(0.4),
-            driveToPoseCommand,
+            alignToReefCommand,
             new PrintCommand("Aligned"),
             Commands.runOnce(swerveDriveManager::stopRobot),
             coralAndElevatorSubsystem.score(),
@@ -271,7 +275,12 @@ public class Auto {
      * @return
      */
     private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
+        Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
+
+
+
         return Commands.sequence(
+                alignToPoseCommand,
                 Commands.runOnce(swerveDriveManager::stopRobot),
                 coralAndElevatorSubsystem.startIntakeCommand(),
                 new PrintCommand("Intaking"),
