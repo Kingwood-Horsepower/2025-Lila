@@ -17,30 +17,15 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
 
   private boolean isAutoStarted = false;
    
 
-  private final AutoChooser autoChooser;
-
   public Robot() {
     m_robotContainer = new RobotContainer();
-    autoChooser = new AutoChooser();
 
-    //elia, use .addRoutine() to do things
-    //autoChooser.addRoutine(null, null);
-    autoChooser.addCmd("dumboBlueRightAutoRoutine", ()->m_robotContainer.auto.dumboBlueRightAutoRoutine1Command());
-    autoChooser.addRoutine("eliatestroutine", () -> m_robotContainer.auto.getTestRoutine());
-//whr
-    
-    //Put the auto chooser on the dashboard
-    SmartDashboard.putData(autoChooser);
-    
-    // Schedule the selected auto during the autonomous period
-    RobotModeTriggers.autonomous().whileTrue(autoChooser.selectedCommandScheduler());
 
   }
 
@@ -65,24 +50,17 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     isAutoStarted = true;
-    //m_robotContainer.swerveDriveManager.setStartPose();;
-
     //Enable this for auto testing. Don't forget to comment the autoroutine.poll in Auto
-    //m_autonomousCommand = m_robotContainer.auto.scoreTestElevatorCommand();
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    // m_robotContainer.auto.scoreTestElevatorCommand().schedule;
   }
 
   @Override
   public void autonomousPeriodic() 
   {
-    m_robotContainer.autonomousPeriodic();
   }
 
   @Override
   public void autonomousExit() {
-    m_robotContainer.disabledAuto();
   }
 
   @Override
