@@ -63,18 +63,21 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
 
     }
 
+    // private Command moveToNormalState(CoralAndElevatorState newState) { // this one is uber mega fucked up
+    //     Command seq = Commands.sequence(
+    //         coralIntake.moveToSetPoint(newState.coralPrePosition),
+    //         new PrintCommand("HeYY " + Double.toString(newState.elevatorPosition)),
+    //         elevator.moveToSetPoint(newState.elevatorPosition),
+    //         coralIntake.moveToSetPoint(newState.coralEndPosition),
+    //         Commands.runOnce(() -> coralIntake.setRollerVelocity(newState.runRollers), coralIntake),
+    //         Commands.runOnce(() -> lastState = newState)
+    //     );
+    //     // adding the full subsystem as a requirement
+    //     seq.addRequirements(this);
+    //     return seq;
+    // }
+
     private Command moveToNormalState(CoralAndElevatorState newState) {
-        // Command seq = Commands.sequence(
-        //     //coralIntake.moveToSetPoint(newState.coralPrePosition),
-        //     new PrintCommand("HeYY " + Double.toString(newState.elevatorPosition)),
-        //     elevator.moveToSetPoint(newState.elevatorPosition),
-        //     coralIntake.moveToSetPoint(newState.coralEndPosition),
-        //     Commands.runOnce(() -> coralIntake.setRollerVelocity(newState.runRollers), coralIntake),
-        //     Commands.runOnce(() -> lastState = newState)
-        // );
-        // // adding the full subsystem as a requirement
-        // seq.addRequirements(this);
-        // return seq;
         Command com = new FunctionalCommand(
             ()->{
                 elevator.setSetPoint(newState.elevatorPosition);
