@@ -168,7 +168,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
      */    
     public Command moveDownCommand() {
         return Commands.sequence(
-            moveToState(STOW_DOWN), 
+            //moveToState(STOW_DOWN), 
             moveToState(STOW_UP),
             Commands.runOnce(() -> resetAllIncrements())
         );
@@ -336,10 +336,10 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     }
 
     public Command overrideHasCoralTrue() {
-        return Commands.runOnce(()->coralIntake.overrideCoral(true));
+        return Commands.runOnce(()->coralIntake.overrideCoralTrue());
     }
     public Command overrideHasCoralFalse() {
-        return Commands.runOnce(()->coralIntake.overrideCoral(false));
+        return Commands.runOnce(()->coralIntake.overrideCoralFalse());
     }
 
     @Override 

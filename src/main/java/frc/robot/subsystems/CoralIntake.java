@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -198,33 +199,43 @@ public class CoralIntake extends SubsystemBase {
         
     }
 
-    public void overrideCoral(boolean isTrue) {
-        if(isTrue){
-            hasCoralOverrideTrue = true;
-            hasCoralOverrideFalse = false;
-            System.out.println("Coral override: TRUE");
-        }
-        else{
-            hasCoralOverrideTrue = false;
-            hasCoralOverrideFalse = true;
-            System.out.println("Coral override: FALSE");
-        }
-        
+    public void overrideCoralTrue() {
+        hasCoralOverrideTrue = true;
+        System.out.println("Coral override: TRUE");
+    }
+
+    public void overrideCoralFalse() {
+        hasCoralOverrideTrue = false;
+        System.out.println("Coral override: FALSE");
     }
 
     private boolean currentlyZeroing = false;
-
+    private Timer zeroStallingTimer = new Timer();
+    
+    // zero the elevator by hitting the bottom
     public Command zeroCoralElevatorCommand() {
+        boolean isStalling = false;
         return new FunctionalCommand(
             ()->{
+                currentlyZeroing = true; // whenever we are zeroing, we prevent the periodic setting of the PID Controller
                 armMotor.set(0.2);
+                
             }, 
-            ()->{}, 
-            t-> {
+            ()->{
+                // if we have stalled, and the stall timer isnt running, start the stall timer
+                if (altEncoder.getVelocity() == 0 && !zeroStallingTimer.isRunning()) zeroStallingTimer.start();
+                // if we are not stalled, reset the timer.
+                else zeroStallingTimer.reset();
+            }, 
+            onEnd -> {
                 armMotor.set(0);
                 altEncoder.setPosition(.973);
+                currentlyZeroing = false;
             }, 
-            ()->altEncoder.getVelocity()==0, 
+            ()->(zeroStallingTimer.get()) == .5, 
+            // the motor has not moved - stalled - for .5 second, 
+            // (the stall timer is greater than .5),
+            // then we hit the bottom bar
             this);
     }
 
