@@ -229,7 +229,7 @@ public class CoralIntake extends SubsystemBase {
         //armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
         armMotor.setVoltage(armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
         SmartDashboard.putNumber("applied voltage", armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
-        hasCoral = !IRsensor.get();//||hasCoralOverrideTrue; //!
+        hasCoral = !IRsensor.get()||hasCoralOverrideTrue; //!
 
         //hasCoral = hasCoralOverrideFalse ? false : !IRsensor.get() ||hasCoralOverrideTrue;
 
