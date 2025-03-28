@@ -27,38 +27,37 @@ import frc.robot.Constants.AlignToL4Constants;
 import static frc.robot.Constants.CameraConstants.*;
 
 public class CameraSubsystem extends SubsystemBase {
-  
-
-  //AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(kApriltags, kFieldLenght.magnitude(), kFieldWidth.magnitude());
-  
+  //Initialize cameras
   PhotonCamera rightCamera = new PhotonCamera("RightCam");
   PhotonCamera leftCamera = new PhotonCamera("LeftCam");
   PhotonCamera upCamera = new PhotonCamera("UpCam");
 
+  //Results
   List<PhotonPipelineResult> rightResults = null;
   List<PhotonPipelineResult> leftResults = null;
   List<PhotonPipelineResult> upResults = null;
   
   AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
+  //Pose estimator
   PhotonPoseEstimator rightPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, kRobotToRightCam);
   PhotonPoseEstimator leftPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, kRobotToLeftCam);
   PhotonPoseEstimator upPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, kRobotToUpCam);
 
+  //Right camera variables
   double ambiguityRight;
   boolean hasTargetRight = false;
   PhotonTrackedTarget rightTarget;
-  double targetRangeRight = 0;
 
+  //Left camera variables
   double ambiguityLeft;
   boolean hasTargetLeft = false;
   PhotonTrackedTarget leftTarget;
-  double targetRangeLeft = 0;
 
+  //Up camera variables
   double ambiguityUp;
   boolean hasTargetUp = false;
   PhotonTrackedTarget upTarget;
-  double targetRangeUp = 0;
 
   /** Creates a new CameraSubsystem. */
   public CameraSubsystem() {
@@ -79,6 +78,10 @@ public class CameraSubsystem extends SubsystemBase {
     processLeftResults();
     processUpResults();
   }
+
+  /* #region PROCESS RESULTS*/
+
+  /** Process */
   private boolean processRightResults()
   {
     //Check if we have a frame
@@ -98,7 +101,6 @@ public class CameraSubsystem extends SubsystemBase {
     if(target != null){
       ambiguityRight = target.poseAmbiguity;
       rightTarget= target;
-      targetRangeRight = PhotonUtils.calculateDistanceToTargetMeters(kRobotToRightCam.getZ(), aprilTagFieldLayout.getTagPose(target.fiducialId).get().getRotation().getY(), kRobotToRightCam.getRotation().getY(), Math.toRadians((target.getPitch())));
       return true;
     }
     return false;
@@ -122,7 +124,6 @@ public class CameraSubsystem extends SubsystemBase {
     if(target != null){
       ambiguityLeft = target.poseAmbiguity;
       leftTarget = target;
-      targetRangeLeft = PhotonUtils.calculateDistanceToTargetMeters(kRobotToRightCam.getZ(), aprilTagFieldLayout.getTagPose(target.fiducialId).get().getRotation().getY(), kRobotToRightCam.getRotation().getY(), Math.toRadians((target.getPitch())));
       return true;
     }
     return false;
@@ -146,13 +147,14 @@ public class CameraSubsystem extends SubsystemBase {
     if(target != null){
       ambiguityUp = target.poseAmbiguity;
       upTarget = target;
-      targetRangeUp = PhotonUtils.calculateDistanceToTargetMeters(kRobotToUpCam.getZ(), aprilTagFieldLayout.getTagPose(target.fiducialId).get().getRotation().getY(), kRobotToUpCam.getRotation().getY(), Math.toRadians((target.getPitch())));
       return true;
     }
     return false;
   }
 
+  /* #endregion */
 
+  /* #region POSE ESTIMATORS*/
  public Optional<EstimatedRobotPose> getEstimatedGlobalRightPose() {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
@@ -193,10 +195,10 @@ public Optional<EstimatedRobotPose> getEstimatedGlobalUpPose() {
   return visionEst;
 }
 
+/* #endregion */
 
 
-
-
+/* #region UTILITY METHODS*/
 PhotonPipelineResult getBestRightResult(){
   return rightResults.get(rightResults.size() - 1);
 }
@@ -229,20 +231,11 @@ public boolean hasDownTarget(){
   return hasTargetLeft || hasTargetRight;
 }
 
-public double getDownTargetRange(){
-  //Chose one with lowest ambiguity
-  if(hasTargetLeft && hasTargetRight)
-    if(ambiguityLeft < ambiguityRight){
-      return targetRangeLeft;
-    }else 
-    return targetRangeRight;
- //if only one actually has a target
-  if(hasTargetLeft)
-    return targetRangeLeft;
-  else 
-    return targetRangeRight;
-}
 
+
+/* #endregion */
+
+/* #region METHODS TO CALCULATE THE ROBOT POSITION BASED ON APRIL TAGS*/
 public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral, boolean isL4){
   boolean isBlue = AprilTagId > 15;
   Translation2d reefCenter = isBlue ? kBlueReefCenter : kRedReefCenter;
@@ -269,7 +262,6 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral, bool
   Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
   if (isL4) {
     goal = goal.plus(l4Transform);
-    //System.out.println("tranformed to l4");
   }
 
   return goal;
@@ -290,13 +282,12 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral, bool
       new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
   }
 
-//DOES NOT WORK because top camera does not align with the reef
-public Pose2d getStationPose2d(int AprilTagId){
-  //int id =  getStationAprilTagId(AprilTagId);
 
+public Pose2d getStationPose2d(int AprilTagId){
   Translation2d aprilTagTranslation2d =  aprilTagFieldLayout.getTagPose(AprilTagId).get().getTranslation().toTranslation2d();
   double rotation = 0;
   
+  //Get the robot rotation based on the station you have to intake
   switch (AprilTagId) {
     case 12:
       rotation = Math.toRadians(234);
@@ -320,4 +311,5 @@ public Pose2d getStationPose2d(int AprilTagId){
   return new Pose2d(aprilTagTranslation2d.minus(fromAprilTagToRobot.times(kDistanceFromStationTorRobot)), new Rotation2d(rotation));
 }
 }
+/* #endregion */
 

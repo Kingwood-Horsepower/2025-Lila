@@ -8,8 +8,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -18,18 +16,12 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.AlignToL4Constants;
-import frc.robot.Constants.AutoConstants.TargetCoralStation;
-import frc.robot.commands.AlignToReefCommand;
 import frc.robot.commands.AlignToStationCommand;
-import frc.robot.commands.AlignCommand;
 import frc.robot.commands.AlignToPoseCommand;
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
-import frc.robot.subsystems.AlgaeIntake;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralAndElevatorSubsystem;
 
-import static frc.robot.Constants.AutoConstants.*;
 import static frc.robot.Constants.ElevatorConstants.STOW_UP;
 import static frc.robot.Constants.ElevatorConstants.STOW_DOWN;
 
@@ -223,7 +215,7 @@ public class Auto {
         //Lila please don't watch
         Command iWannaCry =  Commands.sequence(
             new PrintCommand("What is even going on"),
-            Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory
+            Commands.runOnce(swerveDriveManager::resetAutoTrajectory), //Reset PID values for the next trajectory (MANDATORY BEFORE EVERY TRAJECTORY)
             nexTrajectory.cmd()
         );
         
@@ -253,6 +245,9 @@ public class Auto {
     }
 
     public Command scoreTestElevatorCommand(){
+        //COMMAND USED FOR TESTING - NOT IN THE ACTUAL ROUTINE
+
+
         // Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
         //      () -> visionManager.getRobotScoringPosition(isRightCoral,  false));
         return Commands.sequence(
@@ -264,7 +259,7 @@ public class Auto {
                 new PrintCommand("Finished intaking"),   
                 coralAndElevatorSubsystem.endIntakeCommand(),
                 new PrintCommand("Ended Intake"),   
-                Commands.runOnce(swerveDriveManager::resetAutoTrajectory) //Reset PID values for the next trajectory
+                Commands.runOnce(swerveDriveManager::resetAutoTrajectory) ///Reset PID values for the next trajectory (MANDATORY BEFORE EVERY TRAJECTORY)
                 //nexTrajectory.cmd()
             );
 
@@ -275,8 +270,7 @@ public class Auto {
      * @param nexTrajectory the trajectory to load after intaking
      * @return
      */
-    private Command IntakeCoralAndGo(AutoTrajectory previousTrajectory, AutoTrajectory nexTrajectory){
-        Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
+    private Command IntakeCoralAndGo(AutoTrajectory previousTrajectory, AutoTrajectory nexTrajectory){ 
         Command alignToStationCommand = new AlignToStationCommand(swerveDriveManager, visionManager);
 
 
@@ -299,54 +293,54 @@ public class Auto {
 
     /* #region ALBERTS TRASHCAN*/
 
-    private Command dumboBlueRightAutoRoutine1Command() {
-        Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
-        //newGoal = newGoal.plus(l4Transform);
-        Pose2d wayPoint1Score = visionManager.getRobotScoringPosition(20, true, true);
-        Pose2d wayPoint2Move = new Pose2d(Units.inchesToMeters(170), Units.inchesToMeters(220), new Rotation2d(20));//170. 210
-        Pose2d wayPoint3Intake = visionManager.getRobotIntakePosition(13);
-        Pose2d wayPoint4Score = visionManager.getRobotScoringPosition(19, true, true);
-        Pose2d wayPoint5Score = visionManager.getRobotScoringPosition(19, false, true);
-        //Command align1stCoral = new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint1Score);
+    // private Command dumboBlueRightAutoRoutine1Command() {
+    //     Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
+    //     //newGoal = newGoal.plus(l4Transform);
+    //     Pose2d wayPoint1Score = visionManager.getRobotScoringPosition(20, true, true);
+    //     Pose2d wayPoint2Move = new Pose2d(Units.inchesToMeters(170), Units.inchesToMeters(220), new Rotation2d(20));//170. 210
+    //     Pose2d wayPoint3Intake = visionManager.getRobotIntakePosition(13);
+    //     Pose2d wayPoint4Score = visionManager.getRobotScoringPosition(19, true, true);
+    //     Pose2d wayPoint5Score = visionManager.getRobotScoringPosition(19, false, true);
+    //     //Command align1stCoral = new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint1Score);
 
-        //I HAD TO COMMMENT THIS CAUSE WE CHANGE THE ALIGN TO POSE COMMAND
+    //     //I HAD TO COMMMENT THIS CAUSE WE CHANGE THE ALIGN TO POSE COMMAND
         
-        // Command moveAway = new 
-        return Commands.sequence(
-            //score l4 
-            Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
-            //new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint1Score),
-            new WaitCommand(0.4),
-            coralAndElevatorSubsystem.score(),
-            Commands.runOnce(()->coralAndElevatorSubsystem.moveDown())
-            //go to intake
-            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint2Move),
-            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint3Intake),
-            // Commands.runOnce(coralAndElevatorSubsystem::startIntake),
-            // new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
-            // new WaitCommand(0.2),     
-            // Commands.runOnce(coralAndElevatorSubsystem::endIntake),
-            // //score another l4
-            // Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
-            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint4Score),
-            // new WaitCommand(0.4),
-            // coralAndElevatorSubsystem.score(),
-            // Commands.runOnce(()->coralAndElevatorSubsystem.moveDown()),
-            // //go to intake
-            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint3Intake),
-            // Commands.runOnce(coralAndElevatorSubsystem::startIntake),
-            // new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
-            // new WaitCommand(0.2),     
-            // Commands.runOnce(coralAndElevatorSubsystem::endIntake),
-            // //score the third l4???
-            // Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
-            // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint4Score),
-            // new WaitCommand(0.4),
-            // coralAndElevatorSubsystem.score(),
-            // Commands.runOnce(()->coralAndElevatorSubsystem.moveDown())
+    //     // Command moveAway = new 
+    //     return Commands.sequence(
+    //         //score l4 
+    //         Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
+    //         //new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint1Score),
+    //         new WaitCommand(0.4),
+    //         coralAndElevatorSubsystem.score(),
+    //         Commands.runOnce(()->coralAndElevatorSubsystem.moveDown())
+    //         //go to intake
+    //         // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint2Move),
+    //         // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint3Intake),
+    //         // Commands.runOnce(coralAndElevatorSubsystem::startIntake),
+    //         // new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
+    //         // new WaitCommand(0.2),     
+    //         // Commands.runOnce(coralAndElevatorSubsystem::endIntake),
+    //         // //score another l4
+    //         // Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
+    //         // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint4Score),
+    //         // new WaitCommand(0.4),
+    //         // coralAndElevatorSubsystem.score(),
+    //         // Commands.runOnce(()->coralAndElevatorSubsystem.moveDown()),
+    //         // //go to intake
+    //         // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint3Intake),
+    //         // Commands.runOnce(coralAndElevatorSubsystem::startIntake),
+    //         // new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()),
+    //         // new WaitCommand(0.2),     
+    //         // Commands.runOnce(coralAndElevatorSubsystem::endIntake),
+    //         // //score the third l4???
+    //         // Commands.runOnce(()->coralAndElevatorSubsystem.moveToElevatorScoringLevel(4)),
+    //         // new AlignToPoseCommand(swerveDriveManager, visionManager, wayPoint4Score),
+    //         // new WaitCommand(0.4),
+    //         // coralAndElevatorSubsystem.score(),
+    //         // Commands.runOnce(()->coralAndElevatorSubsystem.moveDown())
 
-        );
-    }
+    //     );
+    // }
 
    /* #endregion */
 }

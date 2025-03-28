@@ -61,6 +61,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putData("Increment", Commands.sequence(incrementElevatorScoringLevelCommand()));
         SmartDashboard.putData("Decrement", Commands.sequence(decrementElevatorScoringLevelCommand()));
         SmartDashboard.putData("testPrint", new PrintCommand("testPrint"));
+        SmartDashboard.putData("zero coral intake", coralIntake.zeroCoralElevatorCommand());
 
     }
 

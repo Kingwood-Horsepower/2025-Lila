@@ -65,46 +65,11 @@ public class Constants {
         public static final CoralAndElevatorState L3 = new CoralAndElevatorState(15.6, .26, .26);
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .24, .24);
         public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24, .24);
-        //public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(1.5, .04, .04, 1);
         public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .05, .05, .5);
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .26, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(10.75, .26, .23, -1);
     }
 
-    public static class AutoConstants
-    {
-        //Used to determine which auto to choose
-        public static final StartCage startingPosition = StartCage.sigmaCenter;
-
-        //Deprecated
-        public static final TargetCoralStation targetStation = TargetCoralStation.leftStation;
-
-
-        enum StartCage{
-            edgeCage, //Farthest left cage from the driver (Same color)
-            sigmaCenter, //Center of the field
-            goonCage //Farthest right cage from the driver(opposite color)
-        }
-        enum TargetCoralStation{
-            leftStation,
-            rightStation
-        }
-
-        public static Translation2d getStartingPosition(){
-            switch (startingPosition) {
-                case edgeCage:
-                    return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(286.779));
-                case sigmaCenter:
-                    return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(242.855));
-                case goonCage:             
-                    return new Translation2d(Units.inchesToMeters(318.428), Units.inchesToMeters(199.947));
-                default:
-                    return null;
-            }
-        }
-        
-
-    }
     
     public static class AlgaeConstants
     {

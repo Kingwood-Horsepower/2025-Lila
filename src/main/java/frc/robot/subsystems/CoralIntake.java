@@ -156,22 +156,13 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public boolean getIsNearSetPoint() {
-        double tolerance = 1; // in encoder rotations
-        double currPosition = armEncoder.getPosition();
-        double targetPosition = setPoint*SPROCKET_RATIO*GEARBOX_RATIO; 
+        double tolerance = .01; // in encoder rotations
+        double currPosition = altEncoder.getPosition();
+        double targetPosition = setPoint*SPROCKET_RATIO; 
         // System.out.print("coralIsNearSetPoint: ");
         // System.out.println(Math.abs(currPosition-targetPosition));
         return Math.abs(currPosition-targetPosition) < tolerance;
     }
-
-    /**
-     * Marked for Deprecation
-     */    
-    // public boolean getIsNearZero() {
-    //     double tolerance = 1; // in encoder rotations
-    //     double currPosition = armEncoder.getPosition(); 
-    //     return Math.abs(currPosition) < tolerance;
-    // }
 
     public boolean runningHighAmps(){
         double threshold = 10;
@@ -193,10 +184,7 @@ public class CoralIntake extends SubsystemBase {
      * 
      * @param setPoint setpoint to move the arm to
      */    
-    // public Command moveToSetPoint(double setPoint) {
-    //     if (setPoint == this.setPoint) return Commands.none();
-    //     return Commands.runOnce(()-> setSetPoint(setPoint), this).until(() -> getIsNearSetPoint());
-    // }
+
     public Command moveToSetPoint(double setPoint) {
         if (setPoint == this.setPoint) return Commands.none();
         return new FunctionalCommand(
@@ -210,29 +198,43 @@ public class CoralIntake extends SubsystemBase {
         
     }
 
-    public void overrideCoral(boolean hasCoral) {
-        if(hasCoral){
+    public void overrideCoral(boolean isTrue) {
+        if(isTrue){
             hasCoralOverrideTrue = true;
             hasCoralOverrideFalse = false;
+            System.out.println("Coral override: TRUE");
         }
         else{
             hasCoralOverrideTrue = false;
             hasCoralOverrideFalse = true;
+            System.out.println("Coral override: FALSE");
         }
         
     }
 
+    private boolean currentlyZeroing = false;
+
+    public Command zeroCoralElevatorCommand() {
+        return new FunctionalCommand(
+            ()->{
+                armMotor.set(0.2);
+            }, 
+            ()->{}, 
+            t-> {
+                armMotor.set(0);
+                altEncoder.setPosition(.973);
+            }, 
+            ()->altEncoder.getVelocity()==0, 
+            this);
+    }
+
     @Override
     public void periodic() {
-        // ill change this later
-        // edit, i changed it
-        //armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
-        armMotor.setVoltage(armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
-        SmartDashboard.putNumber("applied voltage", armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
-        hasCoral = !IRsensor.get()||hasCoralOverrideTrue; //!
 
-        //hasCoral = hasCoralOverrideFalse ? false : !IRsensor.get() ||hasCoralOverrideTrue;
+        if(!currentlyZeroing) armMotor.setVoltage(armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
 
+        //hasCoral = !IRsensor.get()||hasCoralOverrideTrue; //!
+        hasCoral = hasCoralOverrideFalse ? false : !IRsensor.get() ||hasCoralOverrideTrue;
 
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
         //SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());

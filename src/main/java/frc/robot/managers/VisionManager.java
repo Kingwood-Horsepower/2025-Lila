@@ -1,6 +1,6 @@
 package frc.robot.managers;
 
-import static frc.robot.Constants.AutoConstants.getStartingPosition;
+
 import static frc.robot.Constants.CameraConstants.*;
 
 import com.ctre.phoenix6.Utils;
