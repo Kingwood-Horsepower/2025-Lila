@@ -217,22 +217,24 @@ public class CoralIntake extends SubsystemBase {
         boolean isStalling = false;
         return new FunctionalCommand(
             ()->{
+                zeroStallingTimer.reset();
                 currentlyZeroing = true; // whenever we are zeroing, we prevent the periodic setting of the PID Controller
                 armMotor.set(0.2);
                 
             }, 
             ()->{
                 // if we have stalled, and the stall timer isnt running, start the stall timer
-                if (altEncoder.getVelocity() == 0 && !zeroStallingTimer.isRunning()) zeroStallingTimer.start();
+                if (Math.abs(altEncoder.getVelocity()) < 1 && !zeroStallingTimer.isRunning()) zeroStallingTimer.start();
+                else if (Math.abs(altEncoder.getVelocity()) < 1) {} // do nothing 
                 // if we are not stalled, reset the timer.
                 else zeroStallingTimer.reset();
             }, 
             onEnd -> {
                 armMotor.set(0);
-                altEncoder.setPosition(.973);
+                altEncoder.setPosition(1);
                 currentlyZeroing = false;
             }, 
-            ()->(zeroStallingTimer.get()) == .5, 
+            ()->(zeroStallingTimer.get()) > .2, 
             // the motor has not moved - stalled - for .5 second, 
             // (the stall timer is greater than .5),
             // then we hit the bottom bar
@@ -257,6 +259,10 @@ public class CoralIntake extends SubsystemBase {
         SmartDashboard.putBoolean("isOverrideTrue", hasCoralOverrideTrue);
         SmartDashboard.putBoolean("isOverrideFalse", hasCoralOverrideFalse);
         SmartDashboard.putNumber("getPositionError", armController.getPositionError());
+        SmartDashboard.putNumber("zeroStallTimer", zeroStallingTimer.get());
+        SmartDashboard.putNumber("armVelocity", altEncoder.getVelocity());
+        SmartDashboard.putBoolean("timer should be runnning", Math.abs(altEncoder.getVelocity()) < 1 );
+        SmartDashboard.putBoolean("curr zeoring", currentlyZeroing);
                 
         
     }
