@@ -28,7 +28,7 @@ public class Constants {
     {
         public static final Transform3d kRobotToRightCam = new Transform3d(new Translation3d(Inches.of(7), Inches.of(-12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
         public static final Transform3d kRobotToLeftCam = new Transform3d(new Translation3d(Inches.of(7), Inches.of(12), Inches.of(7.750)), new Rotation3d(0, Math.toRadians(15), 0)); 
-        public static final Transform3d kRobotToUpCam = new Transform3d(new Translation3d(Inches.of(3.682), Inches.of(0), Inches.of(-37.079)), new Rotation3d(0, Math.toRadians(15), 0)); 
+        public static final Transform3d kRobotToUpCam = new Transform3d(new Translation3d(Inches.of(0), Inches.of(-3.5), Inches.of(40)), new Rotation3d(0, Math.toRadians(15), 0)); 
 
         public static final Translation2d kBlueReefCenter = new Translation2d(inchesToMeters(176.745), inchesToMeters(158.5));
         public static final Translation2d kRedReefCenter = new Translation2d(inchesToMeters(514.13), inchesToMeters(158.5));
@@ -36,14 +36,16 @@ public class Constants {
         public static final int[] kBlueReefIDs = {17, 18, 19, 20, 21, 22}; 
         public static final int[] kRedReefIDs = {6, 7, 8, 9, 10, 11}; 
 
-        public static final int[] kStationIDs = {12, 13, 1, 2};
+        public static final int[] kRedStationIDs = { 1, 2};
+        public static final int[] kBlueStationIDs = {12, 13};
 
-        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(23); //Vertical distance from the center of the robot
+        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(23
+        ); //Vertical distance from the center of the robot
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5); //Orizzontal distance when scoring
 
         public static final double kDistanceFromApriltagWhenDealgeafy = inchesToMeters(20);
 
-        public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
+        public static final double kDistanceFromStationTorRobot = inchesToMeters(1);
         public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(0.5); // Center of the intake is 5 inches to the left of the center of the rboto
         public static final double kExtraLeftAlignmentAddition = inchesToMeters(1.25); 
     }

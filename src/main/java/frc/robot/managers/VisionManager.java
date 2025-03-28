@@ -160,14 +160,38 @@ public class VisionManager {
                         
                     });
 
-            // visionEst = camera.getEstimatedGlobalUpPose();
-            // visionEst.ifPresent(
-            //         est -> {
-            //             SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
-            //             SmartDashboard.putNumber("CameraUpOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+            visionEst = camera.getEstimatedGlobalUpPose();
+            visionEst.ifPresent(
+                    est -> {
+                        //Ignore results that contain anything other than reef,s april tag
+                        boolean hasBadAprilTag = false;
+
+                        for(PhotonTrackedTarget aprilTag : est.targetsUsed){
+                            boolean isGood = false;
+                            if(isBlue)
+                            {
+                                for(int id : kBlueStationIDs){
+                                    isGood = isGood || aprilTag.fiducialId == id;
+                                }
+                            
+                            }else
+                            {
+                                for(int id : kRedStationIDs){
+                                    isGood = isGood || aprilTag.fiducialId == id;
+                                }
+                            }
+                            
+                            hasBadAprilTag = hasBadAprilTag || !isGood;
+                       }
+                       if(!hasBadAprilTag)
+                       {
+                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
+                        SmartDashboard.putNumber("CameraUpOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
                 
-            //             swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
-            //         });          
+                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                       }
+                    });          
         }
 
         SmartDashboard.putString("Robot Translation", swerveDriveManager.getRobotPose().getTranslation().toString());
@@ -235,13 +259,22 @@ public class VisionManager {
         //     }
         // }
         // if we don't have a target, estimate the closest april tag based on the robot's current position
-
-
-
-        List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
-        for (int id : kStationIDs) {
-            reefPoses.add(camera.getStationPose2d(id));
+              List<Pose2d> reefPoses  = new ArrayList<Pose2d>();    
+        boolean isBlue = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() == Alliance.Blue : false;
+        if(isBlue)
+        {
+            
+            for(int id : kBlueStationIDs){
+                reefPoses.add(camera.getStationPose2d(id));
+            }
+        
+        }else
+        {
+            for(int id : kRedStationIDs){
+                reefPoses.add(camera.getStationPose2d(id));
+            }
         }
+        
         return swerveDriveManager.getRobotPose().nearest(reefPoses);
 
     }

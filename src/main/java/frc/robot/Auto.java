@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.AlignToL4Constants;
 import frc.robot.Constants.AutoConstants.TargetCoralStation;
 import frc.robot.commands.AlignToReefCommand;
+import frc.robot.commands.AlignToStationCommand;
 import frc.robot.commands.AlignCommand;
 import frc.robot.commands.AlignToPoseCommand;
 import frc.robot.managers.SwerveDriveManager;
@@ -94,13 +95,13 @@ public class Auto {
 
 
         AutoTrajectory coral4 = leftRoutine.trajectory("Coral4S2");
-        coral6R.done().onTrue(IntakeCoralAndGo(coral4));
+        coral6R.done().onTrue(IntakeCoralAndGo(coral6R, coral4));
 
         AutoTrajectory coral4R = leftRoutine.trajectory("Coral4S2R");
         coral4.done().onTrue(ScoreCoralAndComeBack(coral4R, false));
 
         AutoTrajectory coral3 = leftRoutine.trajectory("Coral3S2");
-        coral4R.done().onTrue(IntakeCoralAndGo(coral3));
+        coral4R.done().onTrue(IntakeCoralAndGo(coral4R, coral3));
 
         AutoTrajectory coral3R= leftRoutine.trajectory("Coral3S2R");
         coral3.done().onTrue(ScoreCoralAndComeBack(coral3R, true));
@@ -126,13 +127,13 @@ public class Auto {
         goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
 
         AutoTrajectory coral11 = rightRoutine.trajectory("Coral11S1");
-        coral9R.done().onTrue(IntakeCoralAndGo(coral11));
+        coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral11));
 
         AutoTrajectory coral11R = rightRoutine.trajectory("Coral11S1R");
         coral11.done().onTrue(ScoreCoralAndComeBack(coral11R, true));
 
         AutoTrajectory coral12 = rightRoutine.trajectory("Coral12S1");
-        coral11R.done().onTrue(IntakeCoralAndGo(coral12));
+        coral11R.done().onTrue(IntakeCoralAndGo(coral11R, coral12));
 
         AutoTrajectory coral12R = rightRoutine.trajectory("Coral12S1R");
         coral12.done().onTrue(ScoreCoralAndComeBack(coral12R, false));
@@ -159,13 +160,13 @@ public class Auto {
         goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
 
         AutoTrajectory coral11 = middleRoutine.trajectory("Coral11S1");
-        coral9R.done().onTrue(IntakeCoralAndGo(coral11));
+        coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral11));
 
         AutoTrajectory coral11R = middleRoutine.trajectory("Coral11S1R");
         coral11.done().onTrue(ScoreCoralAndComeBack(coral11R, true));
 
         AutoTrajectory coral12 = middleRoutine.trajectory("Coral12S1");
-        coral11R.done().onTrue(IntakeCoralAndGo(coral12));
+        coral11R.done().onTrue(IntakeCoralAndGo(coral11R, coral12));
 
         AutoTrajectory coral12R = middleRoutine.trajectory("Coral12S1R");
         coral12.done().onTrue(ScoreCoralAndComeBack(coral12R, false));
@@ -195,7 +196,7 @@ public class Auto {
 
 
         AutoTrajectory goToCoral2 = routine.trajectory("Coral2S2");
-        testTrajReversed.done().onTrue(IntakeCoralAndGo(goToCoral2));
+        testTrajReversed.done().onTrue(IntakeCoralAndGo(testTrajReversed, goToCoral2));
         
         AutoTrajectory goToCoral2R = routine.trajectory("Coral2S2R");
         goToCoral2.done().onTrue(ScoreCoralAndComeBack(goToCoral2R, false));
@@ -274,15 +275,15 @@ public class Auto {
      * @param nexTrajectory the trajectory to load after intaking
      * @return
      */
-    private Command IntakeCoralAndGo(AutoTrajectory nexTrajectory){
+    private Command IntakeCoralAndGo(AutoTrajectory previousTrajectory, AutoTrajectory nexTrajectory){
         Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
-
+        Command alignToStationCommand = new AlignToStationCommand(swerveDriveManager, visionManager);
 
 
         return Commands.sequence(
-                alignToPoseCommand,
                 Commands.runOnce(swerveDriveManager::stopRobot),
                 coralAndElevatorSubsystem.startIntakeCommand(),
+                alignToStationCommand,
                 new PrintCommand("Intaking"),
                 new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()).withTimeout(2),
                 new WaitCommand(0.2),  

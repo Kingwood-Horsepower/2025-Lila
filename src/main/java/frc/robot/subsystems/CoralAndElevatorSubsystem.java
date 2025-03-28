@@ -56,7 +56,8 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     public CoralAndElevatorSubsystem(){
         //lastState = STOW_UP;
 
-        SmartDashboard.putData("IR Override", overrideHasCoral());
+        SmartDashboard.putData("IR Override True", overrideHasCoralTrue());
+        SmartDashboard.putData("IR Override False", overrideHasCoralFalse());
         SmartDashboard.putData("Increment", Commands.sequence(incrementElevatorScoringLevelCommand()));
         SmartDashboard.putData("Decrement", Commands.sequence(decrementElevatorScoringLevelCommand()));
         SmartDashboard.putData("testPrint", new PrintCommand("testPrint"));
@@ -333,8 +334,11 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         return new Trigger(() -> scoringLevel == 4);
     }
 
-    public Command overrideHasCoral() {
-        return Commands.runOnce(()->coralIntake.hasCoralOverride(true));
+    public Command overrideHasCoralTrue() {
+        return Commands.runOnce(()->coralIntake.overrideCoral(true));
+    }
+    public Command overrideHasCoralFalse() {
+        return Commands.runOnce(()->coralIntake.overrideCoral(false));
     }
 
     @Override 

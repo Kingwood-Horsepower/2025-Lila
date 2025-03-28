@@ -29,8 +29,9 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 //import frc.robot.subsystems.Elevator;
 
 public class CoralIntake extends SubsystemBase {
-    private final DigitalInput IRsensor = new DigitalInput(4); // false = broken
-    private boolean hasCoralOverride = false;
+    private final DigitalInput IRsensor = new DigitalInput(3); // false = broken
+    private boolean hasCoralOverrideTrue = false;
+    private boolean hasCoralOverrideFalse = false;
 
     private final int rollerMotorID = 23;
     private final int armMotorID = 24;
@@ -209,8 +210,16 @@ public class CoralIntake extends SubsystemBase {
         
     }
 
-    public void hasCoralOverride(boolean hasCoral) {
-        hasCoralOverride = hasCoral;
+    public void overrideCoral(boolean hasCoral) {
+        if(hasCoral){
+            hasCoralOverrideTrue = true;
+            hasCoralOverrideFalse = false;
+        }
+        else{
+            hasCoralOverrideTrue = false;
+            hasCoralOverrideFalse = true;
+        }
+        
     }
 
     @Override
@@ -220,7 +229,10 @@ public class CoralIntake extends SubsystemBase {
         //armMotorController.setReference(setPoint*ARM_GEAR_RATIO, ControlType.kMAXMotionPositionControl);//MAXMotionPositionControl
         armMotor.setVoltage(armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
         SmartDashboard.putNumber("applied voltage", armController.calculate(altEncoder.getPosition(), setPoint*SPROCKET_RATIO));
-        hasCoral = !IRsensor.get()||hasCoralOverride; //!
+        hasCoral = !IRsensor.get();//||hasCoralOverrideTrue; //!
+
+        //hasCoral = hasCoralOverrideFalse ? false : !IRsensor.get() ||hasCoralOverrideTrue;
+
 
         SmartDashboard.putBoolean("is at setpoint",getIsNearSetPoint());
         //SmartDashboard.putBoolean("arm is not near zero", !getIsNearZero());
@@ -229,6 +241,8 @@ public class CoralIntake extends SubsystemBase {
         SmartDashboard.putNumber("arm alt encoder", altEncoder.getPosition());
         SmartDashboard.putNumber("roller amps", rollerMotor.getOutputCurrent());
         SmartDashboard.putBoolean("hasCoral", hasCoral);
+        SmartDashboard.putBoolean("isOverrideTrue", hasCoralOverrideTrue);
+        SmartDashboard.putBoolean("isOverrideFalse", hasCoralOverrideFalse);
         SmartDashboard.putNumber("getPositionError", armController.getPositionError());
                 
         
