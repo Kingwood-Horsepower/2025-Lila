@@ -53,7 +53,7 @@ public class Constants {
 
     public static class AlignToL4Constants 
     {
-        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(7); //How much you have to go back when you score L4 (Compared to L3)
+        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(6.3); //How much you have to go back when you score L4 (Compared to L3)
     }
 
     public static class ElevatorConstants
