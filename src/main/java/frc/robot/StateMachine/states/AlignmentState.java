@@ -38,7 +38,7 @@ public class AlignmentState extends PlayerState{
         alignToClosestReefCommand.schedule();
         //swerveTestCommand.schedule();
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-        player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.getSwerveDriveScoringCommand());
+        player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.setSwerveToSlowTestDriveCommand());
         System.out.println("Entered Alignment State");
     }
     @Override public void Exit(){

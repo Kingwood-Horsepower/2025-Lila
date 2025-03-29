@@ -65,7 +65,9 @@ public class SwerveDriveManager {
     private final SlewRateLimiter driveLimiterX = new SlewRateLimiter(1.3); // How fast can the robot accellerate                                                                                // and decellerate
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
-    private final SlewRateLimiter driveLimiterSlowRot = new SlewRateLimiter(1.1);
+
+    private final SlewRateLimiter driveLimiterSlowX = new SlewRateLimiter(.3);
+    private final SlewRateLimiter driveLimiterSlowYLimiter = new SlewRateLimiter(.3);
 
     //PID Controllers (For trajectory following)
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
@@ -105,6 +107,19 @@ public class SwerveDriveManager {
         return command;
     }
 
+
+    public Command setSwerveToSlowTestDriveCommand(){
+        Command command =  drivetrain.applyRequest(() -> driveRobotCentric
+        .withVelocityX(driveLimiterSlowX.calculate(-driverController.getLeftY()* translationVelocityMult
+            * MaxSpeed  * 0.2) )
+        .withVelocityY(driveLimiterSlowYLimiter.calculate(-driverController.getRightX() * translationVelocityMult
+            * MaxSpeed * 0.2) )
+        .withRotationalRate(0));
+
+        command.addRequirements(drivetrain);
+        return command;
+    }
+
     public Command setSwerveToSlowDriveCommand(){
         Command command =  drivetrain.applyRequest(() -> driveRobotCentric
         .withVelocityX(-driverController.getLeftY()* translationVelocityMult
@@ -117,6 +132,7 @@ public class SwerveDriveManager {
         command.addRequirements(drivetrain);
         return command;
     }
+    
 
     public Command getSwerveDriveScoringCommand(){
         Command command =  drivetrain.applyRequest(() -> driveRobotCentric
