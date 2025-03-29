@@ -171,7 +171,7 @@ public class Elevator extends SubsystemBase{
 
         //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
         leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
-        isZerod = !limitSwitch.get();
+        isZerod = limitSwitch.get();
 
 
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
