@@ -45,7 +45,7 @@ public class Constants {
 
         public static final double kDistanceFromApriltagWhenDealgeafy = inchesToMeters(20);
 
-        public static final double kDistanceFromStationTorRobot = inchesToMeters(22);
+        public static final double kDistanceFromStationTorRobot = inchesToMeters(19);
 
         public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(0.5); // Center of the intake is 5 inches to the left of the center of the rboto
         public static final double kExtraLeftAlignmentAddition = inchesToMeters(1.25); 
