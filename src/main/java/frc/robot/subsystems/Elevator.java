@@ -58,7 +58,7 @@ public class Elevator extends SubsystemBase{
     
 
     private double setPoint = 0.0;
-    private boolean isZerod = true;
+    private boolean isZerod = false;
     
 
     private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(400, 1000);
@@ -171,7 +171,7 @@ public class Elevator extends SubsystemBase{
 
         //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
         leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
-        isZerod = limitSwitch.get();
+        //isZerod = limitSwitch.get();
 
 
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());

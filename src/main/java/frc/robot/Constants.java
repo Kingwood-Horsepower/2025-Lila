@@ -53,17 +53,18 @@ public class Constants {
 
     public static class AlignToL4Constants 
     {
-        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(7); //How much you have to go back when you score L4 (Compared to L3)
+        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(6.5); //How much you have to go back when you score L4 (Compared to L3)
     }
 
     public static class ElevatorConstants
     {
+
         //Elevator states 
         public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0, 0);
         public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26, .26);
         public static final CoralAndElevatorState L1 = new CoralAndElevatorState(4, .26, .26);
-        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(8.5, .26, .26);
-        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(15.6, .26, .26);
+        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(9, .26, .26);
+        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17, .26, .26);
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .24, .24);
         public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24, .24);
         public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .05, .05, .5);

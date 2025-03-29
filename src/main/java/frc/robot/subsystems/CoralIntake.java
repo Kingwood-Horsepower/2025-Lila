@@ -54,7 +54,7 @@ public class CoralIntake extends SubsystemBase {
     private double velocity = 0.0;
     public boolean hasCoral = false;
     
-    private final TrapezoidProfile.Constraints ARM_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(5000.0/15*0.1, 5);
+    private final TrapezoidProfile.Constraints ARM_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(5000.0/15*0.1, 7);
     private final ProfiledPIDController armController = new ProfiledPIDController(10, 0, 0, ARM_ROTATION_CONSTRAINTS);
 
     public CoralIntake() {
