@@ -67,8 +67,8 @@ public class SwerveDriveManager {
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
 
-    private final SlewRateLimiter driveLimiterSlowX = new SlewRateLimiter(.3);
-    private final SlewRateLimiter driveLimiterSlowYLimiter = new SlewRateLimiter(.3);
+    private final SlewRateLimiter driveLimiterSlowX = new SlewRateLimiter(1);
+    private final SlewRateLimiter driveLimiterSlowYLimiter = new SlewRateLimiter(1);
 
     //PID Controllers (For trajectory following)
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
@@ -280,7 +280,14 @@ public class SwerveDriveManager {
     }
 
         public Command resetRotation(){
-        return Commands.runOnce(()->resetPose(new Pose2d(this.getRobotPose().getX(), this.getRobotPose().getY(), new Rotation2d(0))));
+        return Commands.runOnce(()->resetPose(
+            new Pose2d(
+                this.getRobotPose().getX(), 
+                this.getRobotPose().getY(), 
+                new Rotation2d(Math.PI)
+                )
+            )
+        );
     }
 
 
