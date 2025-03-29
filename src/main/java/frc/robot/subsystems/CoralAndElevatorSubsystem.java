@@ -124,7 +124,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         //     () -> lastState == L4);
         // seq.addRequirements(this);
         // return seq;
-        return Commands.runOnce( ()->coralIntake.setRollerVelocity(-.15));
+        return Commands.run( ()->coralIntake.setRollerVelocity(-.25)).until(endCondition).andThen( new WaitCommand(0.4));
     }
 
     // the public commands
