@@ -279,6 +279,7 @@ public class Auto {
                 coralAndElevatorSubsystem.startIntakeCommand(),
                 alignToStationCommand,
                 new PrintCommand("Intaking"),
+                Commands.runOnce(swerveDriveManager::stopRobot),
                 new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()).withTimeout(2),
                 new WaitCommand(0.2),  
                 new PrintCommand("Finished intaking"),   
