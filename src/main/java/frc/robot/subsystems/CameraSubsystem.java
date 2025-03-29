@@ -236,7 +236,7 @@ public boolean hasDownTarget(){
 /* #endregion */
 
 /* #region METHODS TO CALCULATE THE ROBOT POSITION BASED ON APRIL TAGS*/
-public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral, boolean isL4){
+public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
   boolean isBlue = AprilTagId > 15;
   Translation2d reefCenter = isBlue ? kBlueReefCenter : kRedReefCenter;
   
@@ -257,12 +257,6 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral, bool
   else 
     goal = new Pose2d(reefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+kExtraLeftAlignmentAddition))), 
     new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
-
-
-  Transform2d l4Transform = new Transform2d(AlignToL4Constants.ROBOT_TO_L4_DISTANCE, 0, new Rotation2d(0));
-  if (isL4) {
-    goal = goal.plus(l4Transform);
-  }
 
   return goal;
 

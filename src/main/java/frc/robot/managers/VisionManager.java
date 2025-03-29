@@ -55,12 +55,12 @@ public class VisionManager {
 
     public void printScoringPosition(){
         for (int id : kRedReefIDs) {
-            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true, true).toString());
-            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false, true).toString());
+            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true).toString());
+            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false).toString());
         }
         for (int id : kBlueReefIDs) {
-            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true, true).toString());
-            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false, true).toString());
+            System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true).toString());
+            System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false).toString());
         }
     }
 
@@ -218,7 +218,7 @@ public class VisionManager {
         swerveDriveManager.addVisionMeasurement(newPose, timestamp);
     }
 
-    public Pose2d getRobotScoringPosition(boolean isRightCoral, boolean isL4){
+    public Pose2d getRobotScoringPosition(boolean isRightCoral){
         // var target = getBestDownTargetOptional();
         // if(target.isPresent()){
 
@@ -237,13 +237,13 @@ public class VisionManager {
         {
             
             for(int id : kBlueReefIDs){
-                reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral, isL4));
+                reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral));
             }
         
         }else
         {
             for(int id : kRedReefIDs){
-                reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral, isL4));
+                reefPoses.add(camera.getCoralScoreTransform(id, isRightCoral));
             }
         }
         
@@ -251,18 +251,18 @@ public class VisionManager {
 
     }
 
-    public Pose2d getRobotScoringPosition(int scoringTag, boolean isRightCoral, boolean isL4) {
-        return camera.getCoralScoreTransform(scoringTag, isRightCoral, isL4);
+    public Pose2d getRobotScoringPosition(int scoringTag, boolean isRightCoral) {
+        return camera.getCoralScoreTransform(scoringTag, isRightCoral);
     }
 
     /**
      * Returns the closest scoring position of the robot, then which one is l4.
      * 
      */    
-    public Pose2d getClosestRobotScoringPosition(boolean isL4)
+    public Pose2d getClosestRobotScoringPosition()
     {
-        Pose2d rightPose = getRobotScoringPosition(true, isL4);
-        Pose2d leftPose = getRobotScoringPosition(false, isL4);
+        Pose2d rightPose = getRobotScoringPosition(true);
+        Pose2d leftPose = getRobotScoringPosition(false);
 
         return swerveDriveManager.getRobotPose().nearest(List.of(rightPose, leftPose));
 

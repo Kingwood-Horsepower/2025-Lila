@@ -13,10 +13,10 @@ public class AlignmentState extends PlayerState{
 
     private BooleanSupplier isL4 = () -> player.coralAndElevatorSubsystem.getScoringLevel() == 4;
 
-    private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true, isL4);
-    private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false, isL4);
+    private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true);
+    private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false);
 
-    private Command alignToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null, isL4);
+    private Command alignToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null);
 
     private Command swerveTestCommand = new AlignCommand(player.swerveDriveManager, player.visionManager);
 
