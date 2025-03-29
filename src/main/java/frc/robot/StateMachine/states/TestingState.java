@@ -18,6 +18,9 @@ public class TestingState extends PlayerState{
         //player.stateMachine.ChangeState(player.alignmentState);
         // player.swerveDriveManager.setSwerveToNormalDriveCommand().schedule();
         // player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.setSwerveToNormalDriveCommand());
+        player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.setSwerveToSlowTestDriveCommand());
+        player.swerveDriveManager.setSwerveToSlowTestDriveCommand().schedule();
+
         System.out.println("Entered Test State");
     }
     @Override public void Exit(){
