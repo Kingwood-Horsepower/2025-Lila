@@ -137,7 +137,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        SmartDashboard.putData("reset gyro", resetGyro());
+        
     }
 
     /**
@@ -247,6 +247,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+        SmartDashboard.putNumber("gyro", this.getPigeon2().getYaw().getValueAsDouble());
     }
 
     
@@ -277,9 +278,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.getState().Pose;
     }
 
-    public Command resetGyro(){
-        return Commands.runOnce(()->this.getPigeon2().reset());
-    }
+
+
+
    
 
 }

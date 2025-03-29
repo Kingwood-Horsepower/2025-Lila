@@ -231,10 +231,10 @@ public class CoralIntake extends SubsystemBase {
             }, 
             onEnd -> {
                 armMotor.set(0);
-                altEncoder.setPosition(1);
+                altEncoder.setPosition(1.07);
                 currentlyZeroing = false;
             }, 
-            ()->(zeroStallingTimer.get()) > .2, 
+            ()->(zeroStallingTimer.get()) > .08, 
             // the motor has not moved - stalled - for .5 second, 
             // (the stall timer is greater than .5),
             // then we hit the bottom bar

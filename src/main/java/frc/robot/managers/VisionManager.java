@@ -164,38 +164,38 @@ public class VisionManager {
                         
                     });
 
-            visionEst = camera.getEstimatedGlobalUpPose();
-            visionEst.ifPresent(
-                    est -> {
-                        //Ignore results that contain anything other than reef,s april tag
-                        boolean hasBadAprilTag = false;
+            // visionEst = camera.getEstimatedGlobalUpPose();
+            // visionEst.ifPresent(
+            //         est -> {
+            //             //Ignore results that contain anything other than reef,s april tag
+            //             boolean hasBadAprilTag = false;
 
-                        for(PhotonTrackedTarget aprilTag : est.targetsUsed){
-                            boolean isGood = false;
-                            if(isBlue)
-                            {
-                                for(int id : kBlueStationIDs){
-                                    isGood = isGood || aprilTag.fiducialId == id;
-                                }
+            //             for(PhotonTrackedTarget aprilTag : est.targetsUsed){
+            //                 boolean isGood = false;
+            //                 if(isBlue)
+            //                 {
+            //                     for(int id : kBlueStationIDs){
+            //                         isGood = isGood || aprilTag.fiducialId == id;
+            //                     }
                             
-                            }else
-                            {
-                                for(int id : kRedStationIDs){
-                                    isGood = isGood || aprilTag.fiducialId == id;
-                                }
-                            }
+            //                 }else
+            //                 {
+            //                     for(int id : kRedStationIDs){
+            //                         isGood = isGood || aprilTag.fiducialId == id;
+            //                     }
+            //                 }
                             
-                            hasBadAprilTag = hasBadAprilTag || !isGood;
-                       }
-                       if(!hasBadAprilTag)
-                       {
-                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
-                        SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraUpOdometry(rotation)",  est.estimatedPose.getRotation().getAngle());
+            //                 hasBadAprilTag = hasBadAprilTag || !isGood;
+            //            }
+            //            if(!hasBadAprilTag)
+            //            {
+            //             swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+            //             SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
+            //             SmartDashboard.putNumber("CameraUpOdometry(rotation)",  est.estimatedPose.getRotation().getAngle());
                 
-                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
-                       }
-                    });          
+            //             swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+            //            }
+            //         });          
         }
 
         SmartDashboard.putString("Robot Translation", swerveDriveManager.getRobotPose().getTranslation().toString());

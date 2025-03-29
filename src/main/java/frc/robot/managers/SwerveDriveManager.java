@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Telemetry;
 import frc.robot.generated.TunerConstants;
@@ -89,6 +90,7 @@ public class SwerveDriveManager {
         yController.setTolerance(0.2);
         thetaController.setTolerance(Units.degreesToRadians(3));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);   
+        SmartDashboard.putData("reset Rotation", resetRotation());
     }
 
     //Robot Movement functions
@@ -261,6 +263,9 @@ public class SwerveDriveManager {
             });
     }
 
+        public Command resetRotation(){
+        return Commands.runOnce(()->resetPose(new Pose2d(this.getRobotPose().getX(), this.getRobotPose().getY(), new Rotation2d(0))));
+    }
 
 
 }
