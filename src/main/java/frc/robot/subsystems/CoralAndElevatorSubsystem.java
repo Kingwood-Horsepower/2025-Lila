@@ -107,23 +107,24 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     }
 
     private Command scoringCommand(BooleanSupplier endCondition) {
-        Command seq = new ConditionalCommand(
-            // if lastState = L4
-            //rizzTheLevel4GyattCommand(endCondition), 
-            // else
-            Commands.run(()-> coralIntake.setRollerVelocity(-.2)),
-            Commands.run(() ->{
-                // if(lastState == L1)
-                //     coralIntake.setRollerVelocity(-0.1);
-                // else if (lastState == L4)
-                    coralIntake.setRollerVelocity(-.7);
-                // else //L2 L3
-                //     coralIntake.setRollerVelocity(-.2);
-            }, 
-            coralIntake).until(endCondition).andThen( new WaitCommand(0.4)), 
-            () -> lastState == L4);
-        seq.addRequirements(this);
-        return seq;
+        // Command seq = new ConditionalCommand(
+        //     // if lastState = L4
+        //     //rizzTheLevel4GyattCommand(endCondition), 
+        //     // else
+        //     Commands.run(()-> coralIntake.setRollerVelocity(-.2)),
+        //     Commands.run(() ->{
+        //         // if(lastState == L1)
+        //         //     coralIntake.setRollerVelocity(-0.1);
+        //         // else if (lastState == L4)
+        //             coralIntake.setRollerVelocity(-.7);
+        //         // else //L2 L3
+        //         //     coralIntake.setRollerVelocity(-.2);
+        //     }, 
+        //     coralIntake).until(endCondition).andThen( new WaitCommand(0.4)), 
+        //     () -> lastState == L4);
+        // seq.addRequirements(this);
+        // return seq;
+        return coralIntake.setRollerVelocity(-.15);
     }
 
     // the public commands
