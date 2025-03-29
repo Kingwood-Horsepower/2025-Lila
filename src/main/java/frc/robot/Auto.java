@@ -233,6 +233,7 @@ public class Auto {
             alignToReefCommand,
             new PrintCommand("Aligned"),
             Commands.runOnce(swerveDriveManager::stopRobot),
+            new WaitCommand(0.6),
             coralAndElevatorSubsystem.score(),
             new WaitCommand(0.2),
             new PrintCommand("Scored"),

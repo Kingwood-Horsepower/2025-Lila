@@ -45,15 +45,15 @@ public class Constants {
 
         public static final double kDistanceFromApriltagWhenDealgeafy = inchesToMeters(20);
 
-        public static final double kDistanceFromStationTorRobot = inchesToMeters(19);
+        public static final double kDistanceFromStationTorRobot = inchesToMeters(17);
 
-        public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(0.5); // Center of the intake is 5 inches to the left of the center of the rboto
+        public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(-0.5); // Center of the intake is 5 inches to the left of the center of the rboto
         public static final double kExtraLeftAlignmentAddition = inchesToMeters(1.25); 
     }
 
     public static class AlignToL4Constants 
     {
-        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(6.5); //How much you have to go back when you score L4 (Compared to L3)
+        public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(7); //How much you have to go back when you score L4 (Compared to L3)
     }
 
     public static class ElevatorConstants

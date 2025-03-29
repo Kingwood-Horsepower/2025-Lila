@@ -114,8 +114,10 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
             Commands.run(() ->{
                 if(lastState == L1)
                     coralIntake.setRollerVelocity(-0.5);
-                else
-                    coralIntake.setRollerVelocity(-1);
+                else if (lastState == L4)
+                    coralIntake.setRollerVelocity(-.5);
+                else //L2 L3
+                    coralIntake.setRollerVelocity(-.5);
             }, 
             coralIntake).until(endCondition).andThen( new WaitCommand(0.4)), 
             () -> lastState == L4);
@@ -346,6 +348,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("scoring level", scoringLevel);
         SmartDashboard.putNumber("dealgae level", deAlgaeifyLevel);
+       
     }
 
 

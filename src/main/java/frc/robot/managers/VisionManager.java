@@ -172,6 +172,11 @@ public class VisionManager {
             //         est -> {
             //             //Ignore results that contain anything other than reef,s april tag
             //             boolean hasBadAprilTag = false;
+            // visionEst = camera.getEstimatedGlobalUpPose();
+            // visionEst.ifPresent(
+            //         est -> {
+            //             //Ignore results that contain anything other than reef,s april tag
+            //             boolean hasBadAprilTag = false;
 
             //             for(PhotonTrackedTarget aprilTag : est.targetsUsed){
             //                 boolean isGood = false;

@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Telemetry;
 import frc.robot.generated.TunerConstants;
@@ -66,8 +67,8 @@ public class SwerveDriveManager {
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
 
-    private final SlewRateLimiter driveLimiterSlowX = new SlewRateLimiter(.3);
-    private final SlewRateLimiter driveLimiterSlowYLimiter = new SlewRateLimiter(.3);
+    private final SlewRateLimiter driveLimiterSlowX = new SlewRateLimiter(1);
+    private final SlewRateLimiter driveLimiterSlowYLimiter = new SlewRateLimiter(1);
 
     //PID Controllers (For trajectory following)
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
@@ -91,6 +92,7 @@ public class SwerveDriveManager {
         yController.setTolerance(0.2);
         thetaController.setTolerance(Units.degreesToRadians(3));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);   
+        SmartDashboard.putData("reset Rotation", resetRotation());
     }
 
     //Robot Movement functions
@@ -277,6 +279,16 @@ public class SwerveDriveManager {
             });
     }
 
+        public Command resetRotation(){
+        return Commands.runOnce(()->resetPose(
+            new Pose2d(
+                this.getRobotPose().getX(), 
+                this.getRobotPose().getY(), 
+                new Rotation2d(Math.PI)
+                )
+            )
+        );
+    }
 
 
 }

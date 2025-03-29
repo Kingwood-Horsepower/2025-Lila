@@ -25,7 +25,7 @@ public class AlignmentState extends PlayerState{
     public AlignmentState(){
         super();
         //When the alignment is not working it gives control back to the player, only x robot centric
-        player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.getSwerveDriveScoringCommand());
+        //player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.getSwerveDriveScoringCommand());
     }
 
     public void setIsRight(boolean isRight) {
