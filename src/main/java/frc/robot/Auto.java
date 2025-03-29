@@ -137,7 +137,7 @@ public class Auto {
     private AutoRoutine getMiddleAutoRoutine()
     {
         AutoRoutine middleRoutine = autoFactory.newRoutine("MiddleAuto");
-        AutoTrajectory goToCoral9 = middleRoutine.trajectory("Start9S1");
+        AutoTrajectory goToCoral9 = middleRoutine.trajectory("StartMiddle9S1");
 
         middleRoutine.active().onTrue(Commands.sequence(
             goToCoral9.resetOdometry(),
