@@ -231,7 +231,7 @@ public class CoralIntake extends SubsystemBase {
             }, 
             onEnd -> {
                 armMotor.set(0);
-                altEncoder.setPosition(1.07);
+                altEncoder.setPosition(.97);
                 currentlyZeroing = false;
             }, 
             ()->(zeroStallingTimer.get()) > .08, 

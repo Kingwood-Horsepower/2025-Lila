@@ -25,6 +25,9 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake();
     //private final SwerveDriveManager swerveDriveManager;
+
+    private double coralZeroPoint = CORAL_ZERO_POINT;
+
     
     private CoralAndElevatorState lastState = STOW_UP;
     private int scoringLevel = 0;
@@ -62,6 +65,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putData("Decrement", Commands.sequence(decrementElevatorScoringLevelCommand()));
         SmartDashboard.putData("testPrint", new PrintCommand("testPrint"));
         SmartDashboard.putData("zero coral intake", coralIntake.zeroCoralElevatorCommand());
+        SmartDashboard.putNumber("coral zero point", coralZeroPoint);
 
     }
 
@@ -350,6 +354,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("scoring level", scoringLevel);
         SmartDashboard.putNumber("dealgae level", deAlgaeifyLevel);
+        coralZeroPoint = SmartDashboard.getNumber("coral zero point", coralZeroPoint);
        
     }
 
