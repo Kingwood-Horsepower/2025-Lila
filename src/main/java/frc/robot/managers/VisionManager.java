@@ -37,7 +37,7 @@ public class VisionManager {
 
     public VisionManager(SwerveDriveManager swerveDriveManager){
         this.swerveDriveManager = swerveDriveManager;
-        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 99.0);
+        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 199.0);
         swerveDriveManager.setVisionTrust(matrix);
 
         SmartDashboard.putString("CameraLeftOdometry", "0");
@@ -120,7 +120,7 @@ public class VisionManager {
                        {
                         swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                         SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));;
+                        SmartDashboard.putNumber("CameraRightOdometry(rotation)", est.estimatedPose.getRotation().getAngle());;
                        }
                         
                         
@@ -155,7 +155,7 @@ public class VisionManager {
                        {
                         swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                         SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+                        SmartDashboard.putNumber("CameraLeftOdometry(rotation)",  est.estimatedPose.getRotation().getAngle());
                        }
                         
                     });
@@ -187,7 +187,7 @@ public class VisionManager {
                        {
                         swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                         SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraUpOdometry(rotation)", Math.toDegrees(est.estimatedPose.getRotation().getAngle()));
+                        SmartDashboard.putNumber("CameraUpOdometry(rotation)",  est.estimatedPose.getRotation().getAngle());
                 
                         swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                        }
