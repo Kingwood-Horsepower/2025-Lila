@@ -113,11 +113,11 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
             // else
             Commands.run(() ->{
                 if(lastState == L1)
-                    coralIntake.setRollerVelocity(-0.5);
+                    coralIntake.setRollerVelocity(-0.3);
                 else if (lastState == L4)
-                    coralIntake.setRollerVelocity(-.5);
+                    coralIntake.setRollerVelocity(-.3);
                 else //L2 L3
-                    coralIntake.setRollerVelocity(-.5);
+                    coralIntake.setRollerVelocity(-.3);
             }, 
             coralIntake).until(endCondition).andThen( new WaitCommand(0.4)), 
             () -> lastState == L4);
