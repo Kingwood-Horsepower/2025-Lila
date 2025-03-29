@@ -23,6 +23,7 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -35,11 +36,14 @@ public class VisionManager {
 
     private static SwerveDriveManager swerveDriveManager;
 
+    private final Field2d m_field = new Field2d();
+
     public VisionManager(SwerveDriveManager swerveDriveManager){
         this.swerveDriveManager = swerveDriveManager;
         Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 199.0);
         swerveDriveManager.setVisionTrust(matrix);
 
+        SmartDashboard.putData("Field", m_field);
         SmartDashboard.putString("CameraLeftOdometry", "0");
         SmartDashboard.putNumber("CameraLeftOdometry(rotation)", Math.toDegrees(0));
         SmartDashboard.putString("CameraRightOdometry", "0");
@@ -196,6 +200,8 @@ public class VisionManager {
 
         SmartDashboard.putString("Robot Translation", swerveDriveManager.getRobotPose().getTranslation().toString());
         SmartDashboard.putNumber("Robot rotation", swerveDriveManager.getRobotPose().getRotation().getDegrees());
+
+        m_field.setRobotPose(swerveDriveManager.getRobotPose());
     }
 
     public Pose2d getRobotScoringPosition(boolean isRightCoral, boolean isL4){
