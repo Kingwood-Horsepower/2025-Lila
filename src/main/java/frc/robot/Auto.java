@@ -110,16 +110,13 @@ public class Auto {
         rightRoutine.active().onTrue(Commands.sequence(
             goToCoral9.resetOdometry(),
             coralAndElevatorSubsystem.moveToState(STOW_UP),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
             goToCoral9.cmd()
         ));
 
         AutoTrajectory coral9R = rightRoutine.trajectory("Coral9S1R");
 
-        goToCoral9.done().onTrue(StartingScoreCoralAndComeBack(coral9R, true));
+        goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
 
         AutoTrajectory coral11 = rightRoutine.trajectory("Coral11S1");
         coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral11));
@@ -146,16 +143,13 @@ public class Auto {
         middleRoutine.active().onTrue(Commands.sequence(
             goToCoral9.resetOdometry(),
             coralAndElevatorSubsystem.moveToState(STOW_UP),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
             goToCoral9.cmd()
         ));
 
         AutoTrajectory coral9R = middleRoutine.trajectory("Coral9S1R");
 
-        goToCoral9.done().onTrue(StartingScoreCoralAndComeBack(coral9R, true));
+        goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
 
         AutoTrajectory coral11 = middleRoutine.trajectory("Coral11S1");
         coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral11));
@@ -185,10 +179,6 @@ public class Auto {
         Commands.sequence(
             testTraj.resetOdometry(),
             coralAndElevatorSubsystem.moveToState(STOW_UP),
-            
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
             testTraj.cmd()
         )
@@ -251,7 +241,7 @@ public class Auto {
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
         Command alignToReefCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
-             () -> visionManager.getRobotScoringPosition(isRightCoral,  true));
+             () -> visionManager.getRobotScoringPosition(isRightCoral,  false));
 
         Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
 
@@ -269,8 +259,8 @@ public class Auto {
             Commands.runOnce(swerveDriveManager::stopRobot),
             coralAndElevatorSubsystem.moveToState(STOW_DOWN),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            // coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            // coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             //coralAndElevatorSubsystem.primeCoralForL4(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             new WaitCommand(0.4),
