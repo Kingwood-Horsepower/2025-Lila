@@ -86,14 +86,14 @@ public class Auto {
         goToCoral6.done().onTrue(ScoreCoralAndComeBack(coral6R, false));
 
 
-        AutoTrajectory coral4 = leftRoutine.trajectory("Coral4S2");
-        coral6R.done().onTrue(IntakeCoralAndGo(coral6R, coral4));
+        AutoTrajectory coral2 = leftRoutine.trajectory("Coral2S2");
+        coral6R.done().onTrue(IntakeCoralAndGo(coral6R, coral2));
 
-        AutoTrajectory coral4R = leftRoutine.trajectory("Coral4S2R");
-        coral4.done().onTrue(ScoreCoralAndComeBack(coral4R, false));
+        AutoTrajectory coral2R = leftRoutine.trajectory("Coral2S2R");
+        coral2.done().onTrue(ScoreCoralAndComeBack(coral2R, false));
 
         AutoTrajectory coral3 = leftRoutine.trajectory("Coral3S2");
-        coral4R.done().onTrue(IntakeCoralAndGo(coral4R, coral3));
+        coral2R.done().onTrue(IntakeCoralAndGo(coral2R, coral3));
 
         AutoTrajectory coral3R= leftRoutine.trajectory("Coral3S2R");
         coral3.done().onTrue(ScoreCoralAndComeBack(coral3R, true));
@@ -118,14 +118,14 @@ public class Auto {
 
         goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
 
-        AutoTrajectory coral11 = rightRoutine.trajectory("Coral11S1");
-        coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral11));
+        AutoTrajectory coral1 = rightRoutine.trajectory("Coral1S1");
+        coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral1));
 
-        AutoTrajectory coral11R = rightRoutine.trajectory("Coral11S1R");
-        coral11.done().onTrue(ScoreCoralAndComeBack(coral11R, true));
+        AutoTrajectory coral1R = rightRoutine.trajectory("Coral1S1R");
+        coral1.done().onTrue(ScoreCoralAndComeBack(coral1R, true));
 
         AutoTrajectory coral12 = rightRoutine.trajectory("Coral12S1");
-        coral11R.done().onTrue(IntakeCoralAndGo(coral11R, coral12));
+        coral1R.done().onTrue(IntakeCoralAndGo(coral1R, coral12));
 
         AutoTrajectory coral12R = rightRoutine.trajectory("Coral12S1R");
         coral12.done().onTrue(ScoreCoralAndComeBack(coral12R, false));
@@ -137,8 +137,7 @@ public class Auto {
     private AutoRoutine getMiddleAutoRoutine()
     {
         AutoRoutine middleRoutine = autoFactory.newRoutine("MiddleAuto");
-        
-        AutoTrajectory goToCoral9 = middleRoutine.trajectory("StartMiddle9S1");
+        AutoTrajectory goToCoral9 = middleRoutine.trajectory("Start9S1");
 
         middleRoutine.active().onTrue(Commands.sequence(
             goToCoral9.resetOdometry(),
@@ -151,14 +150,14 @@ public class Auto {
 
         goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
 
-        AutoTrajectory coral11 = middleRoutine.trajectory("Coral11S1");
-        coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral11));
+        AutoTrajectory coral1 = middleRoutine.trajectory("Coral1S1");
+        coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral1));
 
-        AutoTrajectory coral11R = middleRoutine.trajectory("Coral11S1R");
-        coral11.done().onTrue(ScoreCoralAndComeBack(coral11R, true));
+        AutoTrajectory coral1R = middleRoutine.trajectory("Coral1S1R");
+        coral1.done().onTrue(ScoreCoralAndComeBack(coral1R, true));
 
         AutoTrajectory coral12 = middleRoutine.trajectory("Coral12S1");
-        coral11R.done().onTrue(IntakeCoralAndGo(coral11R, coral12));
+        coral1R.done().onTrue(IntakeCoralAndGo(coral1R, coral12));
 
         AutoTrajectory coral12R = middleRoutine.trajectory("Coral12S1R");
         coral12.done().onTrue(ScoreCoralAndComeBack(coral12R, false));
