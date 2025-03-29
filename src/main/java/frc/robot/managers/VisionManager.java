@@ -18,6 +18,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
@@ -122,7 +123,8 @@ public class VisionManager {
                        }
                        if(!hasBadAprilTag)
                        {
-                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        //swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                         SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraRightOdometry(rotation)", est.estimatedPose.getRotation().getAngle());;
                        }
@@ -157,51 +159,58 @@ public class VisionManager {
                        }
                        if(!hasBadAprilTag)
                        {
-                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        //swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                         SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraLeftOdometry(rotation)",  est.estimatedPose.getRotation().getAngle());
                        }
                         
                     });
 
-            visionEst = camera.getEstimatedGlobalUpPose();
-            visionEst.ifPresent(
-                    est -> {
-                        //Ignore results that contain anything other than reef,s april tag
-                        boolean hasBadAprilTag = false;
+            // visionEst = camera.getEstimatedGlobalUpPose();
+            // visionEst.ifPresent(
+            //         est -> {
+            //             //Ignore results that contain anything other than reef,s april tag
+            //             boolean hasBadAprilTag = false;
 
-                        for(PhotonTrackedTarget aprilTag : est.targetsUsed){
-                            boolean isGood = false;
-                            if(isBlue)
-                            {
-                                for(int id : kBlueStationIDs){
-                                    isGood = isGood || aprilTag.fiducialId == id;
-                                }
+            //             for(PhotonTrackedTarget aprilTag : est.targetsUsed){
+            //                 boolean isGood = false;
+            //                 if(isBlue)
+            //                 {
+            //                     for(int id : kBlueStationIDs){
+            //                         isGood = isGood || aprilTag.fiducialId == id;
+            //                     }
                             
-                            }else
-                            {
-                                for(int id : kRedStationIDs){
-                                    isGood = isGood || aprilTag.fiducialId == id;
-                                }
-                            }
+            //                 }else
+            //                 {
+            //                     for(int id : kRedStationIDs){
+            //                         isGood = isGood || aprilTag.fiducialId == id;
+            //                     }
+            //                 }
                             
-                            hasBadAprilTag = hasBadAprilTag || !isGood;
-                       }
-                       if(!hasBadAprilTag)
-                       {
-                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
-                        SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
-                        SmartDashboard.putNumber("CameraUpOdometry(rotation)",  est.estimatedPose.getRotation().getAngle());
+            //                 hasBadAprilTag = hasBadAprilTag || !isGood;
+            //            }
+            //            if(!hasBadAprilTag)
+            //            {
+            //             swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+            //             SmartDashboard.putString("CameraUpOdometry", est.estimatedPose.getTranslation().toString());
+            //             SmartDashboard.putNumber("CameraUpOdometry(rotation)",  est.estimatedPose.getRotation().getAngle());
                 
-                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
-                       }
-                    });          
+                        //swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+           //            }
+            //        });          
         }
 
         SmartDashboard.putString("Robot Translation", swerveDriveManager.getRobotPose().getTranslation().toString());
         SmartDashboard.putNumber("Robot rotation", swerveDriveManager.getRobotPose().getRotation().getDegrees());
 
         m_field.setRobotPose(swerveDriveManager.getRobotPose());
+    }
+
+    private void addVisionMeasurement(Pose2d pose, double timestamp)
+    {
+        Pose2d newPose = new Pose2d(pose.getTranslation(), swerveDriveManager.getRobotPose().getRotation());
+        swerveDriveManager.addVisionMeasurement(newPose, timestamp);
     }
 
     public Pose2d getRobotScoringPosition(boolean isRightCoral, boolean isL4){
