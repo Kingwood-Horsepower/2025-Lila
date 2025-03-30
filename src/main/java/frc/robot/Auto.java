@@ -276,7 +276,7 @@ public class Auto {
        alignToReefCommand,
        Commands.runOnce(swerveDriveManager::stopRobot),
        new WaitCommand(0.04),
-       new WaitUntilCommand(()->coralAndElevatorSubsystem.getIsNearState()).withTimeout(2),
+       //new WaitUntilCommand(()->coralAndElevatorSubsystem.getIsNearState()).withTimeout(2),
        new WaitCommand(0.1),
        new PrintCommand("Aligned"),
        coralAndElevatorSubsystem.score(),
