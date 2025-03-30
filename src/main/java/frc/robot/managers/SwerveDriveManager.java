@@ -72,8 +72,8 @@ public class SwerveDriveManager {
     private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 5);
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(10,5);
     private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 10);
-    private final ProfiledPIDController xController = new ProfiledPIDController(40, 0, 0, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(40, 0, 0, Y_CONSTRAINTS);
+    private final ProfiledPIDController xController = new ProfiledPIDController(24, 0, 0, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(24, 0, 0, Y_CONSTRAINTS);
     private final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
 
     //Variables
