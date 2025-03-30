@@ -41,7 +41,7 @@ public class VisionManager {
 
     public VisionManager(SwerveDriveManager swerveDriveManager){
         this.swerveDriveManager = swerveDriveManager;
-        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 199.0);
+        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 9999);
         swerveDriveManager.setVisionTrust(matrix);
 
         SmartDashboard.putData("Field", m_field);
