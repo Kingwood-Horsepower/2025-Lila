@@ -209,7 +209,7 @@ public class Auto {
         Command alignToReefCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
              () -> visionManager.getRobotScoringPosition(isRightCoral));
 
-        Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
+        //Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
 
         //This is where coding dies
         //Lila please don't watch
@@ -221,19 +221,18 @@ public class Auto {
         
 
         return Commands.sequence(
-            alignToPoseCommand,
             Commands.runOnce(swerveDriveManager::stopRobot),
             coralAndElevatorSubsystem.moveToState(STOW_DOWN),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            // coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            // coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            //coralAndElevatorSubsystem.primeCoralForL4(),
-            new WaitCommand(0.4),
-            alignToReefCommand,
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            new PrintCommand("Aligned"),
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            alignToReefCommand,
             Commands.runOnce(swerveDriveManager::stopRobot),
-            new WaitCommand(0.6),
+            new WaitCommand(0.04),
+            new WaitUntilCommand(()->coralAndElevatorSubsystem.getIsNearState()).withTimeout(2),
+            new WaitCommand(0.1),
+            new PrintCommand("Aligned"),
             coralAndElevatorSubsystem.score(),
             new WaitCommand(0.2),
             new PrintCommand("Scored"),
@@ -248,21 +247,47 @@ public class Auto {
     public Command scoreTestElevatorCommand(){
         //COMMAND USED FOR TESTING - NOT IN THE ACTUAL ROUTINE
 
+        autoFactory.trajectoryCmd("PracticeField");
+        Command alignToReefCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
+        () -> visionManager.getRobotScoringPosition(true));
 
-        // Command driveToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
-        //      () -> visionManager.getRobotScoringPosition(isRightCoral,  false));
-        return Commands.sequence(
-                Commands.runOnce(swerveDriveManager::stopRobot),
-                coralAndElevatorSubsystem.startIntakeCommand(),
-                new PrintCommand("Intaking"),
-                new WaitUntilCommand(()-> coralAndElevatorSubsystem.hasCoral()).withTimeout(4),
-                new WaitCommand(0.2),  
-                new PrintCommand("Finished intaking"),   
-                coralAndElevatorSubsystem.endIntakeCommand(),
-                new PrintCommand("Ended Intake"),   
-                Commands.runOnce(swerveDriveManager::resetAutoTrajectory) ///Reset PID values for the next trajectory (MANDATORY BEFORE EVERY TRAJECTORY)
-                //nexTrajectory.cmd()
-            );
+        //Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
+
+        //This is where coding dies
+        //Lila please don't watch
+        Command iWannaCry =  Commands.sequence(
+        new PrintCommand("Test successfull"),
+        Commands.runOnce(swerveDriveManager::resetAutoTrajectory) //Reset PID values for the next trajectory (MANDATORY BEFORE EVERY TRAJECTORY)
+         //nexTrajectory.cmd()
+        );
+   
+
+   return Commands.sequence(
+       autoFactory.resetOdometry("Coral3S2R"),
+       coralAndElevatorSubsystem.moveToState(STOW_UP),
+       Commands.runOnce(swerveDriveManager::resetAutoTrajectory),
+       //Trajectory
+       Commands.runOnce(swerveDriveManager::stopRobot),
+       coralAndElevatorSubsystem.moveToState(STOW_DOWN),
+       coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+       coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+       //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+       //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+       alignToReefCommand,
+       Commands.runOnce(swerveDriveManager::stopRobot),
+       new WaitCommand(0.04),
+       new WaitUntilCommand(()->coralAndElevatorSubsystem.getIsNearState()).withTimeout(2),
+       new WaitCommand(0.1),
+       new PrintCommand("Aligned"),
+       coralAndElevatorSubsystem.score(),
+       new WaitCommand(0.2),
+       new PrintCommand("Scored"),
+       coralAndElevatorSubsystem.moveDownAutonomousCommand(), 
+       new PrintCommand("Moved Down"),
+       //THIS COMMAND WILL ---NUKE--- THE SEQUENCE AND START THE NEXT OTHER SEQUENCE
+       Commands.runOnce(() -> coralAndElevatorSubsystem.moveToState(STOW_UP)
+                               .andThen(iWannaCry).schedule()) //Kill myself
+   );
 
     }
 

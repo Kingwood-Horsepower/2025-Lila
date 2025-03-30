@@ -350,6 +350,10 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         return Commands.runOnce(()->coralIntake.overrideCoralFalse());
     }
 
+    public boolean getIsNearState() {
+        return coralIntake.getIsNearSetPoint() && elevator.getIsNearSetPoint();
+    }
+
     @Override 
     public void periodic() {
         SmartDashboard.putNumber("scoring level", scoringLevel);

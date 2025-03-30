@@ -67,16 +67,13 @@ public class SwerveDriveManager {
     private final SlewRateLimiter driveLimiterY = new SlewRateLimiter(1.3);
     private final SlewRateLimiter driveLimiterRot = new SlewRateLimiter(2.6);
 
-    private final SlewRateLimiter driveLimiterSlowX = new SlewRateLimiter(1);
-    private final SlewRateLimiter driveLimiterSlowYLimiter = new SlewRateLimiter(1);
-
     //PID Controllers (For trajectory following)
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-    private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 2);
-    private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(10,2);
+    private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 5);
+    private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(10,5);
     private static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(10, 10);
-    private final ProfiledPIDController xController = new ProfiledPIDController(12, 0, 0.2, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(12, 0, 0.2, Y_CONSTRAINTS);
+    private final ProfiledPIDController xController = new ProfiledPIDController(40, 0, 0, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(40, 0, 0, Y_CONSTRAINTS);
     private final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
 
     //Variables
@@ -109,18 +106,6 @@ public class SwerveDriveManager {
         return command;
     }
 
-
-    public Command setSwerveToSlowTestDriveCommand(){
-        Command command =  drivetrain.applyRequest(() -> driveRobotCentric
-        .withVelocityX(driveLimiterSlowX.calculate(-driverController.getLeftY()* translationVelocityMult
-            * MaxSpeed  * 0.2) )
-        .withVelocityY(driveLimiterSlowYLimiter.calculate(-driverController.getRightX() * translationVelocityMult
-            * MaxSpeed * 0.2) )
-        .withRotationalRate(0));
-
-        command.addRequirements(drivetrain);
-        return command;
-    }
 
     public Command setSwerveToSlowDriveCommand(){
         Command command =  drivetrain.applyRequest(() -> driveRobotCentric

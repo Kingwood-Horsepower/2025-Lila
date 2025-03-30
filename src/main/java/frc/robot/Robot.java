@@ -51,7 +51,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     isAutoStarted = true;
     //Enable this for auto testing. Don't forget to comment the autoroutine.poll in Auto
-    // m_robotContainer.auto.scoreTestElevatorCommand().schedule;
+   // m_robotContainer.auto.scoreTestElevatorCommand().schedule();
   }
 
   @Override
@@ -100,4 +100,6 @@ public class Robot extends TimedRobot {
   public void simulationPeriodic() {
     //m_robotContainer.visionManager.printScoringPosition();
   }
+
+  
 }
