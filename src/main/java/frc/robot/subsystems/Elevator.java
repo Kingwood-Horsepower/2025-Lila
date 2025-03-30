@@ -105,8 +105,8 @@ public class Elevator extends SubsystemBase{
             .follow(leadMotor, true);
         followMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        
-
+        SmartDashboard.putData("override elevator up", OverrideElevatorUp());
+        SmartDashboard.putData("override elevator down", OverrideElevatorDown());
     }
 
     /**
@@ -165,12 +165,36 @@ public class Elevator extends SubsystemBase{
     //         this);
         
     // }
+    boolean elevatorOverriden = false;
+    public Command OverrideElevatorUp() {
+        return Commands.startEnd(
+            ()->{
+                elevatorOverriden = true;
+                leadMotor.set(0.2);
+            }, 
+            ()->{
+                leadMotor.set(0);
+                elevatorOverriden = false;
+            }, this);
+    }
+
+    public Command OverrideElevatorDown() {
+        return Commands.startEnd(
+            ()->{
+                elevatorOverriden = true;
+                leadMotor.set(-0.2);
+            }, 
+            ()->{
+                leadMotor.set(0);
+                elevatorOverriden = false;
+            }, this);
+    }
 
     @Override
     public void periodic() {
 
         //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
-        leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
+        if(!elevatorOverriden)leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
         //isZerod = limitSwitch.get();
 
 
