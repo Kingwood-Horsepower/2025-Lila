@@ -220,6 +220,7 @@ public class CoralIntake extends SubsystemBase {
                 zeroStallingTimer.reset();
                 currentlyZeroing = true; // whenever we are zeroing, we prevent the periodic setting of the PID Controller
                 armMotor.set(0.2);
+                System.out.println("what");
                 
             }, 
             ()->{

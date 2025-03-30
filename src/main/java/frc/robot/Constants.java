@@ -48,7 +48,7 @@ public class Constants {
         public static final double kDistanceFromStationTorRobot = inchesToMeters(17);
 
         public static final double kRobotToCoralIntakeLeftOffset = inchesToMeters(-0.5); // Center of the intake is 5 inches to the left of the center of the rboto
-        public static final double kExtraLeftAlignmentAddition = inchesToMeters(1.25); 
+        public static final double kExtraLeftAlignmentAddition = inchesToMeters(0.5); 
     }
 
     public static class AlignToL4Constants 
@@ -67,10 +67,10 @@ public class Constants {
         public static final CoralAndElevatorState L2 = new CoralAndElevatorState(9, .26, .26);
         public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.2, .26, .26);
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .24, .24);
-        public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24, .24);
+        //public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24, .24);
         public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .05, .05, .5);
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .26, .23, -1);
-        public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(10.75, .26, .23, -1);
+        public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(11.5, .26, .23, -1);
     }
 
     
