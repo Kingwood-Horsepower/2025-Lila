@@ -43,7 +43,7 @@ public class AlignCommand extends Command {
 
     protected static final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.2, X_CONSTRAINTS);
     protected static final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
-    protected static final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
+    protected static final ProfiledPIDController thetaController = new ProfiledPIDController(15, 0, 0, THETA_CONSTRAINTS);
 
 
     // private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -57,7 +57,7 @@ public class AlignCommand extends Command {
         
         xController.setTolerance(0.2);
         yController.setTolerance(0.2);
-        thetaController.setTolerance(Units.degreesToRadians(3));
+        thetaController.setTolerance(Units.degreesToRadians(.2));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);   
         
         addRequirements(swerveDriveManager.getDrivetrain());
@@ -85,8 +85,13 @@ public class AlignCommand extends Command {
         swerveDriveManager.setSwerveDriveChassisSpeeds(speeds);
     }
 
-    public boolean getIsNear(double current, double target) {
+    public boolean getIsNearTranslation(double current, double target) {
         double tolerance = 0.03;
+        return Math.abs(current-target) < tolerance;
+    }
+
+    public boolean getIsNearRotation(double current, double target) {
+        double tolerance = Units.degreesToRadians(0.2);
         return Math.abs(current-target) < tolerance;
     }
 
@@ -98,9 +103,9 @@ public class AlignCommand extends Command {
   
     @Override
     public boolean isFinished() {
-        return getIsNear(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX())
-        && getIsNear(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY())
-        && getIsNear(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
+        return getIsNearTranslation(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX())
+        && getIsNearTranslation(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY())
+        && getIsNearRotation(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
         //return (xController.atGoal() && yController.atGoal() && thetaController.atGoal());
     }
   }
