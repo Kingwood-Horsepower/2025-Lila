@@ -35,7 +35,7 @@ public class AlignmentState extends PlayerState{
     @Override public void Enter()
     {
         super.Enter();
-        //alignToClosestReefCommand.schedule();
+        alignToClosestReefCommand.schedule();
         //swerveTestCommand.schedule();
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
         //player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.setSwerveToSlowTestDriveCommand());
@@ -51,7 +51,7 @@ public class AlignmentState extends PlayerState{
 
     @Override public void onY(){
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-        //alignToClosestReefCommand.schedule();
+        alignToClosestReefCommand.schedule();
     }
     @Override public void onA(){
        ;
@@ -60,7 +60,7 @@ public class AlignmentState extends PlayerState{
             player.stateMachine.ChangeState(player.driveState);
         }        
         else   {
-            //alignToClosestReefCommand.schedule();
+            alignToClosestReefCommand.schedule();
 
         }
     }
