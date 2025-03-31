@@ -41,8 +41,7 @@ public class VisionManager {
 
     public VisionManager(SwerveDriveManager swerveDriveManager){
         this.swerveDriveManager = swerveDriveManager;
-        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 9999);
-        swerveDriveManager.setVisionTrust(matrix);
+        
 
         SmartDashboard.putData("Field", m_field);
         SmartDashboard.putString("CameraLeftOdometry", "0");
@@ -51,6 +50,7 @@ public class VisionManager {
         SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(0));
         SmartDashboard.putString("Robot Translation", "0");
         SmartDashboard.putNumber("Robot rotation", Math.toDegrees(0));
+        SmartDashboard.putNumber("Robot Gyro", Math.toDegrees(0));
     }
 
     public void printScoringPosition(){
@@ -63,6 +63,22 @@ public class VisionManager {
             System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false).toString());
         }
     }
+
+
+    public void setLowTrustInCameraRotation()
+    {
+        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 9999);
+        swerveDriveManager.setVisionTrust(matrix);
+    }
+
+    public void setHighTrustInCameraRotation()
+    {
+        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 5 );
+        swerveDriveManager.setVisionTrust(matrix);
+    }
+
+
+
 
     /**
      * Returns the best target between the right and left camera
@@ -208,6 +224,8 @@ public class VisionManager {
 
         SmartDashboard.putString("Robot Translation", swerveDriveManager.getRobotPose().getTranslation().toString());
         SmartDashboard.putNumber("Robot rotation", swerveDriveManager.getRobotPose().getRotation().getDegrees());
+
+        SmartDashboard.putNumber("Robot Gyro", Math.toDegrees(swerveDriveManager.drivetrain.getPigeon2().getYaw().getValueAsDouble()));
 
         m_field.setRobotPose(swerveDriveManager.getRobotPose());
     }
