@@ -68,7 +68,7 @@ public class Constants {
         public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.2, .26, .26);
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .24, .24);
         //public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24, .24);
-        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .05, .05, .5);
+        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .04, .5);
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .26, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(11.5, .26, .23, -1);
     }
@@ -78,5 +78,6 @@ public class Constants {
     {
         public static final double ALGAE_DOWN_POINT = .12;
         public static final double ALGAE_STORE_POINT = .08;
+        public static final double ALGAE_SCORING_POINT = .03;
     }
 }
