@@ -15,12 +15,14 @@ public class AlgeePickupState extends PlayerState{
     @Override public void Enter()
     {
         super.Enter();
+        player.visionManager.setHighTrustInCameraRotation();
         player.coralAndElevatorSubsystem.incrementDeAlgaeifyLevel();
         dealgeafyAlignCommand.schedule();
         System.out.println("Entered AlgeePickup State");
     }
     @Override public void Exit(){
         super.Exit();
+        player.visionManager.setLowTrustInCameraRotation();
         player.coralAndElevatorSubsystem.resetAllIncrements();
     }
 

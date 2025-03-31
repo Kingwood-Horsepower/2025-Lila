@@ -24,6 +24,7 @@ public class AlignmentState extends PlayerState{
 
     public AlignmentState(){
         super();
+        
         //When the alignment is not working it gives control back to the player, only x robot centric
         //player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.getSwerveDriveScoringCommand());
     }
@@ -35,7 +36,8 @@ public class AlignmentState extends PlayerState{
     @Override public void Enter()
     {
         super.Enter();
-        //alignToClosestReefCommand.schedule();
+        player.visionManager.setHighTrustInCameraRotation();
+        alignToClosestReefCommand.schedule();
         //swerveTestCommand.schedule();
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
         //player.swerveDriveManager.getDrivetrain().setDefaultCommand(player.swerveDriveManager.setSwerveToSlowTestDriveCommand());
@@ -43,6 +45,7 @@ public class AlignmentState extends PlayerState{
     }
     @Override public void Exit(){
         super.Exit();
+        player.visionManager.setLowTrustInCameraRotation();
     }
 
     @Override public void onBumperPressed(){
@@ -51,7 +54,7 @@ public class AlignmentState extends PlayerState{
 
     @Override public void onY(){
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
-        //alignToClosestReefCommand.schedule();
+        alignToClosestReefCommand.schedule();
     }
     @Override public void onA(){
        ;
@@ -60,7 +63,7 @@ public class AlignmentState extends PlayerState{
             player.stateMachine.ChangeState(player.driveState);
         }        
         else   {
-            //alignToClosestReefCommand.schedule();
+            alignToClosestReefCommand.schedule();
 
         }
     }

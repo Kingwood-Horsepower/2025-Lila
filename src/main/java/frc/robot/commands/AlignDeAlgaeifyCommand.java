@@ -10,7 +10,7 @@ public class AlignDeAlgaeifyCommand extends AlignCommand {
     public AlignDeAlgaeifyCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager) {
         super(swerveDriveManager, visionManager);
 
-        visionManager.setHighTrustInCameraRotation();
+        
     }
 
     @Override
@@ -21,7 +21,7 @@ public class AlignDeAlgaeifyCommand extends AlignCommand {
     @Override
     public void end (boolean isInterrupted) {
         super.end(isInterrupted);
-        visionManager.setLowTrustInCameraRotation();
+        
     }
     
 }
