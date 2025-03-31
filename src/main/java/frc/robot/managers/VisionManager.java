@@ -41,8 +41,7 @@ public class VisionManager {
 
     public VisionManager(SwerveDriveManager swerveDriveManager){
         this.swerveDriveManager = swerveDriveManager;
-        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, Double.POSITIVE_INFINITY);
-        swerveDriveManager.setVisionTrust(matrix);
+        setLowTrustInCameraRotation();
 
         SmartDashboard.putData("Field", m_field);
         SmartDashboard.putString("CameraLeftOdometry", "0");
@@ -63,6 +62,18 @@ public class VisionManager {
             System.out.println(id + ", right: " + camera.getCoralScoreTransform(id, true).toString());
             System.out.println(id + ", left: " + camera.getCoralScoreTransform(id, false).toString());
         }
+    }
+
+    public void setLowTrustInCameraRotation()
+    {
+        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 9999);
+        swerveDriveManager.setVisionTrust(matrix);
+    }
+
+    public void setHighTrustInCameraRotation()
+    {
+        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 5 );
+        swerveDriveManager.setVisionTrust(matrix);
     }
 
     /**
