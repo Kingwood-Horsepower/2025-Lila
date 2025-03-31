@@ -51,15 +51,7 @@ public class VisionManager {
         SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(0));
         SmartDashboard.putString("Robot Translation", "0");
         SmartDashboard.putNumber("Robot rotation", Math.toDegrees(0));
-    }
-    public void gyro(int AprilTag){
-        camera.getBestDownTarget();
-        if(getBestDownTargetOptional().isPresent()){
-            if(getBestDownTargetOptional().get().fiducialId == AprilTag){
-                camera.getResetGyroRotationAfterAlign(getBestDownTargetOptional().get().yaw, swerveDriveManager.getRobotPose().getRotation().getRadians());
-            }
-        }
-        
+        SmartDashboard.putNumber("Robot Gyro", Math.toDegrees(0));
     }
 
     public void printScoringPosition(){

@@ -108,4 +108,9 @@ public class AlignCommand extends Command {
         && getIsNearRotation(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians());
         //return (xController.atGoal() && yController.atGoal() && thetaController.atGoal());
     }
+    
+    @Override
+    public void end(boolean isInterrupted){
+        
+    }
   }

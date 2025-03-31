@@ -24,6 +24,7 @@ public class AlignToReefCommand extends AlignCommand {
     public AlignToReefCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager, BooleanSupplier isRight) {
         super(swerveDriveManager, visionManager);
         this.isRight = isRight;
+        visionManager.setHighTrustInCameraRotation();
     }
 
     @Override
@@ -35,6 +36,13 @@ public class AlignToReefCommand extends AlignCommand {
             else newGoal = visionManager.getRobotScoringPosition(isRight.getAsBoolean());
         //}
         return new Pose3d(newGoal);
+    }
+
+
+    @Override
+    public void end (boolean isInterrupted) {
+        super.end(isInterrupted);
+        visionManager.setLowTrustInCameraRotation();
     }
     
 
