@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 //import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+
 import static frc.robot.Constants.AlgaeConstants.*;
 
 public class AlgaeIntake extends SubsystemBase{
@@ -127,9 +129,16 @@ public class AlgaeIntake extends SubsystemBase{
 
     public Command score() {
         return Commands.startEnd(
-            () -> runIntake(algaeDownPoint, 1.0),
+            () -> runIntake(ALGAE_SCORING_POINT, 1.0),
             () -> runIntake(0.0, 0.0), 
             this);
+        // return Commands.sequence(
+        //     Commands.runOnce(() -> runIntake(0, 1)),
+        //     new WaitCommand(.7),
+        //     Commands.runOnce(() -> runIntake(ALGAE_SCORING_POINT, 1.0)),
+        //     new WaitCommand(1),
+        //     Commands.runOnce(() -> runIntake(0, 0))
+        // );
     }
 
 
