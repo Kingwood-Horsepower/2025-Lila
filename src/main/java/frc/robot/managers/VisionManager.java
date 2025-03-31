@@ -53,6 +53,7 @@ public class VisionManager {
         SmartDashboard.putNumber("Robot rotation", Math.toDegrees(0));
     }
     public void gyro(int AprilTag){
+        camera.getBestDownTarget();
         if(getBestDownTargetOptional().isPresent()){
             if(getBestDownTargetOptional().get().fiducialId == AprilTag){
                 camera.getResetGyroRotationAfterAlign(getBestDownTargetOptional().get().yaw, swerveDriveManager.getRobotPose().getRotation().getRadians());

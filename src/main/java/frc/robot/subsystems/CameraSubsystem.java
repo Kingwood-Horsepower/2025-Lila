@@ -262,6 +262,17 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
 
   }
 
+
+  public double getResetGyroRotationAfterAlign(double yaw, double currentRobotAngle){
+    if(yaw >= 0){
+      currentRobotAngle += (yaw - Math.atan((kDistanceFromCoralToAprilTag+kRobotToCoralIntakeLeftOffset)/kDistanceFromApriltagWhenScoring));
+    }else{
+      currentRobotAngle += (yaw - Math.atan(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+kExtraLeftAlignmentAddition)/kDistanceFromApriltagWhenScoring);
+    }
+    System.out.println(currentRobotAngle);
+    return currentRobotAngle;
+  }
+
   public Pose2d getDealgeafyPose2d(int AprilTagId){
     boolean isBlue = AprilTagId > 15;
     Translation2d reefCenter = isBlue ? kBlueReefCenter : kRedReefCenter;
