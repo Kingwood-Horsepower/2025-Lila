@@ -41,7 +41,7 @@ public class VisionManager {
 
     public VisionManager(SwerveDriveManager swerveDriveManager){
         this.swerveDriveManager = swerveDriveManager;
-        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, 9999);
+        Matrix<N3, N1> matrix = MatBuilder.fill( Nat.N3(), Nat.N1(),1, 1, Double.POSITIVE_INFINITY);
         swerveDriveManager.setVisionTrust(matrix);
 
         SmartDashboard.putData("Field", m_field);
@@ -51,6 +51,14 @@ public class VisionManager {
         SmartDashboard.putNumber("CameraRightOdometry(rotation)", Math.toDegrees(0));
         SmartDashboard.putString("Robot Translation", "0");
         SmartDashboard.putNumber("Robot rotation", Math.toDegrees(0));
+    }
+    public void gyro(int AprilTag){
+        if(getBestDownTargetOptional().isPresent()){
+            if(getBestDownTargetOptional().get().fiducialId == AprilTag){
+                camera.getResetGyroRotationAfterAlign(getBestDownTargetOptional().get().yaw, swerveDriveManager.getRobotPose().getRotation().getRadians());
+            }
+        }
+        
     }
 
     public void printScoringPosition(){
@@ -123,8 +131,8 @@ public class VisionManager {
                        }
                        if(!hasBadAprilTag)
                        {
-                        //swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
-                        addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        //addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                         SmartDashboard.putString("CameraRightOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraRightOdometry(rotation)", est.estimatedPose.getRotation().getAngle());;
                        }
@@ -159,8 +167,8 @@ public class VisionManager {
                        }
                        if(!hasBadAprilTag)
                        {
-                        //swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
-                        addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        swerveDriveManager.addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
+                        //addVisionMeasurement(est.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(est.timestampSeconds));
                         SmartDashboard.putString("CameraLeftOdometry", est.estimatedPose.getTranslation().toString());
                         SmartDashboard.putNumber("CameraLeftOdometry(rotation)",  est.estimatedPose.getRotation().getAngle());
                        }
