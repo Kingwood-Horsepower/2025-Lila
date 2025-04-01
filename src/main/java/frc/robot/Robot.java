@@ -15,18 +15,25 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-
+import edu.wpi.first.epilogue.Logged;
+//import edu.wpi.first.epilogue.logging.EpilogueBackend;
+import edu.wpi.first.wpilibj.DataLogManager;
+// Starts recording to data log
+import edu.wpi.first.wpilibj.DriverStation;
+@Logged
 public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
   private boolean isAutoStarted = false;
-   
+  
 
   public Robot() {
+    
     m_robotContainer = new RobotContainer();
-
-
+    DataLogManager.start();
+    DriverStation.startDataLog(DataLogManager.getLog());
+    //Epilogue.bind(this);
   }
 
   @Override
@@ -50,6 +57,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     isAutoStarted = true;
+    //albery yay bookmark
     //Enable this for auto testing. Don't forget to comment the autoroutine.poll in Auto
     //m_robotContainer.auto.scoreTestElevatorCommand().schedule();
   }

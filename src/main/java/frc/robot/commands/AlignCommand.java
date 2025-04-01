@@ -43,8 +43,9 @@ public class AlignCommand extends Command {
 
     protected static final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.2, X_CONSTRAINTS);
     protected static final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
-    protected static final ProfiledPIDController thetaController = new ProfiledPIDController(15, 0, 0, THETA_CONSTRAINTS);
+    public static final ProfiledPIDController thetaController = new ProfiledPIDController(15, 0, 0, THETA_CONSTRAINTS);
 
+    protected static boolean startRotationIsOK = false; 
 
     // private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
     //    .withDriveRequestType(DriveRequestType.Velocity);// (not) Use open-loop control for drive motors
@@ -55,12 +56,19 @@ public class AlignCommand extends Command {
         this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;
         
-        xController.setTolerance(0.2);
-        yController.setTolerance(0.2);
-        thetaController.setTolerance(Units.degreesToRadians(.2));
+        xController.setTolerance(0.5);
+        yController.setTolerance(0.5);
+        thetaController.setTolerance(Units.degreesToRadians(.5));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);   
         
         addRequirements(swerveDriveManager.getDrivetrain());
+    }
+
+    public boolean checkStartRotationIsOK() {
+        double tolerance = Units.degreesToRadians(1);
+        double current = swerveDriveManager.getRobotPose().getRotation().getRadians();
+        double target = goal.toPose2d().getRotation().getRadians();
+        return (Math.abs(current-target) < tolerance);
     }
 
     @Override
@@ -72,15 +80,30 @@ public class AlignCommand extends Command {
         thetaController.reset(swerveDriveManager.getRobotPose().getRotation().getRadians());
 
         goal = initializeGoal();
+        
+        startRotationIsOK = false;
+        startRotationIsOK = checkStartRotationIsOK();
 
     }
 
     public void execute() {
-        ChassisSpeeds speeds = new ChassisSpeeds(
-            xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
-            yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
-            thetaController.calculate(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians())
-        );
+        ChassisSpeeds speeds;
+        if (true) {//!startRotationIsOK
+            speeds = new ChassisSpeeds(
+                xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
+                yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
+                thetaController.calculate(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians())
+            );
+        }
+        else {
+            speeds = new ChassisSpeeds(
+                xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
+                yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
+                0.0
+                );
+        }
+
+        
 
         swerveDriveManager.setSwerveDriveChassisSpeeds(speeds);
     }
@@ -91,7 +114,7 @@ public class AlignCommand extends Command {
     }
 
     public boolean getIsNearRotation(double current, double target) {
-        double tolerance = Units.degreesToRadians(0.2);
+        double tolerance = Units.degreesToRadians(0.5);
         return Math.abs(current-target) < tolerance;
     }
 
