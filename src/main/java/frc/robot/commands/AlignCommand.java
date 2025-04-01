@@ -41,9 +41,9 @@ public class AlignCommand extends Command {
     protected final VisionManager visionManager;
 
 
-    protected static final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.2, X_CONSTRAINTS);
-    protected static final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.2, Y_CONSTRAINTS);
-    public static final ProfiledPIDController thetaController = new ProfiledPIDController(10, 0, 0, THETA_CONSTRAINTS);
+    protected static final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.5, X_CONSTRAINTS);
+    protected static final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.5, Y_CONSTRAINTS);
+    public static final ProfiledPIDController thetaController = new ProfiledPIDController(15, 0, .5, THETA_CONSTRAINTS);
 
     protected static boolean startRotationIsOK = false; 
 
