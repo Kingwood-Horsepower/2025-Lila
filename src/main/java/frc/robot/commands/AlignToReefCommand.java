@@ -15,11 +15,10 @@ public class AlignToReefCommand extends AlignCommand {
     private BooleanSupplier isRight;
 
     /**
-     * Aligns to the nearest coral scoring position. It will not align to l4 if
+     * Aligns to the nearest coral scoring position.
      * @param swerveDriveManager
      * @param visionManager
      * @param isRight
-     * @param isL4
      */
     public AlignToReefCommand(SwerveDriveManager swerveDriveManager, VisionManager visionManager, BooleanSupplier isRight) {
         super(swerveDriveManager, visionManager);
@@ -28,12 +27,11 @@ public class AlignToReefCommand extends AlignCommand {
 
     @Override
     public Pose3d initializeGoal() {
-        //if (isL4.getAsBoolean()) System.out.println("align initialize initialized at l4");
         Pose2d newGoal = null;
-        //if(goal == null) {
-            if(isRight == null) newGoal = visionManager.getClosestRobotScoringPosition();
-            else newGoal = visionManager.getRobotScoringPosition(isRight.getAsBoolean());
-        //}
+
+        if(isRight == null) newGoal = visionManager.getClosestRobotScoringPosition();
+        else newGoal = visionManager.getRobotScoringPosition(isRight.getAsBoolean());
+
         return new Pose3d(newGoal);
     }
 
