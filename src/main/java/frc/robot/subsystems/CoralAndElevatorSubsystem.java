@@ -68,8 +68,10 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("coral zero point", coralZeroPoint);
 
     }
+    
+    // this one is uber mega fucked up
 
-    // private Command moveToNormalState(CoralAndElevatorState newState) { // this one is uber mega fucked up
+    // private Command moveToNormalState(CoralAndElevatorState newState) { 
     //     Command seq = Commands.sequence(
     //         coralIntake.moveToSetPoint(newState.coralPrePosition),
     //         new PrintCommand("HeYY " + Double.toString(newState.elevatorPosition)),

@@ -61,16 +61,16 @@ public class Constants {
 
         public static final double CORAL_ZERO_POINT = 1.07;
         //Elevator states 
-        public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0, 0);
-        public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26, .26);
-        public static final CoralAndElevatorState L1 = new CoralAndElevatorState(4, .26, .26);
-        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(9, .26, .26);
-        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.2, .26, .26);
-        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .24, .24);
-        //public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24, .24);
-        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .04, .5);
-        public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .26, .23, -1);
-        public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(11.5, .26, .23, -1);
+        public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0);
+        public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26);
+        public static final CoralAndElevatorState L1 = new CoralAndElevatorState(4, .26);
+        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(9, .26);
+        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.2, .26);
+        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .24);
+        //public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24);
+        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .04, .5);
+        public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .23, -1);
+        public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(11.5, .23, -1);
     }
 
     
