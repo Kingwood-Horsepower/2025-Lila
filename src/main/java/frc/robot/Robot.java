@@ -4,17 +4,8 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
-
-import choreo.auto.AutoChooser;
-import choreo.auto.AutoFactory;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.epilogue.Logged;
 //import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.wpilibj.DataLogManager;
