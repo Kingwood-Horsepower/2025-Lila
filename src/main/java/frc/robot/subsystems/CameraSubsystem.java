@@ -23,7 +23,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.AlignToL4Constants;
+//import frc.robot.Constants.AlignToL4Constants;
 import frc.robot.managers.SwerveDriveManager;
 
 import static frc.robot.Constants.CameraConstants.*;
@@ -265,10 +265,10 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
   Pose2d goal;
 
   if(getRightCoral)
-    goal = new Pose2d(reefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag+kRobotToCoralIntakeLeftOffset))), 
+    goal = new Pose2d(reefCenter.plus(v.plus(vPerpendicular.times(kDistanceFromCoralToAprilTag+kRightReefScoringOffset))), 
     new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
   else 
-    goal = new Pose2d(reefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+kExtraLeftAlignmentAddition))), 
+    goal = new Pose2d(reefCenter.plus(v.minus(vPerpendicular.times(kDistanceFromCoralToAprilTag+kLeftReefScoringOffset))), 
     new Rotation2d(aprilTagFieldLayout.getTagPose(AprilTagId).get().getRotation().getZ() + Math.PI));
 
   return goal;

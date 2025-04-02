@@ -22,8 +22,8 @@ import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
 import frc.robot.subsystems.CoralAndElevatorSubsystem;
 
-import static frc.robot.Constants.ElevatorConstants.STOW_UP;
-import static frc.robot.Constants.ElevatorConstants.STOW_DOWN;
+import static frc.robot.Constants.CoralAndElevatorConstants.STOW_UP;
+import static frc.robot.Constants.CoralAndElevatorConstants.STOW_DOWN;
 
 public class Auto {
     //Auto Classes

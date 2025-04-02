@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.CoralAndElevatorConstants.CORAL_ZERO_POINT;
+
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 
@@ -233,7 +235,7 @@ public class CoralIntake extends SubsystemBase {
             }, 
             onEnd -> {
                 armMotor.set(0);
-                altEncoder.setPosition(.97);
+                altEncoder.setPosition(CORAL_ZERO_POINT);
                 currentlyZeroing = false;
                 zeroed = true;
             }, 

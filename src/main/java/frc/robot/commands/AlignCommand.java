@@ -26,6 +26,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import static frc.robot.Constants.AlignmentControllerConstants.*;
 
 /** drive to score command!!! yay. */
 public class AlignCommand extends Command {
@@ -41,9 +42,9 @@ public class AlignCommand extends Command {
     protected final VisionManager visionManager;
 
 
-    protected static final ProfiledPIDController xController = new ProfiledPIDController(7, 0, 0.5, X_CONSTRAINTS);
-    protected static final ProfiledPIDController yController = new ProfiledPIDController(7, 0, 0.5, Y_CONSTRAINTS);
-    public static final ProfiledPIDController thetaController = new ProfiledPIDController(15, 0, .5, THETA_CONSTRAINTS);
+    protected static final ProfiledPIDController xController = new ProfiledPIDController(X_Kp, 0, X_Kd, X_CONSTRAINTS);
+    protected static final ProfiledPIDController yController = new ProfiledPIDController(Y_Kp, 0, Y_Kd, Y_CONSTRAINTS);
+    public static final ProfiledPIDController thetaController = new ProfiledPIDController(THETA_Kp, 0, THETA_Kd, THETA_CONSTRAINTS);
 
     protected static boolean startRotationIsOK = false; 
 
@@ -56,9 +57,9 @@ public class AlignCommand extends Command {
         this.swerveDriveManager = swerveDriveManager;
         this.visionManager = visionManager;
         
-        xController.setTolerance(0.5);
-        yController.setTolerance(0.5);
-        thetaController.setTolerance(Units.degreesToRadians(.5));
+        xController.setTolerance(X_CONTROLLER_TOLERANCE);
+        yController.setTolerance(Y_CONTROLLER_TOLERANCE);
+        thetaController.setTolerance(Units.degreesToRadians(THETA_CONTROLLER_TOLERANCE));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);   
         
         addRequirements(swerveDriveManager.getDrivetrain());
@@ -109,12 +110,12 @@ public class AlignCommand extends Command {
     }
 
     public boolean getIsNearTranslation(double current, double target) {
-        double tolerance = 0.03;
+        double tolerance = XY_ALIGNMENT_TOLERANCE;
         return Math.abs(current-target) < tolerance;
     }
 
     public boolean getIsNearRotation(double current, double target) {
-        double tolerance = Units.degreesToRadians(0.5);
+        double tolerance = Units.degreesToRadians(TEHTA_ALIGNMENT_TOLERANCE);
         return Math.abs(current-target) < tolerance;
     }
 

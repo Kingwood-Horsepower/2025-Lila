@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.ElevatorConstants.*;
+import static frc.robot.Constants.CoralAndElevatorConstants.*;
 
 import java.util.Set;
 import java.util.function.BooleanSupplier;
@@ -130,7 +130,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         //     () -> lastState == L4);
         // seq.addRequirements(this);
         // return seq;
-        return Commands.run( ()->coralIntake.setRollerVelocity(-.25)).until(endCondition).andThen( new WaitCommand(0.4));
+        return Commands.run( ()->coralIntake.setRollerVelocity(NORMAL_SCORING_SPEED)).until(endCondition).andThen( new WaitCommand(0.4));
     }
 
     // the public commands
