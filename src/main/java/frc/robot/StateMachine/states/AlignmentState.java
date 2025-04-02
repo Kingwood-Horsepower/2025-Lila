@@ -55,7 +55,7 @@ public class AlignmentState extends PlayerState{
     @Override public void onY(){
         player.coralAndElevatorSubsystem.incrementElevatorScoringLevel();
         alignToClosestReefCommand.schedule();
-        alignToClosestReefCommand.schedule();
+
     }
     @Override public void onA(){
        ;
@@ -65,7 +65,7 @@ public class AlignmentState extends PlayerState{
         }        
         else   {
             alignToClosestReefCommand.schedule();
-            alignToClosestReefCommand.schedule();
+
 
         }
     }

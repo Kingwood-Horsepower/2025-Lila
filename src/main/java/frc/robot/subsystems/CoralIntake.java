@@ -211,6 +211,7 @@ public class CoralIntake extends SubsystemBase {
 
     private boolean currentlyZeroing = false;
     private Timer zeroStallingTimer = new Timer();
+    private boolean zeroed = false;
     
     // zero the elevator by hitting the bottom
     public Command zeroCoralElevatorCommand() {
@@ -234,6 +235,7 @@ public class CoralIntake extends SubsystemBase {
                 armMotor.set(0);
                 altEncoder.setPosition(.97);
                 currentlyZeroing = false;
+                zeroed = true;
             }, 
             ()->(zeroStallingTimer.get()) > .08, 
             // the motor has not moved - stalled - for .5 second, 
@@ -264,6 +266,7 @@ public class CoralIntake extends SubsystemBase {
         SmartDashboard.putNumber("armVelocity", altEncoder.getVelocity());
         SmartDashboard.putBoolean("timer should be runnning", Math.abs(altEncoder.getVelocity()) < 1 );
         SmartDashboard.putBoolean("curr zeoring", currentlyZeroing);
+        SmartDashboard.putBoolean("coral intake zeroed", zeroed);
                 
         
     }

@@ -24,6 +24,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AlignToL4Constants;
+import frc.robot.managers.SwerveDriveManager;
+
 import static frc.robot.Constants.CameraConstants.*;
 
 public class CameraSubsystem extends SubsystemBase {
@@ -231,6 +233,17 @@ public boolean hasDownTarget(){
   return hasTargetLeft || hasTargetRight;
 }
 
+// public void getVisionTrust(Pose2d currentPose) {
+//   Pose2d currentTarget = aprilTagFieldLayout.getTagPose(getBestDownTarget().fiducialId).get().toPose2d();
+//   // double x = currentTarget.getBestCameraToTarget().getMeasureX().magnitude();
+//   // double y = currentTarget.getBestCameraToTarget().getMeasureY().magnitude();
+//   // double distance = 
+//   double distance = cu
+
+
+  
+
+// }
 
 
 /* #endregion */
@@ -263,15 +276,6 @@ public Pose2d getCoralScoreTransform(int AprilTagId, boolean getRightCoral){
   }
 
 
-  public double getResetGyroRotationAfterAlign(double yaw, double currentRobotAngle){
-    if(yaw >= 0){
-      currentRobotAngle += (yaw - Math.atan((kDistanceFromCoralToAprilTag+kRobotToCoralIntakeLeftOffset)/kDistanceFromApriltagWhenScoring));
-    }else{
-      currentRobotAngle += (yaw - Math.atan(kDistanceFromCoralToAprilTag-kRobotToCoralIntakeLeftOffset+kExtraLeftAlignmentAddition)/kDistanceFromApriltagWhenScoring);
-    }
-    System.out.println(currentRobotAngle);
-    return currentRobotAngle;
-  }
 
   public Pose2d getDealgeafyPose2d(int AprilTagId){
     boolean isBlue = AprilTagId > 15;
