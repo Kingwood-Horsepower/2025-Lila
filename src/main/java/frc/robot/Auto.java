@@ -77,7 +77,7 @@ public class Auto {
 
         leftRoutine.active().onTrue(StartingAutonomousCommand(goToCoral6, coral6R));
 
-        goToCoral6.done().onTrue(ScoreCoralAndComeBack(coral6R, false));
+        goToCoral6.done().onTrue(StartingScoreCommand(coral6R, false));
 
 
         AutoTrajectory coral2 = leftRoutine.trajectory("Coral2S2");
@@ -104,7 +104,7 @@ public class Auto {
 
         rightRoutine.active().onTrue(StartingAutonomousCommand(goToCoral9, coral9R));
 
-        goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
+        goToCoral9.done().onTrue(StartingScoreCommand(coral9R, true));
 
         AutoTrajectory coral1 = rightRoutine.trajectory("Coral1S1");
         coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral1));
@@ -130,7 +130,7 @@ public class Auto {
 
         middleRoutine.active().onTrue(StartingAutonomousCommand(goToCoral9, coral9R));
 
-        goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
+        goToCoral9.done().onTrue(StartingScoreCommand(coral9R, true));
 
         AutoTrajectory coral1 = middleRoutine.trajectory("Coral1S1");
         coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral1));
@@ -193,7 +193,7 @@ public class Auto {
      * @param isRightCoral
      * @return
      */
-    private Command startingScoreCommand(AutoTrajectory nexTrajectory, boolean isRightCoral){
+    private Command StartingScoreCommand(AutoTrajectory nexTrajectory, boolean isRightCoral){
         Command alignToReefCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
              () -> visionManager.getRobotScoringPosition(isRightCoral));
 
@@ -210,8 +210,8 @@ public class Auto {
 
         return Commands.sequence(
             Commands.runOnce(swerveDriveManager::stopRobot),
-            coralAndElevatorSubsystem.moveToState(STOW_DOWN),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            //coralAndElevatorSubsystem.moveToState(STOW_DOWN),
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
@@ -231,7 +231,6 @@ public class Auto {
                                     .andThen(iWannaCry).schedule()) //Kill myself
         );
     }
-
 
     /**
      * Intake 
