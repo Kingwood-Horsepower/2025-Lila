@@ -182,7 +182,7 @@ public class Auto {
                 new WaitUntilCommand(0.5).andThen(
                 startTrajectory.cmd())
             )  
-           
+
         );
 
     }
@@ -213,8 +213,8 @@ public class Auto {
             coralAndElevatorSubsystem.moveToState(STOW_DOWN),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             alignToReefCommand,
             Commands.runOnce(swerveDriveManager::stopRobot),
             new WaitCommand(0.04),
@@ -261,8 +261,8 @@ public class Auto {
             coralAndElevatorSubsystem.moveToState(STOW_DOWN),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             alignToReefCommand,
             Commands.runOnce(swerveDriveManager::stopRobot),
             new WaitCommand(0.04),
@@ -307,7 +307,7 @@ public class Auto {
        coralAndElevatorSubsystem.moveToState(STOW_DOWN),
        coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
        coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-       coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+       //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
        //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
        alignToReefCommand,
        Commands.runOnce(swerveDriveManager::stopRobot),
