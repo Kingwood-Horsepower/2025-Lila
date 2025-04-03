@@ -213,7 +213,7 @@ public class Auto {
             //coralAndElevatorSubsystem.moveToState(STOW_DOWN),
             //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             alignToReefCommand,
             Commands.runOnce(swerveDriveManager::stopRobot),
