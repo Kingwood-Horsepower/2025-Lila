@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.CoralAndElevatorState;
@@ -75,7 +76,7 @@ public class Constants {
         public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .035, .5);// original speed was .8
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(11.5, .23, -1);
-        public static final double NORMAL_SCORING_SPEED = -0.25;
+        public static final double NORMAL_SCORING_SPEED = -0.25; 
     }
 
     
