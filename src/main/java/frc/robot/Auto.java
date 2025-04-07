@@ -77,7 +77,7 @@ public class Auto {
 
         leftRoutine.active().onTrue(StartingAutonomousCommand(goToCoral6, coral6R));
 
-        goToCoral6.done().onTrue(ScoreCoralAndComeBack(coral6R, false));
+        goToCoral6.done().onTrue(StartingScoreCommand(coral6R, false));
 
 
         AutoTrajectory coral2 = leftRoutine.trajectory("Coral2S2");
@@ -104,7 +104,7 @@ public class Auto {
 
         rightRoutine.active().onTrue(StartingAutonomousCommand(goToCoral9, coral9R));
 
-        goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
+        goToCoral9.done().onTrue(StartingScoreCommand(coral9R, true));
 
         AutoTrajectory coral1 = rightRoutine.trajectory("Coral1S1");
         coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral1));
@@ -130,7 +130,7 @@ public class Auto {
 
         middleRoutine.active().onTrue(StartingAutonomousCommand(goToCoral9, coral9R));
 
-        goToCoral9.done().onTrue(ScoreCoralAndComeBack(coral9R, true));
+        goToCoral9.done().onTrue(StartingScoreCommand(coral9R, true));
 
         AutoTrajectory coral1 = middleRoutine.trajectory("Coral1S1");
         coral9R.done().onTrue(IntakeCoralAndGo(coral9R, coral1));
@@ -182,7 +182,7 @@ public class Auto {
                 new WaitUntilCommand(0.5).andThen(
                 startTrajectory.cmd())
             )  
-           
+
         );
 
     }
@@ -193,8 +193,10 @@ public class Auto {
      * @param isRightCoral
      * @return
      */
-    private Command startingScoreCommand(AutoTrajectory nexTrajectory, boolean isRightCoral){
-        Command alignToReefCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
+    private Command StartingScoreCommand(AutoTrajectory nexTrajectory, boolean isRightCoral){
+        Command alignToReefCommand1 = new AlignToPoseCommand(swerveDriveManager, visionManager,
+             () -> visionManager.getRobotScoringPosition(isRightCoral));
+        Command alignToReefCommand2 = new AlignToPoseCommand(swerveDriveManager, visionManager,
              () -> visionManager.getRobotScoringPosition(isRightCoral));
 
         //Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
@@ -210,17 +212,17 @@ public class Auto {
 
         return Commands.sequence(
             Commands.runOnce(swerveDriveManager::stopRobot),
-            coralAndElevatorSubsystem.moveToState(STOW_DOWN),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            alignToReefCommand,
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+            alignToReefCommand1,
             Commands.runOnce(swerveDriveManager::stopRobot),
             new WaitCommand(0.04),
             new WaitCommand(0.75),
+            alignToReefCommand2,
+            Commands.runOnce(swerveDriveManager::stopRobot),
             new WaitCommand(0.1),
-            new PrintCommand("Aligned"),
             coralAndElevatorSubsystem.score(),
             new WaitCommand(0.2),
             new PrintCommand("Scored"),
@@ -232,7 +234,6 @@ public class Auto {
         );
     }
 
-
     /**
      * Intake 
      * @param nexTrajectory the trajectory to load after scoring
@@ -242,7 +243,9 @@ public class Auto {
     
 
     private Command ScoreCoralAndComeBack(AutoTrajectory nexTrajectory, boolean isRightCoral){
-        Command alignToReefCommand = new AlignToPoseCommand(swerveDriveManager, visionManager,
+        Command alignToReefCommand1 = new AlignToPoseCommand(swerveDriveManager, visionManager,
+             () -> visionManager.getRobotScoringPosition(isRightCoral));
+        Command alignToReefCommand2 = new AlignToPoseCommand(swerveDriveManager, visionManager,
              () -> visionManager.getRobotScoringPosition(isRightCoral));
 
         //Command alignToPoseCommand = new AlignToPoseCommand(swerveDriveManager, visionManager, () -> nexTrajectory.getInitialPose().get());
@@ -263,10 +266,12 @@ public class Auto {
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
             coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-            alignToReefCommand,
+            alignToReefCommand1,
             Commands.runOnce(swerveDriveManager::stopRobot),
             new WaitCommand(0.04),
             new WaitCommand(0.75),
+            alignToReefCommand2,
+            Commands.runOnce(swerveDriveManager::stopRobot),
             new WaitCommand(0.1),
             new PrintCommand("Aligned"),
             coralAndElevatorSubsystem.score(),
@@ -307,7 +312,7 @@ public class Auto {
        coralAndElevatorSubsystem.moveToState(STOW_DOWN),
        coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
        coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
-       coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
+       //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
        //coralAndElevatorSubsystem.incrementElevatorScoringLevelCommand(),
        alignToReefCommand,
        Commands.runOnce(swerveDriveManager::stopRobot),

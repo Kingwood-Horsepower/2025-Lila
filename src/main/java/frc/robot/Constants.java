@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.CoralAndElevatorState;
@@ -39,8 +40,8 @@ public class Constants {
         public static final int[] kRedStationIDs = { 1, 2};
         public static final int[] kBlueStationIDs = {12, 13};
 
-        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(23
-        ); //Vertical distance from the center of the robot
+        public static final double kDistanceFromApriltagWhenScoring = inchesToMeters(24.8 
+        ); //Vertical distance from the center of the robot originally 23
         public static final double kDistanceFromCoralToAprilTag = inchesToMeters(6.5); //Orizzontal distance when scoring
 
         public static final double kDistanceFromApriltagWhenDealgeafy = inchesToMeters(20);
@@ -49,8 +50,8 @@ public class Constants {
         public static final double kDistanceFromStationTorRobot = inchesToMeters(17);
 
 
-        public static final double kRightReefScoringOffset = inchesToMeters(-0.5); // shifts the robot .5 inches toward the tag (to the left of the right reef)
-        public static final double kLeftReefScoringOffset = inchesToMeters(1); // shifts the robot 1 inch away from the tag (to the left of the left reef)
+        public static final double kRightReefScoringOffset = inchesToMeters(1); // shifts the robot .5 inches toward the tag (to the left of the right reef)
+        public static final double kLeftReefScoringOffset = inchesToMeters(0); // shifts the robot 1 inch away from the tag (to the left of the left reef)
     }
 
     // public static class AlignToL4Constants 
@@ -80,13 +81,15 @@ public class Constants {
         public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0);
         public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26);
         public static final CoralAndElevatorState L1 = new CoralAndElevatorState(4, .26);
-        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(9, .26);
-        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.2, .26);
-        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .245);
-        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .035, .8);
+        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(10, .26);//original is 9 for elevator position
+        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.7, .26);// original is 17.2 for elevator position
+        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .244
+        );
+        //public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24);
+        public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .035, .5);// original speed was .8
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(11.5, .23, -1);
-        public static final double NORMAL_SCORING_SPEED = -0.25;
+        public static final double NORMAL_SCORING_SPEED = -0.25; 
     }
 
     
