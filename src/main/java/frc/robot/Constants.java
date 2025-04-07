@@ -81,11 +81,9 @@ public class Constants {
         public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0);
         public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26);
         public static final CoralAndElevatorState L1 = new CoralAndElevatorState(4, .26);
-        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(10, .26);//original is 9 for elevator position
-        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.7, .26);// original is 17.2 for elevator position
-        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .244
-        );
-        //public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24);
+        public static final CoralAndElevatorState L2 = new CoralAndElevatorState(10, .26); // original is 9 for elevator position
+        public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.7, .26); // original is 17.2 for elevator position
+        public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .244);
         public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .035, .5);// original speed was .8
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(11.5, .23, -1);
