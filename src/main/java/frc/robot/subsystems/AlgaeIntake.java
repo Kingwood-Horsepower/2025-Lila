@@ -9,7 +9,6 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -18,18 +17,12 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-//import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import static frc.robot.Constants.AlgaeConstants.*;
 
 public class AlgaeIntake extends SubsystemBase{
-    //setup motors
 
-    //DigitalInput limitSwitch = new DigitalInput(8);
-
-    
     private final int rollerMotorID = 16;
     private final int armMotorID = 17;
 
@@ -38,17 +31,12 @@ public class AlgaeIntake extends SubsystemBase{
     private final SparkClosedLoopController armMotorController = armMotor.getClosedLoopController();
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
     
-    //look at revlib for arm motor: getForwardLimitSwitch
-    //look at revlib for intake motor: getOutputCurrent
-
     private double setPoint = 0.0;
-    private double velocity = 0.0;
+
 
     private final SparkFlex rollerMotor = new SparkFlex(rollerMotorID, MotorType.kBrushless);
     private final SparkFlexConfig rollerMotorConfig = new SparkFlexConfig();
-    private final SparkClosedLoopController rollerMotorController = rollerMotor.getClosedLoopController();
-    private final RelativeEncoder rollerEncoder = rollerMotor.getEncoder();
-    
+
     private final int ARM_GEAR_RATIO = 135;
 
     public static final String algaeDownSetPointKey = "algae down point";
@@ -110,7 +98,7 @@ public class AlgaeIntake extends SubsystemBase{
      */
     public void runIntake(double setPoint, double velocity) {
         setSetPoint(setPoint);
-        this.velocity = velocity;
+
         rollerMotor.set(velocity);
 
     }

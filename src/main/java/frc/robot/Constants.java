@@ -2,27 +2,11 @@ package frc.robot;
 
 import static edu.wpi.first.math.util.Units.inchesToMeters;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
-
-import org.opencv.core.Mat;
-
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Distance;
-
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.CoralAndElevatorState;
 
 public class Constants {
     public static class CameraConstants
