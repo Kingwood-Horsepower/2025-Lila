@@ -58,11 +58,24 @@ public class Constants {
     //     public static final double ROBOT_TO_L4_DISTANCE = -inchesToMeters(6.3); //How much you have to go back when you score L4 (Compared to L3)
     // }
 
+    public static class CoralIntakeConstants
+    {
+        public static final int GEARBOX_RATIO = 15; // just the ratio of maxplanetaries. not used
+        public static final int SPROCKET_RATIO = 3;
+        //The double set to the throughbore encoder after the end of zeroing
+        public static final double CORAL_ZERO_POINT = .97;
+    }
+
+    public static class ElevatorConstants
+    {
+        public static final int ELEVATOR_GEAR_RATIO = 12;
+        public static final double ELEVATOR_SPROCKET_CIRCUMFERENCE = 1.281*Math.PI;
+        public static final double ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS = ELEVATOR_GEAR_RATIO/ELEVATOR_SPROCKET_CIRCUMFERENCE;
+    }
+
     public static class CoralAndElevatorConstants
     {
 
-        //The double set to the throughbore encoder after the end of zeroing
-        public static final double CORAL_ZERO_POINT = .97;
         // Coral and Elevator states 
         public static final CoralAndElevatorState STOW_UP = new CoralAndElevatorState(0, 0);
         public static final CoralAndElevatorState STOW_DOWN = new CoralAndElevatorState(0, .26);
@@ -70,7 +83,6 @@ public class Constants {
         public static final CoralAndElevatorState L2 = new CoralAndElevatorState(9, .26);
         public static final CoralAndElevatorState L3 = new CoralAndElevatorState(17.2, .26);
         public static final CoralAndElevatorState L4 = new CoralAndElevatorState(28.7, .245);
-        //public static final CoralAndElevatorState L4END = new CoralAndElevatorState(28.7, .24);
         public static final CoralAndElevatorState INTAKE = new CoralAndElevatorState(0, .035, .8);
         public static final CoralAndElevatorState L2ALGAE = new CoralAndElevatorState(4, .23, -1);
         public static final CoralAndElevatorState L3ALGAE = new CoralAndElevatorState(11.5, .23, -1);

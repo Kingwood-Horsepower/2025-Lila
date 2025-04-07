@@ -2,27 +2,23 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import com.google.gson.internal.TroubleshootingGuide;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.sim.SparkMaxSim;
 import com.revrobotics.sim.SparkRelativeEncoderSim;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import static frc.robot.Constants.CoralAndElevatorConstants.*;
+
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.PWMSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -30,45 +26,49 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.Robot;
+import static frc.robot.Constants.ElevatorConstants.*;
 
 public class Elevator extends SubsystemBase{
 
-    
-    DigitalInput limitSwitch = new DigitalInput(8);
-    //DigitalInput IRZero = new DigitalInput(8);
+    // initialize important objects for the elevator motors and limit switch. 
+    private final DigitalInput limitSwitch = new DigitalInput(8);
+    // only turns true after being true for a second, but turns false immediately on false (kRising)
+    private final Debouncer limitSwtichDebouncer = new Debouncer(1, Debouncer.DebounceType.kRising);
 
     private final int leadMotorID = 21;
     private final int followMotorID = 19;
 
     private final SparkMax leadMotor = new SparkMax(leadMotorID, MotorType.kBrushless);
     private final SparkMaxConfig leadMotorConfig = new SparkMaxConfig();
-    private final SparkClosedLoopController leadMotorController = leadMotor.getClosedLoopController();
     private final RelativeEncoder leadEncoder = leadMotor.getEncoder();
 
     private final SparkMax followMotor = new SparkMax(followMotorID, MotorType.kBrushless);
     private final SparkMaxConfig followMotorConfig = new SparkMaxConfig();
     private final RelativeEncoder followEncoder = followMotor.getEncoder();
 
-    private final int ELEVATOR_GEAR_RATIO = 12;
-    private final double ELEVATOR_SPROCKET_CIRCUMFERENCE = 1.281*Math.PI;
-    private final double ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS = ELEVATOR_GEAR_RATIO/ELEVATOR_SPROCKET_CIRCUMFERENCE;
-    
-
-    private double setPoint = 0.0;
-    private boolean isZerod = false;
-    
-
+    // velocity and acceleration constraints of the PID controller below. 
+    // The PID controller is what calculates elevator speed in periodic()
     private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(400, 1000);
     private final ProfiledPIDController elevatorController = new ProfiledPIDController(.6, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
 
-    //sim
 
-    private final DCMotor elevatorDCMotor = DCMotor.getNEO(1);
+    // setpoint of the elevator, the elevator is driven to this value on every run of periodic()
+    private double setPoint = 0.0;
+    // used for the limit switch, not working
+    private boolean isZerod = false; 
+    private boolean elevatorOverriden = false;
+    
+    
+    // Simulation stuff, not working well for now
+
+    // create a motor model and sparkMaxSim object with the motor model
+    private final DCMotor elevatorDCMotor = DCMotor.getNEO(1); // this should be 2 since 2 motors are used
     private final SparkMaxSim leadMotorSim = new SparkMaxSim(leadMotor, elevatorDCMotor);
 
+    // create an elevator simulation with our elevator's characteristics
     private final ElevatorSim elevatorSim = new ElevatorSim(
         elevatorDCMotor, 
         ELEVATOR_GEAR_RATIO, 
@@ -81,22 +81,30 @@ public class Elevator extends SubsystemBase{
         0.01,
         0
     );
-
+    
+    // create mechanisms, read wpilib for this.
     private final Mechanism2d mech = new Mechanism2d(50, 100);
     private final MechanismRoot2d rootMech = mech.getRoot("base", 10, 0);
+    // create ligament mechanism that represents the elevator 
     private final MechanismLigament2d elevatorMech2d =
       rootMech.append(
           new MechanismLigament2d("elevator", 0.1*20, 90) // 20 is pixels per meter
           );
+    // our pid code relies on the outputs of the encoder, so we must simulate it aswell
     private final SparkRelativeEncoderSim leadEncoderSim = leadMotorSim.getRelativeEncoderSim();
     
 
     public Elevator() {
+        /*  revlib has the ability to configure the sparkmaxes run the Profiled PID controllers in the sparkmax hardware
+            but I have had unsolvable issues with the motion being shaky and not smooth. 
+            I would advise against using it unless it has been improved for the 2026 season
+         */
+
+        // configure rev motors with simple configurations.
         leadMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)
-            .inverted(false)
-                ; // <- this semicolon is VERY important
+            .inverted(false); 
         leadMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
         followMotorConfig
@@ -105,6 +113,7 @@ public class Elevator extends SubsystemBase{
             .follow(leadMotor, true);
         followMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+        // create dashboard override buttons. They take a name and a command that is run on press. Right now, these overrides are unusable
         SmartDashboard.putData("override elevator up", OverrideElevatorUp());
         SmartDashboard.putData("override elevator down", OverrideElevatorDown());
     }
@@ -121,12 +130,13 @@ public class Elevator extends SubsystemBase{
 
 
     public double getLeadEncoderPosition() {
-        double pos = -1;
-        if(Robot.isSimulation()) pos = leadEncoderSim.getPosition();
-        pos = leadEncoder.getPosition();
-        return pos;
+        if(Robot.isSimulation()) return leadEncoderSim.getPosition();
+        else return leadEncoder.getPosition();
     }
 
+    /**
+     * Determines if the elevator is near (2 motor rotations of tolerance) the current setPoint
+     */    
     public boolean getIsNearSetPoint() {
         double tolerance = 2;  // in encoder rotations
         double currPosition = getLeadEncoderPosition(); 
@@ -153,7 +163,8 @@ public class Elevator extends SubsystemBase{
         return Commands.runOnce(()-> setSetPoint(setPoint), this);//.until(() -> getIsNearSetPoint());
     }
 
-    // public Command moveToSetPoint(double setPoint) {
+    // deprecated. A command like this can be used to have the command only end when it is near the setPoint it is initially commanded to go to
+    // public Command moveUntilAtSetPoint(double setPoint) {
     //     if (setPoint == this.setPoint) return Commands.none();
     //     return new FunctionalCommand(
     //         () -> {
@@ -163,9 +174,10 @@ public class Elevator extends SubsystemBase{
     //         t->{},
     //         () -> getIsNearSetPoint(), 
     //         this);
-        
     // }
-    boolean elevatorOverriden = false;
+
+
+    // these are bad
     public Command OverrideElevatorUp() {
         return Commands.startEnd(
             ()->{
@@ -193,17 +205,17 @@ public class Elevator extends SubsystemBase{
     @Override
     public void periodic() {
 
-        //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl);
-        if(!elevatorOverriden)leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
-        //isZerod = limitSwitch.get();
-
+        //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl); // the rev version of PID. Had problems as discussed above
+        if (!elevatorOverriden)leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
+        // only tells that the elevator hit the limit switch if activated for one second
+        if (limitSwtichDebouncer.calculate(limitSwitch.get())) {
+            isZerod = limitSwitch.get();
+        }
 
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
         SmartDashboard.putNumber("elevator setpoint", setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS);
-        //SmartDashboard.putNumber("elevator level", getElevatorLevel());
         SmartDashboard.putBoolean("is zeroed limitwsitch", isZerod);
-        //SmartDashboard.putBoolean("elevator is near zero", getIsNearZero());
         SmartDashboard.putBoolean("elevator is near setpoint", getIsNearSetPoint());
         SmartDashboard.putNumber("elevator motor current", leadMotor.getOutputCurrent());
 
@@ -237,11 +249,6 @@ public class Elevator extends SubsystemBase{
         leadEncoderSim.setPosition(leadMotorSim.getPosition());
         // modify the mechanism
         elevatorMech2d.setLength(.1+elevatorSim.getPositionMeters()*10);
-        //System.out.println(leadMotorSim.getPosition());\
-
-        //System.out.println(leadMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
-
-
         SmartDashboard.putData("elevator please", mech);
         
     }

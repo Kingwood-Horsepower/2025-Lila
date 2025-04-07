@@ -10,11 +10,9 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -24,16 +22,12 @@ import frc.robot.CoralAndElevatorState;
 public class CoralAndElevatorSubsystem extends SubsystemBase {
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake();
-    //private final SwerveDriveManager swerveDriveManager;
-
-    private double coralZeroPoint = CORAL_ZERO_POINT;
-
     
     private CoralAndElevatorState lastState = STOW_UP;
     private int scoringLevel = 0;
 
     private final CoralAndElevatorState[] scoringStates = {
-        STOW_DOWN, // this is wrong
+        STOW_DOWN, // this is wrong?
         L1,
         L2,
         L3,
@@ -65,7 +59,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putData("Decrement", Commands.sequence(decrementElevatorScoringLevelCommand()));
         SmartDashboard.putData("testPrint", new PrintCommand("testPrint"));
         SmartDashboard.putData("zero coral intake", coralIntake.zeroCoralElevatorCommand());
-        SmartDashboard.putNumber("coral zero point", coralZeroPoint);
+        //SmartDashboard.putNumber("coral zero point", coralZeroPoint);
 
     }
     
@@ -322,7 +316,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     } 
 
     public boolean hasCoral(){
-        return coralIntake.hasCoral;
+        return coralIntake.hasCoral();
     }
 
     public Elevator getElevator() {
@@ -333,9 +327,9 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         return coralIntake;
     }
 
-    public void jiggleIntake(){
-        coralIntake.jiggleIntakeLol( ()-> coralIntake.getRollerEncoderPosition());
-    }
+    // public void jiggleIntake(){
+    //     coralIntake.jiggleIntakeLol( ()-> coralIntake.getRollerEncoderPosition());
+    // }
 
     public int getScoringLevel() {
         return scoringLevel;
@@ -360,7 +354,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("scoring level", scoringLevel);
         SmartDashboard.putNumber("dealgae level", deAlgaeifyLevel);
-        coralZeroPoint = SmartDashboard.getNumber("coral zero point", coralZeroPoint);
+        //coralZeroPoint = SmartDashboard.getNumber("coral zero point", coralZeroPoint);
        
     }
 

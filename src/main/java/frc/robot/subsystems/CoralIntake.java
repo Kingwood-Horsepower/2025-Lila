@@ -1,8 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.CoralAndElevatorConstants.CORAL_ZERO_POINT;
-
-import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.RelativeEncoder;
@@ -24,17 +21,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
-//import frc.robot.subsystems.Elevator;
+import static frc.robot.Constants.CoralIntakeConstants.*;
 
 public class CoralIntake extends SubsystemBase {
+    // create objects for sensors and motors
     private final DigitalInput IRsensor = new DigitalInput(3); // false = broken
-    private boolean hasCoralOverrideTrue = false;
-    private boolean hasCoralOverrideFalse = false;
 
     private final int rollerMotorID = 23;
     private final int armMotorID = 24;
@@ -46,21 +39,22 @@ public class CoralIntake extends SubsystemBase {
     
     private final SparkMax rollerMotor = new SparkMax(rollerMotorID, MotorType.kBrushless);
     private final SparkMaxConfig rollerMotorConfig = new SparkMaxConfig();
-    private final SparkClosedLoopController rollerMotorController = rollerMotor.getClosedLoopController();
-    private final RelativeEncoder rollerEncoder = rollerMotor.getEncoder();
+    // private final SparkClosedLoopController rollerMotorController = rollerMotor.getClosedLoopController();
+    // private final RelativeEncoder rollerEncoder = rollerMotor.getEncoder();
     
-    private final int GEARBOX_RATIO = 15; // this is the sprocket gear ratio now
-    private final int SPROCKET_RATIO = 3;
-
-    private double setPoint = 0.0;
-    private double velocity = 0.0;
-    public boolean hasCoral = false;
-    
+    // velocity and acceleration constraints of the PID controller below. 
+    // The PID controller is what calculates wrist speed in periodic()
     private final TrapezoidProfile.Constraints ARM_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(5000.0/15*0.1, 7);
     private final ProfiledPIDController armController = new ProfiledPIDController(10, 0, 0, ARM_ROTATION_CONSTRAINTS);
+    
+    private boolean hasCoralOverrideTrue = false;
+    private boolean hasCoralOverrideFalse = false;
+    // the setPoint of the wrist. The wrist is driven to this value on every run of periodic()
+    private double setPoint = 0.0;
+    private boolean hasCoral = false;
 
     public CoralIntake() {
-
+        //configure sparkmax objects
         armMotorConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kBrake)
@@ -74,12 +68,13 @@ public class CoralIntake extends SubsystemBase {
         rollerMotorConfig
             .smartCurrentLimit(38)
             .idleMode(IdleMode.kCoast)
-            .inverted(false)
-            .closedLoop
-            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .pid(1.5, 0.0, 0)
-            .outputRange(-1, 1) //what does this do??
-            ;
+            .inverted(false);
+            // // this sparkmax uses simple pid control for the rollers position of the coral intake, 
+            // // its intended use was in jiggling, which was never used
+            // .closedLoop
+            // .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            // .pid(1.5, 0.0, 0)
+            // .outputRange(-1, 1);
         rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
 
@@ -96,56 +91,51 @@ public class CoralIntake extends SubsystemBase {
     }
 
     public void setRollerVelocity(double velocity) {
-        this.velocity = velocity;
         rollerMotor.set(velocity);
     }
 
-    public void moveRollerPosition(double distance) {
-        rollerMotorController.setReference(distance, ControlType.kPosition);
-    }
+    // // used to move the coral a distance, was used for priming and jiggling but they were never used
+    // public void moveRollerPosition(double distance) {
+    //     rollerMotorController.setReference(distance, ControlType.kPosition);
+    // }
 
-    private boolean getRollerIsNearPosition(double targetPosition) {
-        return Math.abs(rollerEncoder.getPosition()-targetPosition) < .2;
-    }
+    // private boolean getRollerIsNearPosition(double targetPosition) {
+    //     return Math.abs(rollerEncoder.getPosition()-targetPosition) < .2;
+    // }
 
-    public double getRollerEncoderPosition() {
-        return rollerEncoder.getPosition();
-    }
+    // public double getRollerEncoderPosition() {
+    //     return rollerEncoder.getPosition();
+    // }
 
     // public void primeCoralForL4() {
     //     moveRollerPosition(getRollerEncoderPosition()-.7);
     //     System.out.println("primed");
     // }
 
-
-
     // public void retractCoralFromL4() {
     //     moveRollerPosition(getRollerEncoderPosition()+1.2);
     // }
 
-    
-
-    public Command jiggleIntakeLol(DoubleSupplier currentRollerEncoderPosition) {
-        double startDistance = currentRollerEncoderPosition.getAsDouble();
-        double jiggleStartDistance = -2 + startDistance;
-        double jiggleDistance = 1;
-        return Commands.sequence(
-            Commands.runOnce(() -> System.out.println("running jiggle")),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-1), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition()-1)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
-            Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() +1 ), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() +1 )),
-            Commands.runOnce(() -> System.out.println("ending jiggle"))
-        );
-    }
+    // public Command jiggleIntakeLol(DoubleSupplier currentRollerEncoderPosition) {
+    //     double startDistance = currentRollerEncoderPosition.getAsDouble();
+    //     double jiggleDistance = 1;
+    //     return Commands.sequence(
+    //         Commands.runOnce(() -> System.out.println("running jiggle")),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition()-1), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition()-1)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() + jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() + jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() - jiggleDistance), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() - jiggleDistance)),
+    //         Commands.runOnce(()-> moveRollerPosition(getRollerEncoderPosition() +1 ), this).until(() -> getRollerIsNearPosition(getRollerEncoderPosition() +1 )),
+    //         Commands.runOnce(() -> System.out.println("ending jiggle"))
+    //     );
+    // }
     
     /**
      * Command arm to setpoint and run intake
@@ -158,12 +148,13 @@ public class CoralIntake extends SubsystemBase {
         setRollerVelocity(velocity);
     }
 
+    /**
+     * Determines if the coralWrist is near (2 motor rotations of tolerance) the current setPoint
+     */    
     public boolean getIsNearSetPoint() {
         double tolerance = .01; // in encoder rotations
         double currPosition = altEncoder.getPosition();
         double targetPosition = setPoint*SPROCKET_RATIO; 
-        // System.out.print("coralIsNearSetPoint: ");
-        // System.out.println(Math.abs(currPosition-targetPosition));
         return Math.abs(currPosition-targetPosition) < tolerance;
     }
 
