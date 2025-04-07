@@ -4,8 +4,6 @@ import static frc.robot.Constants.CoralAndElevatorConstants.*;
 
 import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,6 +21,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     private final Elevator elevator = new Elevator();
     private final CoralIntake coralIntake = new CoralIntake();
     
+    @SuppressWarnings("unused") // im not sure if a null lastState would screw something up on the first use of a method in this class
     private CoralAndElevatorState lastState = STOW_UP;
     private int scoringLevel = 0;
 
@@ -42,7 +41,7 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         L3ALGAE
     };
 
-    private double testSetPoint = 0.0;
+    // private double testSetPoint = 0.0;
     
  
     public void bindTriggers(){
@@ -96,15 +95,15 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
     }
 
 
-    private Command rizzTheLevel4GyattCommand(BooleanSupplier endCondition) {
-        return Commands.sequence(
-            Commands.run(() -> coralIntake.setRollerVelocity(-.5), coralIntake).until(endCondition)
-            .andThen(new WaitCommand(0.4))
+    // private Command rizzTheLevel4GyattCommand(BooleanSupplier endCondition) {
+    //     return Commands.sequence(
+    //         Commands.run(() -> coralIntake.setRollerVelocity(-.5), coralIntake).until(endCondition)
+    //         .andThen(new WaitCommand(0.4))
             
-            //moveToNormalState(L4END)
-            //i will add something here
-        );
-    }
+    //         //moveToNormalState(L4END)
+    //         //i will add something here
+    //     );
+    // }
 
     private Command scoringCommand(BooleanSupplier endCondition) {
         // Command seq = new ConditionalCommand(
@@ -146,16 +145,16 @@ public class CoralAndElevatorSubsystem extends SubsystemBase {
         //);
     }
 
-    private Command moveToSupplierState(Supplier<CoralAndElevatorState> stateSupplier) {
-        return Commands.sequence(
-            new PrintCommand("moveToSupplierState has state with elevator distance: " + Double.toString(stateSupplier.get().elevatorPosition)),
-            moveToNormalState(stateSupplier.get())
-        );
-    }
+    // private Command moveToSupplierState(Supplier<CoralAndElevatorState> stateSupplier) {
+    //     return Commands.sequence(
+    //         new PrintCommand("moveToSupplierState has state with elevator distance: " + Double.toString(stateSupplier.get().elevatorPosition)),
+    //         moveToNormalState(stateSupplier.get())
+    //     );
+    // }
 
-    private CoralAndElevatorState getScoringState(IntSupplier levelSupplier) {
-        return scoringStates[levelSupplier.getAsInt()];
-    }
+    // private CoralAndElevatorState getScoringState(IntSupplier levelSupplier) {
+    //     return scoringStates[levelSupplier.getAsInt()];
+    // }
 
     public void scheduleNewState(CoralAndElevatorState newState) {
         moveToState(newState).schedule();

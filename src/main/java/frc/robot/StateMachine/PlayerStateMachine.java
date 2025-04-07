@@ -1,7 +1,5 @@
 package frc.robot.StateMachine;
 
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.StateMachine.states.AlgeePickupState;
 import frc.robot.StateMachine.states.AlignmentState;
 import frc.robot.StateMachine.states.DriveState;

@@ -1,25 +1,20 @@
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
-
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -47,6 +42,8 @@ public class CoralIntake extends SubsystemBase {
     private final TrapezoidProfile.Constraints ARM_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(5000.0/15*0.1, 7);
     private final ProfiledPIDController armController = new ProfiledPIDController(10, 0, 0, ARM_ROTATION_CONSTRAINTS);
     
+    private final Debouncer zeroingDebouncer = new Debouncer(0.8, DebounceType.kRising); // zero after 4 schedular loop runs
+
     private boolean hasCoralOverrideTrue = false;
     private boolean hasCoralOverrideFalse = false;
     // the setPoint of the wrist. The wrist is driven to this value on every run of periodic()
@@ -173,24 +170,24 @@ public class CoralIntake extends SubsystemBase {
         return hasCoral;
     }
 
-    /**
-     * Move the Coral Intake to the setPoint and return when finished
-     * 
-     * @param setPoint setpoint to move the arm to
-     */    
+    // /**
+    //  * Move the Coral Intake to the setPoint and return when finished
+    //  * 
+    //  * @param setPoint setpoint to move the arm to
+    //  */    
 
-    public Command moveToSetPoint(double setPoint) {
-        if (setPoint == this.setPoint) return Commands.none();
-        return new FunctionalCommand(
-            () -> {
-                setSetPoint(setPoint);
-            }, 
-            ()->{}, 
-            t->{},
-            () -> getIsNearSetPoint(), 
-            this);
+    // public Command moveUntilAtSetPoint(double setPoint) {
+    //     if (setPoint == this.setPoint) return Commands.none();
+    //     return new FunctionalCommand(
+    //         () -> {
+    //             setSetPoint(setPoint);
+    //         }, 
+    //         ()->{}, 
+    //         t->{},
+    //         () -> getIsNearSetPoint(), 
+    //         this);
         
-    }
+    // }
 
     public void overrideCoralTrue() {
         hasCoralOverrideTrue = true;
@@ -202,38 +199,60 @@ public class CoralIntake extends SubsystemBase {
         System.out.println("Coral override: FALSE");
     }
 
-    private boolean currentlyZeroing = false;
-    private Timer zeroStallingTimer = new Timer();
-    private boolean zeroed = false;
+ 
+    // private Timer zeroStallingTimer = new Timer();
+    // private boolean zeroed = false;
     
+    // // zero the elevator by hitting the bottom
+    // public Command zeroCoralElevatorCommand() {
+    //     boolean isStalling = false;
+    //     return new FunctionalCommand(
+    //         ()->{
+    //             zeroStallingTimer.reset();
+    //             currentlyZeroing = true; // whenever we are zeroing, we prevent the periodic setting of the PID Controller
+    //             armMotor.set(0.2);
+    //             System.out.println("what");
+                
+    //         }, 
+    //         ()->{
+    //             // if we have stalled, and the stall timer isnt running, start the stall timer
+    //             if (Math.abs(altEncoder.getVelocity()) < 1 && !zeroStallingTimer.isRunning()) zeroStallingTimer.start();
+    //             else if (Math.abs(altEncoder.getVelocity()) < 1) {} // do nothing 
+    //             // if we are not stalled, reset the timer.
+    //             else zeroStallingTimer.reset();
+    //         }, 
+    //         onEnd -> {
+    //             armMotor.set(0);
+    //             altEncoder.setPosition(CORAL_ZERO_POINT);
+    //             currentlyZeroing = false;
+    //             zeroed = true;
+    //         }, 
+    //         ()->(zeroStallingTimer.get()) > .08, 
+    //         // the motor has not moved - stalled - for .5 second, 
+    //         // (the stall timer is greater than .5),
+    //         // then we hit the bottom bar
+    //         this);
+    // }
+
+    private boolean currentlyZeroing = false;
+
     // zero the elevator by hitting the bottom
     public Command zeroCoralElevatorCommand() {
-        boolean isStalling = false;
         return new FunctionalCommand(
             ()->{
-                zeroStallingTimer.reset();
-                currentlyZeroing = true; // whenever we are zeroing, we prevent the periodic setting of the PID Controller
+                currentlyZeroing = true;
                 armMotor.set(0.2);
-                System.out.println("what");
-                
-            }, 
-            ()->{
-                // if we have stalled, and the stall timer isnt running, start the stall timer
-                if (Math.abs(altEncoder.getVelocity()) < 1 && !zeroStallingTimer.isRunning()) zeroStallingTimer.start();
-                else if (Math.abs(altEncoder.getVelocity()) < 1) {} // do nothing 
-                // if we are not stalled, reset the timer.
-                else zeroStallingTimer.reset();
-            }, 
-            onEnd -> {
+            },
+            ()->{}, 
+            onEnd -> {  // the name "onEnd" doesnt actually exist. 
+                        // you can literally name the parameter of the consumer to anything and it will still work
                 armMotor.set(0);
                 altEncoder.setPosition(CORAL_ZERO_POINT);
                 currentlyZeroing = false;
-                zeroed = true;
-            }, 
-            ()->(zeroStallingTimer.get()) > .08, 
-            // the motor has not moved - stalled - for .5 second, 
-            // (the stall timer is greater than .5),
-            // then we hit the bottom bar
+            },  
+            // an alt encoder velocity of 1 is the threshold that is considered stalling. This was determined experimentally
+            // meaning i just guessed a value, then tuned that value to be as low as possible while the function still worked
+            ()->zeroingDebouncer.calculate(altEncoder.getVelocity()<1),
             this);
     }
 
@@ -255,11 +274,11 @@ public class CoralIntake extends SubsystemBase {
         SmartDashboard.putBoolean("isOverrideTrue", hasCoralOverrideTrue);
         SmartDashboard.putBoolean("isOverrideFalse", hasCoralOverrideFalse);
         SmartDashboard.putNumber("getPositionError", armController.getPositionError());
-        SmartDashboard.putNumber("zeroStallTimer", zeroStallingTimer.get());
+        //SmartDashboard.putNumber("zeroStallTimer", zeroStallingTimer.get());
         SmartDashboard.putNumber("armVelocity", altEncoder.getVelocity());
         SmartDashboard.putBoolean("timer should be runnning", Math.abs(altEncoder.getVelocity()) < 1 );
         SmartDashboard.putBoolean("curr zeoring", currentlyZeroing);
-        SmartDashboard.putBoolean("coral intake zeroed", zeroed);
+        //SmartDashboard.putBoolean("coral intake zeroed", zeroed);
                 
         
     }

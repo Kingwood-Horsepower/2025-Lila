@@ -1,24 +1,20 @@
 package frc.robot.StateMachine.states;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
 
 import frc.robot.commands.AlignToReefCommand;
-import frc.robot.commands.AlignCommand;
 
 public class AlignmentState extends PlayerState{
+    @SuppressWarnings("unused")
     private boolean isRight = true;
-
-    private BooleanSupplier isL4 = () -> player.coralAndElevatorSubsystem.getScoringLevel() == 4;
 
     private Command alignToRightReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->true);
     private Command alignToLeftReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, ()->false);
 
     private Command alignToClosestReefCommand = new AlignToReefCommand(player.swerveDriveManager, player.visionManager, null);
 
-    private Command swerveTestCommand = new AlignCommand(player.swerveDriveManager, player.visionManager);
+    //private Command swerveTestCommand = new AlignCommand(player.swerveDriveManager, player.visionManager);
 
 
 

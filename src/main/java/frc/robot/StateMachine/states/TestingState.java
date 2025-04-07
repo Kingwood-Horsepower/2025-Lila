@@ -1,11 +1,6 @@
 package frc.robot.StateMachine.states;
 
-import java.util.function.BooleanSupplier;
-
-import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.StateMachine.PlayerState;
-import frc.robot.StateMachine.PlayerStateMachine;
-import frc.robot.commands.AlignToReefCommand;
 
 public class TestingState extends PlayerState{
     public TestingState(){

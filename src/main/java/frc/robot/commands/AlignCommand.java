@@ -3,28 +3,12 @@ package frc.robot.commands;
 
 import frc.robot.managers.SwerveDriveManager;
 import frc.robot.managers.VisionManager;
-import frc.robot.subsystems.CameraSubsystem;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
-
-import org.photonvision.PhotonCamera;
-
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import static frc.robot.Constants.AlignmentControllerConstants.*;
 
@@ -89,20 +73,20 @@ public class AlignCommand extends Command {
 
     public void execute() {
         ChassisSpeeds speeds;
-        if (true) {//!startRotationIsOK
+        //if (true) {//!startRotationIsOK
             speeds = new ChassisSpeeds(
                 xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
                 yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
                 thetaController.calculate(swerveDriveManager.getRobotPose().getRotation().getRadians(), goal.toPose2d().getRotation().getRadians())
             );
-        }
-        else {
-            speeds = new ChassisSpeeds(
-                xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
-                yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
-                0.0
-                );
-        }
+        //}
+        // else {
+        //     speeds = new ChassisSpeeds(
+        //         xController.calculate(swerveDriveManager.getRobotPose().getX(), goal.toPose2d().getX()),
+        //         yController.calculate(swerveDriveManager.getRobotPose().getY(), goal.toPose2d().getY()),
+        //         0.0
+        //         );
+        // }
 
         
 
