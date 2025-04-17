@@ -51,14 +51,15 @@ public class Elevator extends SubsystemBase{
 
     // velocity and acceleration constraints of the PID controller below. 
     // The PID controller is what calculates elevator speed in periodic()
-    private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(400, 1000);
-    private final ProfiledPIDController elevatorController = new ProfiledPIDController(.6, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
+    private final TrapezoidProfile.Constraints ELEVATOR_MOTOR_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(400, 400);
+    private final ProfiledPIDController elevatorController = new ProfiledPIDController(1, 0, 0, ELEVATOR_MOTOR_ROTATION_CONSTRAINTS);
 
 
     // setpoint of the elevator, the elevator is driven to this value on every run of periodic()
     private double setPoint = 0.0;
     // used for the limit switch, not working
     private boolean isZerod = false; 
+    private boolean wasZerod = false;
     private boolean elevatorOverriden = false;
     
     
@@ -207,10 +208,13 @@ public class Elevator extends SubsystemBase{
 
         //leadMotorController.setReference(setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS, ControlType.kMAXMotionPositionControl); // the rev version of PID. Had problems as discussed above
         if (!elevatorOverriden)leadMotor.setVoltage(elevatorController.calculate(getLeadEncoderPosition(), setPoint*ELEVATOR_INCHES_TO_MOTOR_REVOLUTIONS));
-        // only tells that the elevator hit the limit switch if activated for one second
-        if (limitSwtichDebouncer.calculate(limitSwitch.get())) {
-            isZerod = limitSwitch.get();
+        // only tells that the elevator hit the limit switch if activated for one second, and only runs command on rising edge
+        isZerod = limitSwtichDebouncer.calculate(limitSwitch.get());
+        if (isZerod && !wasZerod) { // if the limit switch has hit, and it havent been zeroed yet
+            System.out.println("zeroed");
+            resetEncoders();
         }
+        wasZerod = isZerod;
 
         SmartDashboard.putNumber("lead elevator encoder", leadEncoder.getPosition());
         SmartDashboard.putNumber("follow elevator encoder", followEncoder.getPosition());
